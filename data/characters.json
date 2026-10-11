@@ -1,0 +1,328 @@
+[
+  {
+    "id": "luffy",
+    "name": "Monkey D. Luffy",
+    "crew": "Strohhutbande",
+    "role": "Kapitän",
+    "tier": "S",
+    "devilFruit": "Hito Hito no Mi, Modell: Nika",
+    "alive": true,
+    "cost": 100,
+    "versions": [
+      { "id": "luffy-east-blue", "label": "East Blue", "stats": { "staerke": 40, "haki": 10, "intelligenz": 30, "geschwindigkeit": 45, "durabilitaet": 40 } },
+      { "id": "luffy-gear5", "label": "Gear 5", "stats": { "staerke": 98, "haki": 95, "intelligenz": 55, "geschwindigkeit": 90, "durabilitaet": 95 } }
+    ]
+  },
+  {
+    "id": "zoro",
+    "name": "Roronoa Zoro",
+    "crew": "Strohhutbande",
+    "role": "Kämpfer",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 90,
+    "versions": [
+      { "id": "zoro-current", "label": "Aktuell (Wano)", "stats": { "staerke": 88, "haki": 85, "intelligenz": 55, "geschwindigkeit": 75, "durabilitaet": 80 } }
+    ]
+  },
+  {
+    "id": "sanji",
+    "name": "Vinsmoke Sanji",
+    "crew": "Strohhutbande",
+    "role": "Koch",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 80,
+    "versions": [
+      { "id": "sanji-current", "label": "Aktuell (Wano)", "stats": { "staerke": 78, "haki": 70, "intelligenz": 60, "geschwindigkeit": 85, "durabilitaet": 65 } }
+    ]
+  },
+  {
+    "id": "nami",
+    "name": "Nami",
+    "crew": "Strohhutbande",
+    "role": "Navigator",
+    "tier": "C",
+    "devilFruit": "Hito Hito no Mi, Modell: Zou",
+    "alive": true,
+    "cost": 35,
+    "versions": [
+      { "id": "nami-current", "label": "Aktuell", "stats": { "staerke": 30, "haki": 10, "intelligenz": 75, "geschwindigkeit": 50, "durabilitaet": 35 } }
+    ]
+  },
+  {
+    "id": "usopp",
+    "name": "Usopp",
+    "crew": "Strohhutbande",
+    "role": "Scharfschütze",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 30,
+    "versions": [
+      { "id": "usopp-current", "label": "Aktuell", "stats": { "staerke": 30, "haki": 25, "intelligenz": 60, "geschwindigkeit": 40, "durabilitaet": 30 } }
+    ]
+  },
+  {
+    "id": "chopper",
+    "name": "Tony Tony Chopper",
+    "crew": "Strohhutbande",
+    "role": "Arzt",
+    "tier": "C",
+    "devilFruit": "Hito Hito no Mi",
+    "alive": true,
+    "cost": 35,
+    "versions": [
+      { "id": "chopper-monster", "label": "Monster Point", "stats": { "staerke": 60, "haki": 15, "intelligenz": 45, "geschwindigkeit": 45, "durabilitaet": 65 } }
+    ]
+  },
+  {
+    "id": "robin",
+    "name": "Nico Robin",
+    "crew": "Strohhutbande",
+    "role": "Archäologe",
+    "tier": "B",
+    "devilFruit": "Hana Hana no Mi",
+    "alive": true,
+    "cost": 55,
+    "versions": [
+      { "id": "robin-current", "label": "Aktuell", "stats": { "staerke": 55, "haki": 40, "intelligenz": 80, "geschwindigkeit": 45, "durabilitaet": 45 } }
+    ]
+  },
+  {
+    "id": "franky",
+    "name": "Franky",
+    "crew": "Strohhutbande",
+    "role": "Zimmermann",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 50,
+    "versions": [
+      { "id": "franky-current", "label": "Aktuell", "stats": { "staerke": 65, "haki": 20, "intelligenz": 55, "geschwindigkeit": 35, "durabilitaet": 75 } }
+    ]
+  },
+  {
+    "id": "brook",
+    "name": "Brook",
+    "crew": "Strohhutbande",
+    "role": "Musiker",
+    "tier": "C",
+    "devilFruit": "Yomi Yomi no Mi",
+    "alive": true,
+    "cost": 40,
+    "versions": [
+      { "id": "brook-current", "label": "Aktuell", "stats": { "staerke": 50, "haki": 50, "intelligenz": 45, "geschwindigkeit": 55, "durabilitaet": 30 } }
+    ]
+  },
+  {
+    "id": "jinbe",
+    "name": "Jinbe",
+    "crew": "Strohhutbande",
+    "role": "Steuermann",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 70,
+    "versions": [
+      { "id": "jinbe-current", "label": "Aktuell", "stats": { "staerke": 75, "haki": 65, "intelligenz": 55, "geschwindigkeit": 50, "durabilitaet": 80 } }
+    ]
+  },
+  {
+    "id": "law",
+    "name": "Trafalgar D. Water Law",
+    "crew": "Herzpiraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Ope Ope no Mi",
+    "alive": true,
+    "cost": 85,
+    "versions": [
+      { "id": "law-current", "label": "Aktuell", "stats": { "staerke": 75, "haki": 75, "intelligenz": 85, "geschwindigkeit": 60, "durabilitaet": 55 } }
+    ]
+  },
+  {
+    "id": "kid",
+    "name": "Eustass Kid",
+    "crew": "Kid-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Jiki Jiki no Mi",
+    "alive": true,
+    "cost": 80,
+    "versions": [
+      { "id": "kid-current", "label": "Aktuell", "stats": { "staerke": 82, "haki": 70, "intelligenz": 50, "geschwindigkeit": 50, "durabilitaet": 70 } }
+    ]
+  },
+  {
+    "id": "shanks",
+    "name": "Shanks",
+    "crew": "Rotharrbande",
+    "role": "Kapitän",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 98,
+    "versions": [
+      { "id": "shanks-current", "label": "Aktuell", "stats": { "staerke": 92, "haki": 97, "intelligenz": 75, "geschwindigkeit": 70, "durabilitaet": 75 } }
+    ]
+  },
+  {
+    "id": "whitebeard",
+    "name": "Edward Newgate (Whitebeard)",
+    "crew": "Weißbart-Piraten",
+    "role": "Kapitän",
+    "tier": "S",
+    "devilFruit": "Gura Gura no Mi",
+    "alive": false,
+    "cost": 95,
+    "versions": [
+      { "id": "whitebeard-marineford", "label": "Marineford", "stats": { "staerke": 95, "haki": 90, "intelligenz": 65, "geschwindigkeit": 40, "durabilitaet": 85 } }
+    ]
+  },
+  {
+    "id": "ace",
+    "name": "Portgas D. Ace",
+    "crew": "Weißbart-Piraten",
+    "role": "Sonstige",
+    "tier": "A",
+    "devilFruit": "Mera Mera no Mi",
+    "alive": false,
+    "cost": 70,
+    "versions": [
+      { "id": "ace-marineford", "label": "Marineford", "stats": { "staerke": 75, "haki": 60, "intelligenz": 55, "geschwindigkeit": 65, "durabilitaet": 55 } }
+    ]
+  },
+  {
+    "id": "blackbeard",
+    "name": "Marshall D. Teach",
+    "crew": "Schwarzbart-Piraten",
+    "role": "Kapitän",
+    "tier": "S",
+    "devilFruit": "Yami Yami no Mi / Gura Gura no Mi",
+    "alive": true,
+    "cost": 92,
+    "versions": [
+      { "id": "blackbeard-current", "label": "Aktuell", "stats": { "staerke": 88, "haki": 60, "intelligenz": 70, "geschwindigkeit": 45, "durabilitaet": 80 } }
+    ]
+  },
+  {
+    "id": "akainu",
+    "name": "Sakazuki (Akainu)",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": "Magu Magu no Mi",
+    "alive": true,
+    "cost": 90,
+    "versions": [
+      { "id": "akainu-current", "label": "Aktuell (Fleet Admiral)", "stats": { "staerke": 88, "haki": 75, "intelligenz": 60, "geschwindigkeit": 55, "durabilitaet": 85 } }
+    ]
+  },
+  {
+    "id": "kizaru",
+    "name": "Borsalino (Kizaru)",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "A",
+    "devilFruit": "Pika Pika no Mi",
+    "alive": true,
+    "cost": 85,
+    "versions": [
+      { "id": "kizaru-current", "label": "Aktuell", "stats": { "staerke": 78, "haki": 70, "intelligenz": 55, "geschwindigkeit": 97, "durabilitaet": 55 } }
+    ]
+  },
+  {
+    "id": "garp",
+    "name": "Monkey D. Garp",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 90,
+    "versions": [
+      { "id": "garp-current", "label": "Aktuell", "stats": { "staerke": 90, "haki": 90, "intelligenz": 60, "geschwindigkeit": 55, "durabilitaet": 85 } }
+    ]
+  },
+  {
+    "id": "kaido",
+    "name": "Kaido",
+    "crew": "Bestienpiraten",
+    "role": "Kapitän",
+    "tier": "S",
+    "devilFruit": "Uo Uo no Mi",
+    "alive": true,
+    "cost": 96,
+    "versions": [
+      { "id": "kaido-current", "label": "Aktuell (Wano)", "stats": { "staerke": 96, "haki": 88, "intelligenz": 55, "geschwindigkeit": 50, "durabilitaet": 98 } }
+    ]
+  },
+  {
+    "id": "big-mom",
+    "name": "Charlotte Linlin (Big Mom)",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kapitän",
+    "tier": "S",
+    "devilFruit": "Soru Soru no Mi",
+    "alive": true,
+    "cost": 94,
+    "versions": [
+      { "id": "big-mom-current", "label": "Aktuell", "stats": { "staerke": 90, "haki": 85, "intelligenz": 60, "geschwindigkeit": 45, "durabilitaet": 90 } }
+    ]
+  },
+  {
+    "id": "doflamingo",
+    "name": "Donquixote Doflamingo",
+    "crew": "Donquixote-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Ito Ito no Mi",
+    "alive": true,
+    "cost": 78,
+    "versions": [
+      { "id": "doflamingo-current", "label": "Aktuell", "stats": { "staerke": 75, "haki": 55, "intelligenz": 75, "geschwindigkeit": 55, "durabilitaet": 60 } }
+    ]
+  },
+  {
+    "id": "crocodile",
+    "name": "Sir Crocodile",
+    "crew": "Baroque Works",
+    "role": "Kapitän",
+    "tier": "B",
+    "devilFruit": "Suna Suna no Mi",
+    "alive": true,
+    "cost": 60,
+    "versions": [
+      { "id": "crocodile-current", "label": "Aktuell", "stats": { "staerke": 65, "haki": 60, "intelligenz": 70, "geschwindigkeit": 45, "durabilitaet": 50 } }
+    ]
+  },
+  {
+    "id": "boa-hancock",
+    "name": "Boa Hancock",
+    "crew": "Kuja-Piratinnen",
+    "role": "Kapitän",
+    "tier": "B",
+    "devilFruit": "Mero Mero no Mi",
+    "alive": true,
+    "cost": 65,
+    "versions": [
+      { "id": "hancock-current", "label": "Aktuell", "stats": { "staerke": 68, "haki": 55, "intelligenz": 55, "geschwindigkeit": 55, "durabilitaet": 50 } }
+    ]
+  },
+  {
+    "id": "imu",
+    "name": "Imu",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 120,
+    "versions": [
+      { "id": "imu-current", "label": "Unbekannt", "stats": { "staerke": 99, "haki": 99, "intelligenz": 90, "geschwindigkeit": 80, "durabilitaet": 95 } }
+    ]
+  }
+]
