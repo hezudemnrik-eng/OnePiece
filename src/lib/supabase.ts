@@ -54,7 +54,23 @@ export async function ensureSupabaseSession(): Promise<string | null> {
 }
 
 function usernameToEmail(username: string): string {
-  const slug = username.trim().toLowerCase().replace(/[^a-z0-9_.-]/g, "");
+  let slug = username
+    .trim()
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9_.-]/g, "")
+    .replace(/^[.-]+/, "")
+    .replace(/[.-]+$/, "");
+  if (!slug) {
+    // Deterministic fallback (no randomness) so the same unusual username
+    // always maps back to the same synthetic email on login.
+    let hash = 7;
+    for (const ch of username) hash = (hash * 31 + ch.charCodeAt(0)) % 1000000;
+    slug = `user${hash}`;
+  }
   return `${slug}@onepiece.local`;
 }
 
