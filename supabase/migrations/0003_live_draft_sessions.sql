@@ -15,12 +15,14 @@ alter table public.draft_sessions
   add column if not exists phase text not null default 'lobby',
   add column if not exists battle jsonb;
 
-alter table public.draft_sessions
-  drop column if exists participant_ids;
-
+-- Drop the old policies BEFORE the column they depend on, or Postgres
+-- refuses the drop (2BP01: objects depend on it).
 drop policy if exists "participants read their draft session" on public.draft_sessions;
 drop policy if exists "participants update their draft session" on public.draft_sessions;
 drop policy if exists "anyone signed in can create a draft session" on public.draft_sessions;
+
+alter table public.draft_sessions
+  drop column if exists participant_ids;
 
 create policy "signed in users read draft sessions"
   on public.draft_sessions for select
