@@ -7,6 +7,7 @@ import {
   fetchLeaderboard,
   fetchMyRecentMatches,
   fetchOnlineFriends,
+  fetchQuizLeaderboard,
   fetchRelevantLiveDrafts,
   getCurrentAuthUser,
   isSupabaseConfigured,
@@ -14,14 +15,16 @@ import {
   type MatchMode,
   type OnlineProfile,
   type OpenLiveDraft,
+  type QuizLeaderboardEntry,
   type RecentMatch,
 } from "@/lib/supabase";
 
 const MODES: { href: string; icon: string; title: string; desc: string; matchMode?: MatchMode }[] = [
   { href: "/draft", icon: "⚔️", title: "PvP-Draft gegen Freunde", desc: "Snake-Draft im Hotseat, danach Kampfsimulation." },
   { href: "/draft/live", icon: "🌐", title: "Live-Draft (mehrere Geräte)", desc: "Lobby mit Code teilen, jeder draftet von seinem Gerät.", matchMode: "live-draft" },
-  { href: "/imu", icon: "👁️", title: "Gegen Imu", desc: "Solo-Draft gegen eine starke KI-Auswahl.", matchMode: "imu" },
+  { href: "/imu", icon: "👁️", title: "Gegen Imu", desc: "Solo-Draft gegen einen übermächtigen Boss-Gegner.", matchMode: "imu" },
   { href: "/zufallsgegner", icon: "🎲", title: "Gegen Zufallsgegner", desc: "Ranked-Übungsrunde gegen eine leichtere KI.", matchMode: "zufallsgegner" },
+  { href: "/quiz", icon: "❓", title: "One-Piece-Quiz", desc: "Trivia zu Charakteren, Crews & Teufelsfrüchten — solo oder mit Freunden." },
   { href: "/tierlisten", icon: "📜", title: "Tierlisten", desc: "Charaktere, Arcs, Inseln & mehr in S–D einstufen und vergleichen." },
 ];
 
@@ -49,6 +52,7 @@ export function HomeOverview() {
   const [username, setUsername] = useState<string | null>(null);
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [quizLeaderboard, setQuizLeaderboard] = useState<QuizLeaderboardEntry[]>([]);
   const [recent, setRecent] = useState<RecentMatch[]>([]);
   const [online, setOnline] = useState<OnlineProfile[]>([]);
   const [liveDrafts, setLiveDrafts] = useState<OpenLiveDraft[]>([]);
@@ -60,13 +64,15 @@ export function HomeOverview() {
     Promise.all([
       getCurrentAuthUser(),
       fetchLeaderboard(),
+      fetchQuizLeaderboard(),
       fetchMyRecentMatches(10),
       fetchOnlineFriends(),
       fetchRelevantLiveDrafts(),
-    ]).then(([user, board, matches, friends, drafts]) => {
+    ]).then(([user, board, quizBoard, matches, friends, drafts]) => {
       setUsername(user?.username ?? null);
       setMyUserId(user?.id ?? null);
       setLeaderboard(board);
+      setQuizLeaderboard(quizBoard);
       setRecent(matches);
       setOnline(friends);
       setLiveDrafts(drafts);
@@ -233,6 +239,47 @@ export function HomeOverview() {
                       </span>
                       <span className="text-emerald-600">{e.wins}S</span>
                       <span className="text-rose-500">{e.losses}N</span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+          )}
+
+          {quizLeaderboard.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
+                Quiz-Bestenliste
+              </h2>
+              <ol className="flex flex-col gap-1.5">
+                {quizLeaderboard.slice(0, 10).map((e, i) => {
+                  const avatar = avatarFor(e.avatarCharacterId);
+                  const isMe = e.userId === myUserId;
+                  const pct = Math.round((e.totalScore / Math.max(1, e.totalQuestions)) * 100);
+                  return (
+                    <li
+                      key={e.userId}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm ${isMe ? "bg-amber-500/10 border border-amber-500/30" : "border border-transparent"}`}
+                    >
+                      <span className="w-5 text-right text-black/40 dark:text-white/30 font-mono">{i + 1}.</span>
+                      {avatar?.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={avatar.imageUrl}
+                          alt=""
+                          referrerPolicy="no-referrer"
+                          className="h-6 w-6 rounded-full object-cover object-top"
+                        />
+                      ) : (
+                        <span className="h-6 w-6 rounded-full bg-amber-500/15" />
+                      )}
+                      <span className="flex-1 font-medium">
+                        {e.username}
+                        {isMe && " (du)"}
+                      </span>
+                      <span className="text-black/50 dark:text-white/40">
+                        {pct}% ({e.quizzesPlayed} Quizze)
+                      </span>
                     </li>
                   );
                 })}

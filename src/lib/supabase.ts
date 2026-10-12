@@ -554,3 +554,143 @@ export async function fetchRelevantLiveDrafts(): Promise<OpenLiveDraft[]> {
     })
     .filter((s) => s.isMine || s.phase === "lobby");
 }
+
+/** Appends one solo quiz result for the signed-in user. */
+export async function recordQuizResult(
+  score: number,
+  total: number,
+  category: string,
+  difficulty: string
+): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("quiz_results").insert({ user_id: userId, score, total, category, difficulty });
+}
+
+export type QuizLeaderboardEntry = {
+  userId: string;
+  username: string;
+  avatarCharacterId: string | null;
+  totalScore: number;
+  totalQuestions: number;
+  quizzesPlayed: number;
+};
+
+/** Aggregates quiz_results + profiles into a per-player quiz leaderboard, same pattern as fetchLeaderboard(). */
+export async function fetchQuizLeaderboard(): Promise<QuizLeaderboardEntry[]> {
+  if (!supabase) return [];
+  const { data: results } = await supabase.from("quiz_results").select("user_id, score, total");
+  if (!results || results.length === 0) return [];
+
+  const tally = new Map<string, { totalScore: number; totalQuestions: number; quizzesPlayed: number }>();
+  for (const r of results) {
+    const entry = tally.get(r.user_id) ?? { totalScore: 0, totalQuestions: 0, quizzesPlayed: 0 };
+    entry.totalScore += r.score;
+    entry.totalQuestions += r.total;
+    entry.quizzesPlayed += 1;
+    tally.set(r.user_id, entry);
+  }
+
+  const userIds = Array.from(tally.keys());
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, username, avatar_character_id")
+    .in("id", userIds);
+
+  return userIds
+    .map((userId) => {
+      const profile = profiles?.find((p) => p.id === userId);
+      const stats = tally.get(userId)!;
+      return {
+        userId,
+        username: profile?.username ?? "?",
+        avatarCharacterId: profile?.avatar_character_id ?? null,
+        ...stats,
+      };
+    })
+    .filter((e) => e.username !== "?")
+    .sort((a, b) => b.totalScore / Math.max(1, b.totalQuestions) - a.totalScore / Math.max(1, a.totalQuestions));
+}
+
+export type QuizSession = {
+  id: string;
+  invite_code: string;
+  host_id: string;
+  category: string;
+  difficulty: string;
+  questions: unknown[];
+  created_at: string;
+};
+
+/** Creates a multiplayer quiz lobby with a fixed, shared question set. */
+export async function createQuizSession(
+  category: string,
+  difficulty: string,
+  questions: unknown[]
+): Promise<QuizSession | null> {
+  if (!supabase) return null;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return null;
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const inviteCode = Math.random().toString(36).slice(2, 8).toUpperCase();
+    const { data, error } = await supabase
+      .from("quiz_sessions")
+      .insert({ invite_code: inviteCode, host_id: userId, category, difficulty, questions })
+      .select()
+      .single();
+    if (!error && data) return data as QuizSession;
+    if (error && error.code !== "23505") break;
+  }
+  return null;
+}
+
+export async function fetchQuizSessionByCode(inviteCode: string): Promise<QuizSession | null> {
+  if (!supabase) return null;
+  const { data } = await supabase
+    .from("quiz_sessions")
+    .select()
+    .eq("invite_code", inviteCode.trim().toUpperCase())
+    .maybeSingle();
+  return (data as QuizSession) ?? null;
+}
+
+export type QuizParticipant = {
+  session_id: string;
+  user_id: string;
+  username: string;
+  score: number | null;
+  finished_at: string | null;
+};
+
+/** Claims (or re-fetches) this user's participant row for a quiz session. */
+export async function joinQuizSession(sessionId: string, username: string): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase
+    .from("quiz_participants")
+    .upsert({ session_id: sessionId, user_id: userId, username }, { onConflict: "session_id,user_id" });
+}
+
+export async function submitQuizScore(sessionId: string, score: number): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase
+    .from("quiz_participants")
+    .update({ score, finished_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq("session_id", sessionId)
+    .eq("user_id", userId);
+}
+
+export async function fetchQuizParticipants(sessionId: string): Promise<QuizParticipant[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("quiz_participants")
+    .select("session_id, user_id, username, score, finished_at")
+    .eq("session_id", sessionId)
+    .order("score", { ascending: false, nullsFirst: false });
+  return (data as QuizParticipant[]) ?? [];
+}
