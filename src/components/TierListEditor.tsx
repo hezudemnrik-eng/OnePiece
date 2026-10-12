@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { characters, type Tier } from "@/lib/characters";
+import type { Tier } from "@/lib/characters";
 import {
   ensureProfile,
   fetchMyTierLists,
@@ -9,20 +9,42 @@ import {
   isSupabaseConfigured,
   saveTierListRemote,
 } from "@/lib/supabase";
-import { CharacterCard } from "./CharacterCard";
+import {
+  BUILT_IN_CATEGORIES,
+  builtInCategory,
+  createCustomCategory,
+  loadCustomCategories,
+  saveCustomCategories,
+  type CustomCategory,
+  type RankableItem,
+} from "@/lib/tierCategories";
+import { RankItemCard } from "./RankItemCard";
 
 const TIERS: Tier[] = ["S", "A", "B", "C", "D"];
 const STORAGE_KEY = "op-tierlists";
 const NICKNAME_KEY = "op-nickname";
+const DEFAULT_LIST_NAME = "Meine Tierliste";
 
 type Assignments = Record<string, Tier>;
+/** Keyed by `${category}::${listName}`. */
 type StoredLists = Record<string, Assignments>;
 type PublicFlags = Record<string, boolean>;
+
+function storageKey(category: string, name: string): string {
+  return `${category}::${name}`;
+}
 
 function loadLists(): StoredLists {
   if (typeof window === "undefined") return {};
   try {
-    return JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "{}");
+    const raw: StoredLists = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "{}");
+    // Older versions stored lists keyed by plain name (always "characters").
+    // Remap any such legacy key on load so existing lists aren't orphaned.
+    const migrated: StoredLists = {};
+    for (const [key, value] of Object.entries(raw)) {
+      migrated[key.includes("::") ? key : storageKey("characters", key)] = value;
+    }
+    return migrated;
   } catch {
     return {};
   }
@@ -46,11 +68,17 @@ function loadNickname(): string {
 }
 
 export function TierListEditor() {
-  const [listName, setListName] = useState("Meine Tierliste");
+  const [category, setCategory] = useState("characters");
+  const [customCategories, setCustomCategories] = useState<CustomCategory[]>(() => loadCustomCategories());
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [customLabel, setCustomLabel] = useState("");
+  const [customItemsText, setCustomItemsText] = useState("");
+
+  const [listName, setListName] = useState(DEFAULT_LIST_NAME);
   const [allLists, setAllLists] = useState<StoredLists>(() => loadLists());
   const [publicFlags, setPublicFlags] = useState<PublicFlags>({});
   const [assignments, setAssignments] = useState<Assignments>(
-    () => allLists["Meine Tierliste"] ?? {}
+    () => allLists[storageKey("characters", DEFAULT_LIST_NAME)] ?? {}
   );
   const [compareWith, setCompareWith] = useState<string>("");
   const [syncState, setSyncState] = useState<"off" | "loading" | "synced" | "auth-error" | "query-error">(
@@ -60,9 +88,13 @@ export function TierListEditor() {
 
   const [nickname, setNickname] = useState(() => loadNickname());
   const [myShareCode, setMyShareCode] = useState<string | null>(null);
-  const [friendLists, setFriendLists] = useState<Record<string, Assignments>>({});
+  const [friendLists, setFriendLists] = useState<Record<string, { category: string; assignments: Assignments }>>({});
   const [friendCodeInput, setFriendCodeInput] = useState("");
   const [friendLoadStatus, setFriendLoadStatus] = useState<"idle" | "loading" | "ok" | "not-found">("idle");
+
+  const items: RankableItem[] = builtInCategory(category)?.items ?? customCategories.find((c) => c.id === category)?.items ?? [];
+  const categoryLabel =
+    builtInCategory(category)?.label ?? customCategories.find((c) => c.id === category)?.label ?? category;
 
   useEffect(() => {
     try {
@@ -98,7 +130,9 @@ export function TierListEditor() {
     }
     setFriendLists((prev) => {
       const next = { ...prev };
-      for (const l of lists) next[`${l.ownerNickname}: ${l.name}`] = l.assignments as Assignments;
+      for (const l of lists) {
+        next[`${l.ownerNickname}: ${l.name}`] = { category: l.category, assignments: l.assignments as Assignments };
+      }
       return next;
     });
     setFriendLoadStatus("ok");
@@ -126,11 +160,13 @@ export function TierListEditor() {
         const merged = { ...prev };
         const flags: PublicFlags = {};
         for (const list of remoteLists) {
-          merged[list.name] = list.assignments as Assignments;
-          flags[list.name] = list.is_public;
+          const key = storageKey(list.category, list.name);
+          merged[key] = list.assignments as Assignments;
+          flags[key] = list.is_public;
         }
         setPublicFlags((prevFlags) => ({ ...prevFlags, ...flags }));
-        if (merged[listName]) setAssignments(merged[listName]);
+        const currentKey = storageKey(category, listName);
+        if (merged[currentKey]) setAssignments(merged[currentKey]);
         return merged;
       });
       setSyncState("synced");
@@ -141,12 +177,13 @@ export function TierListEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function persist(nextAssignments: Assignments, nextPublic = publicFlags[listName] ?? false) {
-    const next = { ...allLists, [listName]: nextAssignments };
+  function persist(nextAssignments: Assignments, nextPublic = publicFlags[storageKey(category, listName)] ?? false) {
+    const key = storageKey(category, listName);
+    const next = { ...allLists, [key]: nextAssignments };
     setAllLists(next);
     saveLists(next);
     if (isSupabaseConfigured()) {
-      saveTierListRemote(listName, nextAssignments, nextPublic).then(({ error }) => {
+      saveTierListRemote(listName, category, nextAssignments, nextPublic).then(({ error }) => {
         if (error) {
           setSyncState("query-error");
           setSyncErrorDetail(error);
@@ -157,35 +194,95 @@ export function TierListEditor() {
     }
   }
 
-  function assign(characterId: string, tier: Tier) {
-    const next = { ...assignments, [characterId]: tier };
+  function assign(itemId: string, tier: Tier) {
+    const next = { ...assignments, [itemId]: tier };
     setAssignments(next);
     persist(next);
   }
 
   function togglePublic() {
-    const nextPublic = !(publicFlags[listName] ?? false);
-    setPublicFlags((prev) => ({ ...prev, [listName]: nextPublic }));
+    const key = storageKey(category, listName);
+    const nextPublic = !(publicFlags[key] ?? false);
+    setPublicFlags((prev) => ({ ...prev, [key]: nextPublic }));
     persist(assignments, nextPublic);
   }
 
-  function unassigned() {
-    return characters.filter((c) => !assignments[c.id]);
+  function switchCategory(nextCategory: string) {
+    setCategory(nextCategory);
+    setListName(DEFAULT_LIST_NAME);
+    setAssignments(allLists[storageKey(nextCategory, DEFAULT_LIST_NAME)] ?? {});
+    setCompareWith("");
   }
 
-  const compareAssignments = compareWith ? friendLists[compareWith] ?? allLists[compareWith] : null;
+  function handleCreateCustomCategory() {
+    if (!customLabel.trim() || !customItemsText.trim()) return;
+    const cat = createCustomCategory(customLabel, customItemsText.split("\n"));
+    const next = [...customCategories, cat];
+    setCustomCategories(next);
+    saveCustomCategories(next);
+    setShowCustomForm(false);
+    setCustomLabel("");
+    setCustomItemsText("");
+    switchCategory(cat.id);
+  }
+
+  function unassigned() {
+    return items.filter((item) => !assignments[item.id]);
+  }
+
+  // Names of saved lists within the currently selected category, for the
+  // "compare with" dropdown — comparing an Arcs list against a Characters
+  // list wouldn't make sense.
+  const namesInCategory = Object.keys(allLists)
+    .filter((key) => key.startsWith(`${category}::`))
+    .map((key) => key.slice(category.length + 2))
+    .filter((name) => name !== listName);
+  const friendNamesInCategory = Object.entries(friendLists)
+    .filter(([, v]) => v.category === category)
+    .map(([name]) => name);
+
+  const compareRaw = compareWith
+    ? friendLists[compareWith]?.assignments ?? allLists[storageKey(category, compareWith)]
+    : null;
+  const compareAssignments = compareRaw ?? null;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm">
+          Kategorie
+          <select
+            value={category}
+            onChange={(e) => {
+              if (e.target.value === "__new__") {
+                setShowCustomForm(true);
+                return;
+              }
+              switchCategory(e.target.value);
+            }}
+            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
+          >
+            {BUILT_IN_CATEGORIES.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label}
+              </option>
+            ))}
+            {customCategories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.label} (eigene)
+              </option>
+            ))}
+            <option value="__new__">+ Eigene Kategorie erstellen</option>
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
           Listenname
           <input
             value={listName}
             onChange={(e) => {
-              const name = e.target.value || "Meine Tierliste";
+              const name = e.target.value || DEFAULT_LIST_NAME;
               setListName(name);
-              setAssignments(allLists[name] ?? {});
+              setAssignments(allLists[storageKey(category, name)] ?? {});
             }}
             className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
           />
@@ -198,14 +295,12 @@ export function TierListEditor() {
             className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
           >
             <option value="">– keine –</option>
-            {Object.keys(allLists)
-              .filter((name) => name !== listName)
-              .map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            {Object.keys(friendLists).map((name) => (
+            {namesInCategory.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+            {friendNamesInCategory.map((name) => (
               <option key={name} value={name}>
                 {name} (Freund)
               </option>
@@ -214,7 +309,11 @@ export function TierListEditor() {
         </label>
         {isSupabaseConfigured() ? (
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={publicFlags[listName] ?? false} onChange={togglePublic} />
+            <input
+              type="checkbox"
+              checked={publicFlags[storageKey(category, listName)] ?? false}
+              onChange={togglePublic}
+            />
             Öffentlich teilen (Freunde können diese Liste zum Vergleich sehen)
           </label>
         ) : (
@@ -238,12 +337,53 @@ export function TierListEditor() {
           {syncState === "query-error" && (
             <span className="text-amber-600">
               Nur lokal – Datenbankfehler ({syncErrorDetail}). Vermutlich
-              wurde die Migration supabase/migrations/0001_init.sql noch
-              nicht auf dem Supabase-Projekt ausgeführt.
+              wurde eine Migration noch nicht auf dem Supabase-Projekt
+              ausgeführt.
             </span>
           )}
         </p>
       </div>
+
+      {showCustomForm && (
+        <div className="flex flex-col gap-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 max-w-md">
+          <label className="flex flex-col gap-1 text-sm">
+            Name der Kategorie
+            <input
+              value={customLabel}
+              onChange={(e) => setCustomLabel(e.target.value)}
+              placeholder="z. B. Teufelsfrüchte"
+              className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Einträge (einer pro Zeile)
+            <textarea
+              value={customItemsText}
+              onChange={(e) => setCustomItemsText(e.target.value)}
+              rows={5}
+              placeholder={"Gomu Gomu no Mi\nMera Mera no Mi\nHie Hie no Mi"}
+              className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5 font-mono text-xs"
+            />
+          </label>
+          <div className="flex gap-3">
+            <button
+              onClick={handleCreateCustomCategory}
+              className="rounded-md bg-amber-600 text-white px-4 py-2 text-sm font-medium hover:bg-amber-700"
+            >
+              Kategorie erstellen
+            </button>
+            <button
+              onClick={() => setShowCustomForm(false)}
+              className="text-sm text-black/50 dark:text-white/40"
+            >
+              Abbrechen
+            </button>
+          </div>
+          <p className="text-xs text-black/50 dark:text-white/40">
+            Eigene Kategorien werden aktuell nur in diesem Browser gespeichert (kein Sync mit Freunden).
+          </p>
+        </div>
+      )}
 
       {isSupabaseConfigured() && (
         <div className="flex flex-wrap items-end gap-3 rounded-lg border border-black/10 dark:border-white/10 p-3">
@@ -285,13 +425,15 @@ export function TierListEditor() {
         </div>
       )}
 
+      <h2 className="text-lg font-semibold">{categoryLabel}</h2>
+
       <div className="grid gap-3">
         {TIERS.map((tier) => (
           <div
             key={tier}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
-              const id = e.dataTransfer.getData("text/character-id");
+              const id = e.dataTransfer.getData("text/rank-item-id");
               if (id) assign(id, tier);
             }}
             className="flex items-start gap-3 rounded-lg border border-dashed border-black/15 dark:border-white/15 p-3 min-h-20"
@@ -300,14 +442,14 @@ export function TierListEditor() {
               {tier}
             </span>
             <div className="flex flex-wrap gap-2">
-              {characters
-                .filter((c) => assignments[c.id] === tier)
-                .map((c) => (
-                  <div key={c.id} className="relative">
-                    <CharacterCard character={c} draggable onDragStart={() => {}} />
-                    {compareAssignments && compareAssignments[c.id] && compareAssignments[c.id] !== tier && (
+              {items
+                .filter((item) => assignments[item.id] === tier)
+                .map((item) => (
+                  <div key={item.id} className="relative">
+                    <RankItemCard item={item} draggable onDragStart={() => {}} />
+                    {compareAssignments && compareAssignments[item.id] && compareAssignments[item.id] !== tier && (
                       <span className="absolute -top-2 -right-2 rounded-full bg-fuchsia-600 text-white text-[10px] px-1.5 py-0.5">
-                        dort: {compareAssignments[c.id]}
+                        dort: {compareAssignments[item.id]}
                       </span>
                     )}
                   </div>
@@ -319,11 +461,11 @@ export function TierListEditor() {
 
       <div>
         <h3 className="mb-2 text-sm font-medium text-black/60 dark:text-white/50">
-          Noch nicht eingestuft – zieh einen Charakter in eine Tier-Reihe
+          Noch nicht eingestuft – zieh einen Eintrag in eine Tier-Reihe
         </h3>
         <div className="flex flex-wrap gap-2">
-          {unassigned().map((c) => (
-            <CharacterCard key={c.id} character={c} draggable onDragStart={() => {}} />
+          {unassigned().map((item) => (
+            <RankItemCard key={item.id} item={item} draggable onDragStart={() => {}} />
           ))}
         </div>
       </div>

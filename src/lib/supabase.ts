@@ -118,6 +118,7 @@ export async function signOutUser(): Promise<void> {
 export type RemoteTierList = {
   id: string;
   name: string;
+  category: string;
   assignments: Record<string, string>;
   is_public: boolean;
   updated_at: string;
@@ -144,16 +145,17 @@ export async function fetchMyTierLists(): Promise<TierListFetchResult> {
   if (!userId) return { userId: null, lists: [] };
   const { data, error } = await supabase
     .from("tier_lists")
-    .select("id, name, assignments, is_public, updated_at")
+    .select("id, name, category, assignments, is_public, updated_at")
     .eq("owner_id", userId)
     .order("updated_at", { ascending: false });
   if (error) return { userId, lists: [], error: error.message };
   return { userId, lists: (data as RemoteTierList[]) ?? [] };
 }
 
-/** Creates or updates (by owner_id + name) a tier list. No-op if Supabase isn't configured. */
+/** Creates or updates (by owner_id + name + category) a tier list. No-op if Supabase isn't configured. */
 export async function saveTierListRemote(
   name: string,
+  category: string,
   assignments: Record<string, string>,
   isPublic: boolean
 ): Promise<{ error?: string }> {
@@ -163,8 +165,8 @@ export async function saveTierListRemote(
   const { error } = await supabase
     .from("tier_lists")
     .upsert(
-      { owner_id: userId, name, assignments, is_public: isPublic, updated_at: new Date().toISOString() },
-      { onConflict: "owner_id,name" }
+      { owner_id: userId, name, category, assignments, is_public: isPublic, updated_at: new Date().toISOString() },
+      { onConflict: "owner_id,name,category" }
     );
   return error ? { error: error.message } : {};
 }
@@ -327,6 +329,7 @@ export async function ensureProfile(nickname: string): Promise<Profile | null> {
 export type FriendPublicList = {
   ownerNickname: string;
   name: string;
+  category: string;
   assignments: Record<string, string>;
 };
 
@@ -344,13 +347,18 @@ export async function fetchPublicListsByShareCode(
 
   const { data: lists, error } = await supabase
     .from("tier_lists")
-    .select("name, assignments")
+    .select("name, category, assignments")
     .eq("owner_id", profile.id)
     .eq("is_public", true);
   if (error || !lists) return { ok: false, lists: [] };
 
   return {
     ok: true,
-    lists: lists.map((l) => ({ ownerNickname: profile.nickname, name: l.name, assignments: l.assignments })),
+    lists: lists.map((l) => ({
+      ownerNickname: profile.nickname,
+      name: l.name,
+      category: l.category,
+      assignments: l.assignments,
+    })),
   };
 }

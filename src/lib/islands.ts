@@ -1,0 +1,40 @@
+export type Island = {
+  id: string;
+  name: string;
+};
+
+export const islands: Island[] = [
+  { id: "dawn-island", name: "Dawn Island" },
+  { id: "shells-town", name: "Shells Town" },
+  { id: "orange-town", name: "Orange Town" },
+  { id: "syrup-village", name: "Syrup Village" },
+  { id: "baratie", name: "Baratie" },
+  { id: "cocoyasi-village", name: "Cocoyasi-Dorf" },
+  { id: "loguetown", name: "Loguetown" },
+  { id: "whisky-peak", name: "Whisky Peak" },
+  { id: "little-garden", name: "Little Garden" },
+  { id: "drum-island", name: "Drum Island (Sakura-Königreich)" },
+  { id: "alabasta", name: "Alabasta" },
+  { id: "jaya", name: "Jaya" },
+  { id: "skypiea", name: "Skypiea" },
+  { id: "long-ring-long-land", name: "Long Ring Long Land" },
+  { id: "water-7", name: "Water 7" },
+  { id: "enies-lobby", name: "Enies Lobby" },
+  { id: "thriller-bark", name: "Thriller Bark" },
+  { id: "sabaody-archipelago", name: "Sabaody Archipelago" },
+  { id: "amazon-lily", name: "Amazon Lily" },
+  { id: "impel-down", name: "Impel Down" },
+  { id: "marineford", name: "Marineford" },
+  { id: "fish-man-island", name: "Fish-Man Island" },
+  { id: "punk-hazard", name: "Punk Hazard" },
+  { id: "dressrosa", name: "Dressrosa" },
+  { id: "zou", name: "Zou" },
+  { id: "whole-cake-island", name: "Whole Cake Island" },
+  { id: "wano-country", name: "Wano Country" },
+  { id: "egghead-island", name: "Egghead Island" },
+  { id: "elbaph", name: "Elbaph" },
+  { id: "mariejois", name: "Mariejois" },
+  { id: "ohara", name: "Ohara" },
+  { id: "baltigo", name: "Baltigo" },
+  { id: "laugh-tale", name: "Laugh Tale" },
+];
