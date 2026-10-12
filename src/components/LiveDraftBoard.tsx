@@ -2,22 +2,25 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { characters, getDefaultVersion, type Character } from "@/lib/characters";
+import { characters, type Role } from "@/lib/characters";
 import {
+  allRolesConfirmed,
+  assignRole,
   assignTeam,
   autoPick,
   claimSeat,
+  confirmRoles,
   createDraft,
   currentPlayer,
   firstOpenSeat,
   getTeam,
-  getTeamSidePicks,
   isLobbyFull,
   pickCharacter,
   skipRoll,
   type DraftTeam,
 } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
+import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import {
   createLiveDraft,
@@ -31,14 +34,16 @@ import {
   type LiveDraftSession,
 } from "@/lib/supabase";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
+import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
 import { RollPanel } from "./RollPanel";
 import { TimerBar } from "./TimerBar";
 import { VictoryBanner } from "./VictoryBanner";
 
 const PICK_SECONDS = 30;
+const ROLES_SECONDS = 45;
 const NICKNAME_KEY = "op-nickname";
 
-type View = "loading" | "home" | "create-form" | "join-form" | "lobby" | "drafting" | "result";
+type View = "loading" | "home" | "create-form" | "join-form" | "lobby" | "drafting" | "roles" | "result";
 
 function loadNickname(): string {
   try {
@@ -46,10 +51,6 @@ function loadNickname(): string {
   } catch {
     return "Spieler";
   }
-}
-
-function charactersFromIds(ids: string[]): Character[] {
-  return ids.map((id) => characters.find((c) => c.id === id)).filter((c): c is Character => Boolean(c));
 }
 
 export function LiveDraftBoard() {
@@ -78,6 +79,7 @@ export function LiveDraftBoard() {
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoPickFiredRef = useRef(false);
+  const autoConfirmRolesFiredRef = useRef(false);
   const matchRecordedRef = useRef(false);
 
   function detachPolling() {
@@ -135,6 +137,7 @@ export function LiveDraftBoard() {
     unsubscribeRef.current = subscribeLiveDraft(s.id, (updated) => {
       setSession(updated);
       autoPickFiredRef.current = false;
+      autoConfirmRolesFiredRef.current = false;
     });
 
     // Realtime push isn't guaranteed — the project's Realtime service can
@@ -169,7 +172,9 @@ export function LiveDraftBoard() {
       ? "lobby"
       : session.phase === "drafting"
         ? "drafting"
-        : "result"
+        : session.phase === "roles"
+          ? "roles"
+          : "result"
     : view;
 
   async function handleCreate() {
@@ -295,39 +300,91 @@ export function LiveDraftBoard() {
     }
   }, [nowTick, view, session, myUserId, isSpectator]);
 
-  // The host's browser computes the battle result once the draft finishes,
-  // so exactly one client writes it instead of every client racing to.
+  // The host's browser moves the draft into the role-assignment phase once
+  // it finishes, so exactly one client writes the transition instead of
+  // every client racing to.
   useEffect(() => {
     if (!session || session.phase !== "drafting" || !session.state.finished) return;
+    if (session.host_id !== myUserId) return;
+    writeLiveDraft(session.id, session.updated_at, { phase: "roles" }).then((r) => {
+      if (r.session) setSession(r.session);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.state.finished, session?.phase, myUserId]);
+
+  // The host's browser computes the battle result once every seated player
+  // has confirmed their role assignments, so exactly one client writes it.
+  useEffect(() => {
+    if (!session || session.phase !== "roles" || !allRolesConfirmed(session.state)) return;
     if (session.host_id !== myUserId) return;
 
     const isTeamMode = session.state.players.some((p) => p.team);
     let result: BattleResult;
     if (isTeamMode) {
-      const sideA = charactersFromIds(getTeamSidePicks(session.state, "A"));
-      const sideB = charactersFromIds(getTeamSidePicks(session.state, "B"));
-      result = simulateBattle(
-        sideA.map(getDefaultVersion),
-        sideA.map((c) => c.name),
-        sideB.map(getDefaultVersion),
-        sideB.map((c) => c.name)
-      );
+      const sideA = session.state.players.filter((p) => p.team === "A");
+      const sideB = session.state.players.filter((p) => p.team === "B");
+      const sideAVersions = sideA.flatMap((p) => getRoleAdjustedVersions(getTeam(session.state, p.id, characters), p.roleAssignments));
+      const sideANames = sideA.flatMap((p) => getTeam(session.state, p.id, characters).map((c) => c.name));
+      const sideBVersions = sideB.flatMap((p) => getRoleAdjustedVersions(getTeam(session.state, p.id, characters), p.roleAssignments));
+      const sideBNames = sideB.flatMap((p) => getTeam(session.state, p.id, characters).map((c) => c.name));
+      result = simulateBattle(sideAVersions, sideANames, sideBVersions, sideBNames);
     } else {
       const [p1, p2] = session.state.players;
-      const teamA = getTeam(session.state, p1.id, characters).map(getDefaultVersion);
-      const teamB = getTeam(session.state, p2.id, characters).map(getDefaultVersion);
+      const rosterA = getTeam(session.state, p1.id, characters);
+      const rosterB = getTeam(session.state, p2.id, characters);
       result = simulateBattle(
-        teamA,
-        getTeam(session.state, p1.id, characters).map((c) => c.name),
-        teamB,
-        getTeam(session.state, p2.id, characters).map((c) => c.name)
+        getRoleAdjustedVersions(rosterA, p1.roleAssignments),
+        rosterA.map((c) => c.name),
+        getRoleAdjustedVersions(rosterB, p2.roleAssignments),
+        rosterB.map((c) => c.name)
       );
     }
     writeLiveDraft(session.id, session.updated_at, { phase: "result", battle: result }).then((r) => {
       if (r.session) setSession(r.session);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.state.finished, session?.phase, myUserId]);
+  }, [session?.state.players, session?.phase, myUserId]);
+
+  async function handleAssignRole(characterId: string, role: Role) {
+    if (!session || !myUserId) return;
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    if (!me) return;
+    const next = assignRole(session.state, me.id, characterId, role);
+    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
+    if (result.session) setSession(result.session);
+    else if (result.conflict) {
+      const refetched = await fetchLiveDraftById(session.id);
+      if (refetched) setSession(refetched);
+    }
+  }
+
+  async function handleConfirmRoles() {
+    if (!session || !myUserId) return;
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    if (!me) return;
+    const next = confirmRoles(session.state, me.id);
+    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
+    if (result.session) setSession(result.session);
+    else if (result.conflict) {
+      const refetched = await fetchLiveDraftById(session.id);
+      if (refetched) setSession(refetched);
+    }
+  }
+
+  // Auto-confirms this viewer's roles (with whatever they've assigned so
+  // far, possibly nothing) if they sit on the role-assignment screen too
+  // long — mirrors the pick timer so a quiet player can't stall the match.
+  useEffect(() => {
+    if (effectiveView !== "roles" || !session || !myUserId || isSpectator) return;
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    if (!me || me.rolesReady) return;
+    const elapsed = (nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000;
+    if (elapsed >= ROLES_SECONDS && !autoConfirmRolesFiredRef.current) {
+      autoConfirmRolesFiredRef.current = true;
+      handleConfirmRoles();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nowTick, effectiveView, session, myUserId, isSpectator]);
 
   // Every participant's own browser records its own win/loss once — not
   // just the host's — so the friend leaderboard reflects everyone.
@@ -579,6 +636,38 @@ export function LiveDraftBoard() {
             </div>
           ))}
         </aside>
+      </div>
+    );
+  }
+
+  if (effectiveView === "roles" && session) {
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    const roster = me ? getTeam(session.state, me.id, characters) : [];
+    const elapsed = Math.floor((nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000);
+    const secondsLeft = Math.max(0, ROLES_SECONDS - elapsed);
+    const readyCount = session.state.players.filter((p) => p.rolesReady).length;
+
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-black/60 dark:text-white/50">
+            Bereit: {readyCount}/{session.state.players.length}
+          </p>
+          <TimerBar secondsLeft={secondsLeft} totalSeconds={ROLES_SECONDS} />
+        </div>
+        {isSpectator || !me ? (
+          <p className="text-sm text-black/50 dark:text-white/40">Warte, bis alle Spieler ihre Rollen zugeteilt haben…</p>
+        ) : me.rolesReady ? (
+          <p className="text-sm text-black/50 dark:text-white/40">Rollen bestätigt — warte auf die anderen Spieler…</p>
+        ) : (
+          <RoleAssignmentPanel
+            roster={roster}
+            assignments={me.roleAssignments}
+            onAssign={handleAssignRole}
+            onConfirm={handleConfirmRoles}
+            confirmLabel="Bereit"
+          />
+        )}
       </div>
     );
   }

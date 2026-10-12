@@ -2,19 +2,22 @@ import charactersData from "../../data/characters.json";
 
 export type Tier = "S" | "A" | "B" | "C" | "D";
 
-export type Role =
-  | "Kapitän"
-  | "Erster Offizier"
-  | "Kämpfer"
-  | "Navigator"
-  | "Koch"
-  | "Arzt"
-  | "Scharfschütze"
-  | "Zimmermann"
-  | "Musiker"
-  | "Archäologe"
-  | "Steuermann"
-  | "Sonstige";
+export const ROLES = [
+  "Kapitän",
+  "Erster Offizier",
+  "Kämpfer",
+  "Navigator",
+  "Koch",
+  "Arzt",
+  "Scharfschütze",
+  "Zimmermann",
+  "Musiker",
+  "Archäologe",
+  "Steuermann",
+  "Sonstige",
+] as const;
+
+export type Role = (typeof ROLES)[number];
 
 export type Stats = {
   staerke: number;

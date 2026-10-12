@@ -251,7 +251,7 @@ export type LiveDraftSession = {
   invite_code: string;
   host_id: string;
   max_players: number;
-  phase: "lobby" | "drafting" | "result";
+  phase: "lobby" | "drafting" | "roles" | "result";
   state: DraftState;
   battle: BattleResult | null;
   updated_at: string;

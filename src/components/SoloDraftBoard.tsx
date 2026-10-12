@@ -1,20 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { characters, getDefaultVersion } from "@/lib/characters";
-import { autoPick, createDraft, currentPlayer, getTeam, pickCharacter, skipRoll, type DraftState } from "@/lib/draft";
+import { characters, type Role } from "@/lib/characters";
+import { assignRole, autoPick, createDraft, currentPlayer, getTeam, pickCharacter, skipRoll, type DraftState } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
+import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { generateAiTeam, generateImuBoss, type AiTeam, type Difficulty } from "@/lib/imu";
 import { getCurrentAuthUser, recordMatchResult } from "@/lib/supabase";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
+import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
 import { RollPanel } from "./RollPanel";
 import { TimerBar } from "./TimerBar";
 import { VictoryBanner } from "./VictoryBanner";
 
 const PICK_SECONDS = 30;
 
-type Phase = "setup" | "drafting" | "result";
+type Phase = "setup" | "drafting" | "roles" | "result";
 
 type RunRecord = { date: string; result: "win" | "loss"; rounds: number };
 
@@ -75,12 +77,14 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     setPhase("drafting");
   }
 
-  function finishWithTeam(next: DraftState) {
+  function startBattle() {
+    if (!draft) return;
     const ai = isBossFight ? generateImuBoss(difficulty) : generateAiTeam({ teamSize, difficulty, topShare, flatBonus });
     setOpponentTeam(ai);
-    const player = next.players[0];
-    const playerVersions = getTeam(next, player.id, characters).map(getDefaultVersion);
-    const playerNames = getTeam(next, player.id, characters).map((c) => c.name);
+    const player = draft.players[0];
+    const roster = getTeam(draft, player.id, characters);
+    const playerVersions = getRoleAdjustedVersions(roster, player.roleAssignments);
+    const playerNames = roster.map((c) => c.name);
     const result = simulateBattle(playerVersions, playerNames, ai.versions, ai.names);
     setBattle(result);
     const run: RunRecord = {
@@ -94,10 +98,14 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     recordMatchResult(opponentName === "Imu" ? "imu" : "zufallsgegner", opponentName, run.result);
   }
 
+  function handleAssignRole(characterId: string, role: Role) {
+    setDraft((d) => (d ? assignRole(d, d.players[0].id, characterId, role) : d));
+  }
+
   function applyDraft(next: DraftState) {
     setDraft(next);
     if (next.finished) {
-      finishWithTeam(next);
+      setPhase("roles");
     } else {
       setSecondsLeft(PICK_SECONDS);
     }
@@ -203,6 +211,20 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
         </div>
         <RollPanel offered={offered} skipsLeft={player.skipsLeft} onPick={handlePick} onSkip={handleSkip} />
       </div>
+    );
+  }
+
+  if (phase === "roles" && draft) {
+    const player = draft.players[0];
+    const roster = getTeam(draft, player.id, characters);
+    return (
+      <RoleAssignmentPanel
+        roster={roster}
+        assignments={player.roleAssignments}
+        onAssign={handleAssignRole}
+        onConfirm={startBattle}
+        confirmLabel={`Kampf gegen ${opponentName} starten`}
+      />
     );
   }
 

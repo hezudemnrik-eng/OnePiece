@@ -1,4 +1,4 @@
-import type { Character } from "./characters";
+import type { Character, Role } from "./characters";
 
 export type DraftTeam = "A" | "B";
 
@@ -12,6 +12,10 @@ export type DraftPlayer = {
   userId?: string | null;
   /** How many more times this player may reroll their current offer this turn — resets to skipsPerTurn at the start of each of their turns (see advanceTurn), rather than being a fixed pool for the whole draft. */
   skipsLeft: number;
+  /** Crew position assigned to each of this player's own picked characters (characterId -> Role), set after the draft finishes. A role can only be held by one of this player's characters at a time (see assignRole) — picking the character's own natural role (Character.role) gives a battle bonus, any other specific role a penalty; "Sonstige" is always neutral. */
+  roleAssignments?: Record<string, Role>;
+  /** Whether this player has confirmed their role assignments (or chosen to skip them) and is ready for battle. */
+  rolesReady?: boolean;
 };
 
 export type DraftState = {
@@ -196,4 +200,38 @@ export function getTeam(state: DraftState, playerId: string, allCharacters: Char
   return player.pickedCharacterIds
     .map((id) => allCharacters.find((c) => c.id === id))
     .filter((c): c is Character => Boolean(c));
+}
+
+/**
+ * Assigns a crew position to one of this player's own picked characters.
+ * Enforced unique per player (not shared across teammates in Team-vs-Team
+ * mode — see crewRoles.ts) — if another of their characters already holds
+ * that role, it's cleared from them first (a swap, not a conflict error).
+ * No-op if the draft isn't finished yet or the character isn't actually
+ * one of this player's picks.
+ */
+export function assignRole(state: DraftState, playerId: string, characterId: string, role: Role): DraftState {
+  if (!state.finished) return state;
+  const player = state.players.find((p) => p.id === playerId);
+  if (!player || !player.pickedCharacterIds.includes(characterId)) return state;
+
+  const nextAssignments: Record<string, Role> = { ...player.roleAssignments };
+  for (const [existingCharId, existingRole] of Object.entries(nextAssignments)) {
+    if (existingRole === role && existingCharId !== characterId) delete nextAssignments[existingCharId];
+  }
+  nextAssignments[characterId] = role;
+
+  const players = state.players.map((p) => (p.id === playerId ? { ...p, roleAssignments: nextAssignments } : p));
+  return { ...state, players };
+}
+
+/** Marks a player ready for battle — role assignment is optional, this can be called with nothing assigned to just fight with unmodified stats. */
+export function confirmRoles(state: DraftState, playerId: string): DraftState {
+  const players = state.players.map((p) => (p.id === playerId ? { ...p, rolesReady: true } : p));
+  return { ...state, players };
+}
+
+/** True once every seated (claimed) player has confirmed their roles — the live draft's battle computation waits for this before running. */
+export function allRolesConfirmed(state: DraftState): boolean {
+  return state.players.filter((p) => p.userId || p.pickedCharacterIds.length > 0).every((p) => p.rolesReady);
 }

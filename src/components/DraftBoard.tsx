@@ -1,29 +1,31 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { characters, getDefaultVersion, type Character } from "@/lib/characters";
+import { characters, type Character, type Role } from "@/lib/characters";
 import {
+  assignRole,
   autoPick,
   createDraft,
   currentPlayer,
   getTeam,
-  getTeamSidePicks,
   pickCharacter,
   skipRoll,
   type DraftState,
   type DraftTeam,
 } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
+import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { getCurrentAuthUser } from "@/lib/supabase";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
+import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
 import { RollPanel } from "./RollPanel";
 import { TimerBar } from "./TimerBar";
 import { VictoryBanner } from "./VictoryBanner";
 
 const PICK_SECONDS = 30;
 
-type Phase = "setup" | "drafting" | "result";
+type Phase = "setup" | "drafting" | "roles" | "result";
 
 function charactersFromIds(ids: string[]): Character[] {
   return ids.map((id) => characters.find((c) => c.id === id)).filter((c): c is Character => Boolean(c));
@@ -40,6 +42,7 @@ export function DraftBoard() {
   const [secondsLeft, setSecondsLeft] = useState(PICK_SECONDS);
   const [battle, setBattle] = useState<BattleResult | null>(null);
   const [winnerLabel, setWinnerLabel] = useState<string>("");
+  const [roleStepIndex, setRoleStepIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Hotseat mode is shared-device, but whoever's logged in on this device
@@ -63,28 +66,52 @@ export function DraftBoard() {
     setPhase("drafting");
   }
 
-  // Applies a new draft state and, the moment it comes out finished, derives
-  // the battle result right here (not in an effect) so there is no extra
-  // render cascade between "draft finished" and "result shown".
+  // Applies a new draft state and, the moment it comes out finished, moves
+  // to the role-assignment step (if a battle can actually be computed for
+  // this player setup) rather than straight to the result.
   function applyDraft(next: DraftState) {
     setDraft(next);
     if (!next.finished) {
       setSecondsLeft(PICK_SECONDS);
       return;
     }
+    const isTeamMode = next.players.some((p) => p.team);
+    if (isTeamMode || next.players.length === 2) {
+      setRoleStepIndex(0);
+      setPhase("roles");
+    } else {
+      setBattle(null);
+      setPhase("result");
+    }
+  }
 
+  function handleAssignRole(characterId: string, role: Role) {
+    if (!draft) return;
+    const player = draft.players[roleStepIndex];
+    setDraft(assignRole(draft, player.id, characterId, role));
+  }
+
+  // Each player assigns roles to their own roster in turn, then the
+  // battle is computed with every player's bonus/malus applied.
+  function nextRoleStep() {
+    if (!draft) return;
+    if (roleStepIndex < draft.players.length - 1) {
+      setRoleStepIndex(roleStepIndex + 1);
+      return;
+    }
+    computeBattle(draft);
+  }
+
+  function computeBattle(next: DraftState) {
     const isTeamMode = next.players.some((p) => p.team);
     if (isTeamMode) {
-      const sideAIds = getTeamSidePicks(next, "A");
-      const sideBIds = getTeamSidePicks(next, "B");
-      const sideA = charactersFromIds(sideAIds);
-      const sideB = charactersFromIds(sideBIds);
-      const result = simulateBattle(
-        sideA.map(getDefaultVersion),
-        sideA.map((c) => c.name),
-        sideB.map(getDefaultVersion),
-        sideB.map((c) => c.name)
-      );
+      const sideA = next.players.filter((p) => p.team === "A");
+      const sideB = next.players.filter((p) => p.team === "B");
+      const sideAVersions = sideA.flatMap((p) => getRoleAdjustedVersions(getTeam(next, p.id, characters), p.roleAssignments));
+      const sideANames = sideA.flatMap((p) => getTeam(next, p.id, characters).map((c) => c.name));
+      const sideBVersions = sideB.flatMap((p) => getRoleAdjustedVersions(getTeam(next, p.id, characters), p.roleAssignments));
+      const sideBNames = sideB.flatMap((p) => getTeam(next, p.id, characters).map((c) => c.name));
+      const result = simulateBattle(sideAVersions, sideANames, sideBVersions, sideBNames);
       setBattle(result);
       const names = next.players
         .filter((p) => p.team === (result.winnerTeam === "A" ? "A" : "B"))
@@ -93,13 +120,15 @@ export function DraftBoard() {
       setWinnerLabel(`Team ${result.winnerTeam} (${names})`);
     } else if (next.players.length === 2) {
       const [p1, p2] = next.players;
-      const teamA = getTeam(next, p1.id, characters).map(getDefaultVersion);
-      const teamB = getTeam(next, p2.id, characters).map(getDefaultVersion);
+      const rosterA = getTeam(next, p1.id, characters);
+      const rosterB = getTeam(next, p2.id, characters);
+      const teamA = getRoleAdjustedVersions(rosterA, p1.roleAssignments);
+      const teamB = getRoleAdjustedVersions(rosterB, p2.roleAssignments);
       const result = simulateBattle(
         teamA,
-        getTeam(next, p1.id, characters).map((c) => c.name),
+        rosterA.map((c) => c.name),
         teamB,
-        getTeam(next, p2.id, characters).map((c) => c.name)
+        rosterB.map((c) => c.name)
       );
       setBattle(result);
       setWinnerLabel(next.players[result.winnerTeam === "A" ? 0 : 1].name);
@@ -254,6 +283,26 @@ export function DraftBoard() {
             </div>
           )}
         </aside>
+      </div>
+    );
+  }
+
+  if (phase === "roles" && draft) {
+    const player = draft.players[roleStepIndex];
+    const roster = getTeam(draft, player.id, characters);
+    const isLastStep = roleStepIndex === draft.players.length - 1;
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-sm text-black/60 dark:text-white/50">
+          Rollen für <span className="font-semibold text-black dark:text-white">{player.name}</span>
+        </p>
+        <RoleAssignmentPanel
+          roster={roster}
+          assignments={player.roleAssignments}
+          onAssign={handleAssignRole}
+          onConfirm={nextRoleStep}
+          confirmLabel={isLastStep ? "Kampf starten" : "Weiter"}
+        />
       </div>
     );
   }
