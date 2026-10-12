@@ -59,6 +59,15 @@ export function getDefaultVersion(character: Character): CharacterVersion {
   return character.versions[0];
 }
 
+function statSum(stats: Stats): number {
+  return stats.staerke + stats.haki + stats.intelligenz + stats.geschwindigkeit + stats.durabilitaet;
+}
+
+/** The character's strongest version by total stats (e.g. Luffy's Gear 5 over his East Blue debut). */
+export function getStrongestVersion(character: Character): CharacterVersion {
+  return character.versions.reduce((best, v) => (statSum(v.stats) > statSum(best.stats) ? v : best), character.versions[0]);
+}
+
 export function getCrews(): string[] {
   return Array.from(new Set(characters.map((c) => c.crew))).sort();
 }
