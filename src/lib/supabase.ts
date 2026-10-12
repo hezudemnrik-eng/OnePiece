@@ -545,13 +545,17 @@ export type OpenLiveDraft = {
  * in (so they can jump back in). Fetches the most recently active sessions
  * and filters client-side — fine at this app's scale.
  */
+const OPEN_LOBBY_MAX_AGE_HOURS = 12;
+
 export async function fetchRelevantLiveDrafts(): Promise<OpenLiveDraft[]> {
   if (!supabase) return [];
   const myUserId = await ensureSupabaseSession();
+  const cutoff = new Date(Date.now() - OPEN_LOBBY_MAX_AGE_HOURS * 60 * 60 * 1000).toISOString();
   const { data } = await supabase
     .from("draft_sessions")
     .select("id, invite_code, host_id, phase, state, max_players, updated_at")
     .neq("phase", "result")
+    .gte("updated_at", cutoff)
     .order("updated_at", { ascending: false })
     .limit(30);
   if (!data) return [];

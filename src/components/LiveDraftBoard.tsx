@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { characters, getDefaultVersion, type Character } from "@/lib/characters";
 import {
   acceptRoll,
+  assignTeam,
   autoPick,
   claimSeat,
   createDraft,
@@ -171,9 +172,9 @@ export function LiveDraftBoard() {
     if (!myUserId) return;
     setErrorMsg("");
     const ids = characters.map((c) => c.id);
-    const teams: DraftTeam[] | undefined = teamMode && playerCount === 4 ? ["A", "A", "B", "B"] : undefined;
+    const teamModeEnabled = teamMode && playerCount === 4;
     const placeholderNames = Array.from({ length: playerCount }, () => "Offen");
-    let initial = createDraft(placeholderNames, ids, teamSize, { teams });
+    let initial = createDraft(placeholderNames, ids, teamSize, { teamModeEnabled });
     initial = claimSeat(initial, 0, myUserId, nickname || "Spieler");
     const created = await createLiveDraft(initial, playerCount);
     if (!created) {
@@ -235,6 +236,17 @@ export function LiveDraftBoard() {
     if (!session) return;
     const result = await writeLiveDraft(session.id, session.updated_at, { phase: "drafting" });
     if (result.session) setSession(result.session);
+  }
+
+  async function handleAssignTeam(seatIndex: number, team: DraftTeam | undefined) {
+    if (!session) return;
+    const next = assignTeam(session.state, seatIndex, team);
+    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
+    if (result.session) setSession(result.session);
+    else if (result.conflict) {
+      const refetched = await fetchLiveDraftById(session.id);
+      if (refetched) setSession(refetched);
+    }
   }
 
   async function applyAccept() {
@@ -451,23 +463,49 @@ export function LiveDraftBoard() {
   if (effectiveView === "lobby" && session) {
     const full = isLobbyFull(session.state);
     const isHost = session.host_id === myUserId;
+    const teamModeEnabled = Boolean(session.state.teamModeEnabled);
+    const claimedPlayers = session.state.players.filter((p) => p.userId);
+    const teamsAssigned = !teamModeEnabled || claimedPlayers.every((p) => p.team);
+    const canStart = full && teamsAssigned;
     return (
       <div className="flex flex-col gap-4 max-w-md">
         <div>
           <p className="text-sm text-black/60 dark:text-white/50">Einladungscode</p>
           <p className="font-mono text-2xl tracking-widest">{session.invite_code}</p>
         </div>
+        {teamModeEnabled && isHost && (
+          <p className="text-sm text-black/60 dark:text-white/50">
+            Teile jeden Spieler einem Team zu, bevor du den Draft startest — danach lässt sich das nicht mehr ändern.
+          </p>
+        )}
         <ul className="flex flex-col gap-2">
           {session.state.players.map((p, i) => (
             <li
               key={i}
-              className="rounded-md border border-black/10 dark:border-white/10 px-3 py-2 text-sm flex items-center justify-between"
+              className="rounded-md border border-black/10 dark:border-white/10 px-3 py-2 text-sm flex items-center justify-between gap-3"
             >
               <span>
                 Sitz {i + 1}: {p.userId ? p.name : <em className="text-black/40 dark:text-white/30">offen</em>}
                 {p.team && ` · Team ${p.team}`}
+                {p.userId === myUserId && <span className="ml-2 text-amber-600 text-xs">Du</span>}
               </span>
-              {p.userId === myUserId && <span className="text-amber-600 text-xs">Du</span>}
+              {teamModeEnabled && isHost && p.userId && (
+                <div className="flex gap-1 shrink-0">
+                  {(["A", "B"] as const).map((team) => (
+                    <button
+                      key={team}
+                      onClick={() => handleAssignTeam(i, p.team === team ? undefined : team)}
+                      className={`rounded px-2 py-1 text-xs font-medium ${
+                        p.team === team
+                          ? "bg-amber-600 text-white"
+                          : "border border-black/15 dark:border-white/15 text-black/60 dark:text-white/50"
+                      }`}
+                    >
+                      Team {team}
+                    </button>
+                  ))}
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -475,10 +513,10 @@ export function LiveDraftBoard() {
         {isHost && (
           <button
             onClick={startDraft}
-            disabled={!full}
+            disabled={!canStart}
             className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700 disabled:opacity-40"
           >
-            {full ? "Draft starten" : "Warte auf weitere Spieler…"}
+            {!full ? "Warte auf weitere Spieler…" : !teamsAssigned ? "Teile erst alle Teams zu…" : "Draft starten"}
           </button>
         )}
         {!isHost && !full && <p className="text-sm text-black/50 dark:text-white/40">Warte auf weitere Spieler…</p>}

@@ -24,6 +24,8 @@ export type DraftState = {
   finished: boolean;
   /** Names of people watching without drafting themselves. */
   spectators: string[];
+  /** Whether the host can assign players to Team A/B in the lobby (see assignTeam). Once the draft leaves the lobby phase, assignments are frozen — there's no mutator that changes `team` after that point. */
+  teamModeEnabled?: boolean;
   /** ISO timestamp of when the current turn began — lets every client in a
    * live draft agree on the pick-timer countdown instead of each running
    * its own clock from whenever it happened to render. Unused in hotseat
@@ -45,7 +47,13 @@ export function createDraft(
   playerNames: string[],
   allCharacterIds: string[],
   teamSize: number,
-  options: { teams?: DraftTeam[]; spectators?: string[]; maxSkips?: number; rng?: () => number } = {}
+  options: {
+    teams?: DraftTeam[];
+    teamModeEnabled?: boolean;
+    spectators?: string[];
+    maxSkips?: number;
+    rng?: () => number;
+  } = {}
 ): DraftState {
   const maxSkips = options.maxSkips ?? 3;
   const rng = options.rng ?? Math.random;
@@ -65,6 +73,7 @@ export function createDraft(
     direction: 1,
     finished: false,
     spectators: options.spectators ?? [],
+    teamModeEnabled: options.teamModeEnabled,
     turnStartedAt: new Date().toISOString(),
     rolledCharacterId: rollRandom(availableCharacterIds, rng),
     maxSkips,
@@ -86,6 +95,14 @@ export function claimSeat(state: DraftState, seatIndex: number, userId: string, 
   const seat = state.players[seatIndex];
   if (!seat || seat.userId) return state;
   const players = state.players.map((p, i) => (i === seatIndex ? { ...p, userId, name } : p));
+  return { ...state, players };
+}
+
+/** Assigns (or clears, with `team: undefined`) the host's Team A/B pick for a seat. Only meant to be called while the draft is still in its lobby phase — callers are expected to stop offering this once the draft starts, which is what makes the assignment "locked" from then on. */
+export function assignTeam(state: DraftState, seatIndex: number, team: DraftTeam | undefined): DraftState {
+  const seat = state.players[seatIndex];
+  if (!seat) return state;
+  const players = state.players.map((p, i) => (i === seatIndex ? { ...p, team } : p));
   return { ...state, players };
 }
 

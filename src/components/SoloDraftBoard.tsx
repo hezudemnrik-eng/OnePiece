@@ -55,14 +55,19 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
   const [runs, setRuns] = useState<RunRecord[]>(() => loadRuns(storageKey));
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const isBossFight = opponentName === "Imu";
+  // Against Imu, only draft from the strongest characters (B-tier or
+  // higher) — the whole point of the boss fight is a tough match, not a
+  // roll that might hand the player five D-tier characters to lose with.
+  const bossTierPool = ["S", "A", "B"];
+
   function startDraft() {
-    const ids = characters.map((c) => c.id);
+    const pool = isBossFight ? characters.filter((c) => bossTierPool.includes(c.tier)) : characters;
+    const ids = pool.map((c) => c.id);
     setDraft(createDraft([playerName || "Du"], ids, teamSize));
     setSecondsLeft(PICK_SECONDS);
     setPhase("drafting");
   }
-
-  const isBossFight = opponentName === "Imu";
 
   function finishWithTeam(next: DraftState) {
     const ai = isBossFight ? generateImuBoss(difficulty) : generateAiTeam({ teamSize, difficulty, topShare, flatBonus });
