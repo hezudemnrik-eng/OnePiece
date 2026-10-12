@@ -37,9 +37,10 @@ export function TierListEditor() {
     () => allLists["Meine Tierliste"] ?? {}
   );
   const [compareWith, setCompareWith] = useState<string>("");
-  const [syncState, setSyncState] = useState<"off" | "loading" | "synced" | "auth-error">(
+  const [syncState, setSyncState] = useState<"off" | "loading" | "synced" | "auth-error" | "query-error">(
     isSupabaseConfigured() ? "loading" : "off"
   );
+  const [syncErrorDetail, setSyncErrorDetail] = useState("");
 
   // One-time async fetch of this browser's remote tier lists, merged over
   // the local cache (remote wins on name clashes since it's the source of
@@ -48,10 +49,15 @@ export function TierListEditor() {
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
     let cancelled = false;
-    fetchMyTierLists().then(({ userId, lists: remoteLists }) => {
+    fetchMyTierLists().then(({ userId, lists: remoteLists, error }) => {
       if (cancelled) return;
       if (!userId) {
         setSyncState("auth-error");
+        return;
+      }
+      if (error) {
+        setSyncState("query-error");
+        setSyncErrorDetail(error);
         return;
       }
       setAllLists((prev) => {
@@ -78,7 +84,14 @@ export function TierListEditor() {
     setAllLists(next);
     saveLists(next);
     if (isSupabaseConfigured()) {
-      saveTierListRemote(listName, nextAssignments, nextPublic);
+      saveTierListRemote(listName, nextAssignments, nextPublic).then(({ error }) => {
+        if (error) {
+          setSyncState("query-error");
+          setSyncErrorDetail(error);
+        } else {
+          setSyncState("synced");
+        }
+      });
     }
   }
 
@@ -153,6 +166,13 @@ export function TierListEditor() {
               Nur lokal – Supabase-Anmeldung fehlgeschlagen. Bitte in den
               Supabase-Projekteinstellungen unter Authentication → Sign In
               Methods &bdquo;Anonymous Sign-Ins&ldquo; aktivieren.
+            </span>
+          )}
+          {syncState === "query-error" && (
+            <span className="text-amber-600">
+              Nur lokal – Datenbankfehler ({syncErrorDetail}). Vermutlich
+              wurde die Migration supabase/migrations/0001_init.sql noch
+              nicht auf dem Supabase-Projekt ausgeführt.
             </span>
           )}
         </p>
