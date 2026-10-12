@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { characters, type Tier } from "@/lib/characters";
+import { fetchMyTierLists, isSupabaseConfigured, saveTierListRemote } from "@/lib/supabase";
 import { CharacterCard } from "./CharacterCard";
 
 const TIERS: Tier[] = ["S", "A", "B", "C", "D"];
@@ -9,6 +10,7 @@ const STORAGE_KEY = "op-tierlists";
 
 type Assignments = Record<string, Tier>;
 type StoredLists = Record<string, Assignments>;
+type PublicFlags = Record<string, boolean>;
 
 function loadLists(): StoredLists {
   if (typeof window === "undefined") return {};
@@ -30,21 +32,62 @@ function saveLists(lists: StoredLists) {
 export function TierListEditor() {
   const [listName, setListName] = useState("Meine Tierliste");
   const [allLists, setAllLists] = useState<StoredLists>(() => loadLists());
+  const [publicFlags, setPublicFlags] = useState<PublicFlags>({});
   const [assignments, setAssignments] = useState<Assignments>(
     () => allLists["Meine Tierliste"] ?? {}
   );
   const [compareWith, setCompareWith] = useState<string>("");
+  const [syncState, setSyncState] = useState<"off" | "loading" | "synced">(
+    isSupabaseConfigured() ? "loading" : "off"
+  );
 
-  function persist(nextAssignments: Assignments) {
+  // One-time async fetch of this browser's remote tier lists, merged over
+  // the local cache (remote wins on name clashes since it's the source of
+  // truth once configured). This is a genuine network round-trip, not a
+  // synchronous state mirror, so it belongs in an effect.
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    let cancelled = false;
+    fetchMyTierLists().then((remoteLists) => {
+      if (cancelled) return;
+      setAllLists((prev) => {
+        const merged = { ...prev };
+        const flags: PublicFlags = {};
+        for (const list of remoteLists) {
+          merged[list.name] = list.assignments as Assignments;
+          flags[list.name] = list.is_public;
+        }
+        setPublicFlags((prevFlags) => ({ ...prevFlags, ...flags }));
+        if (merged[listName]) setAssignments(merged[listName]);
+        return merged;
+      });
+      setSyncState("synced");
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function persist(nextAssignments: Assignments, nextPublic = publicFlags[listName] ?? false) {
     const next = { ...allLists, [listName]: nextAssignments };
     setAllLists(next);
     saveLists(next);
+    if (isSupabaseConfigured()) {
+      saveTierListRemote(listName, nextAssignments, nextPublic);
+    }
   }
 
   function assign(characterId: string, tier: Tier) {
     const next = { ...assignments, [characterId]: tier };
     setAssignments(next);
     persist(next);
+  }
+
+  function togglePublic() {
+    const nextPublic = !(publicFlags[listName] ?? false);
+    setPublicFlags((prev) => ({ ...prev, [listName]: nextPublic }));
+    persist(assignments, nextPublic);
   }
 
   function unassigned() {
@@ -85,10 +128,22 @@ export function TierListEditor() {
               ))}
           </select>
         </label>
-        <p className="text-xs text-black/50 dark:text-white/40 max-w-xs">
-          Listen werden aktuell nur in diesem Browser gespeichert. Für echten
-          Vergleich mit Freunden auf anderen Geräten braucht es noch die
-          Supabase-Anbindung (siehe .env.example).
+        {isSupabaseConfigured() ? (
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={publicFlags[listName] ?? false} onChange={togglePublic} />
+            Öffentlich teilen (Freunde können diese Liste zum Vergleich sehen)
+          </label>
+        ) : (
+          <p className="text-xs text-black/50 dark:text-white/40 max-w-xs">
+            Listen werden aktuell nur in diesem Browser gespeichert. Für
+            echten Vergleich mit Freunden auf anderen Geräten braucht es
+            noch die Supabase-Anbindung (siehe .env.example).
+          </p>
+        )}
+        <p className="text-xs text-black/40 dark:text-white/30">
+          {syncState === "loading" && "Synchronisiere…"}
+          {syncState === "synced" && "Synchronisiert ✓"}
+          {syncState === "off" && "Nur lokal (Supabase nicht konfiguriert)"}
         </p>
       </div>
 

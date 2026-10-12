@@ -1,9 +1,13 @@
 import type { Character } from "./characters";
 
+export type DraftTeam = "A" | "B";
+
 export type DraftPlayer = {
   id: string;
   name: string;
   pickedCharacterIds: string[];
+  /** Set when the draft is Team-vs-Team; undefined for free-for-all drafts. */
+  team?: DraftTeam;
 };
 
 export type DraftState = {
@@ -14,18 +18,22 @@ export type DraftState = {
   round: number;
   direction: 1 | -1; // snake draft reverses direction each round
   finished: boolean;
+  /** Names of people watching without drafting themselves. */
+  spectators: string[];
 };
 
 export function createDraft(
   playerNames: string[],
   allCharacterIds: string[],
-  teamSize: number
+  teamSize: number,
+  options: { teams?: DraftTeam[]; spectators?: string[] } = {}
 ): DraftState {
   return {
     players: playerNames.map((name, i) => ({
       id: `p${i + 1}`,
       name,
       pickedCharacterIds: [],
+      team: options.teams?.[i],
     })),
     availableCharacterIds: [...allCharacterIds],
     teamSize,
@@ -33,7 +41,13 @@ export function createDraft(
     round: 1,
     direction: 1,
     finished: false,
+    spectators: options.spectators ?? [],
   };
+}
+
+/** All characters picked so far by every player on a given side, for Team-vs-Team drafts. */
+export function getTeamSidePicks(state: DraftState, team: DraftTeam): string[] {
+  return state.players.filter((p) => p.team === team).flatMap((p) => p.pickedCharacterIds);
 }
 
 export function currentPlayer(state: DraftState): DraftPlayer {

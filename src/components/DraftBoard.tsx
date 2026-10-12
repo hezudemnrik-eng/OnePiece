@@ -2,7 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import { characters, getDefaultVersion, type Character } from "@/lib/characters";
-import { autoPick, createDraft, currentPlayer, getTeam, pick, type DraftState } from "@/lib/draft";
+import {
+  autoPick,
+  createDraft,
+  currentPlayer,
+  getTeam,
+  getTeamSidePicks,
+  pick,
+  type DraftState,
+  type DraftTeam,
+} from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { CharacterCard } from "./CharacterCard";
 
@@ -10,19 +19,32 @@ const PICK_SECONDS = 30;
 
 type Phase = "setup" | "drafting" | "result";
 
+function charactersFromIds(ids: string[]): Character[] {
+  return ids.map((id) => characters.find((c) => c.id === id)).filter((c): c is Character => Boolean(c));
+}
+
 export function DraftBoard() {
   const [phase, setPhase] = useState<Phase>("setup");
   const [playerCount, setPlayerCount] = useState(2);
   const [names, setNames] = useState(["Spieler 1", "Spieler 2"]);
   const [teamSize, setTeamSize] = useState(5);
+  const [teamMode, setTeamMode] = useState(false);
+  const [spectatorsInput, setSpectatorsInput] = useState("");
   const [draft, setDraft] = useState<DraftState | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(PICK_SECONDS);
   const [battle, setBattle] = useState<BattleResult | null>(null);
+  const [winnerLabel, setWinnerLabel] = useState<string>("");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   function startDraft() {
     const ids = characters.map((c) => c.id);
-    setDraft(createDraft(names.slice(0, playerCount), ids, teamSize));
+    const teams: DraftTeam[] | undefined =
+      teamMode && playerCount === 4 ? ["A", "A", "B", "B"] : undefined;
+    const spectators = spectatorsInput
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    setDraft(createDraft(names.slice(0, playerCount), ids, teamSize, { teams, spectators }));
     setSecondsLeft(PICK_SECONDS);
     setPhase("drafting");
   }
@@ -36,18 +58,39 @@ export function DraftBoard() {
       setSecondsLeft(PICK_SECONDS);
       return;
     }
-    if (next.players.length === 2) {
+
+    const isTeamMode = next.players.some((p) => p.team);
+    if (isTeamMode) {
+      const sideAIds = getTeamSidePicks(next, "A");
+      const sideBIds = getTeamSidePicks(next, "B");
+      const sideA = charactersFromIds(sideAIds);
+      const sideB = charactersFromIds(sideBIds);
+      const result = simulateBattle(
+        sideA.map(getDefaultVersion),
+        sideA.map((c) => c.name),
+        sideB.map(getDefaultVersion),
+        sideB.map((c) => c.name)
+      );
+      setBattle(result);
+      const names = next.players
+        .filter((p) => p.team === (result.winnerTeam === "A" ? "A" : "B"))
+        .map((p) => p.name)
+        .join(" & ");
+      setWinnerLabel(`Team ${result.winnerTeam} (${names})`);
+    } else if (next.players.length === 2) {
       const [p1, p2] = next.players;
       const teamA = getTeam(next, p1.id, characters).map(getDefaultVersion);
       const teamB = getTeam(next, p2.id, characters).map(getDefaultVersion);
-      setBattle(
-        simulateBattle(
-          teamA,
-          getTeam(next, p1.id, characters).map((c) => c.name),
-          teamB,
-          getTeam(next, p2.id, characters).map((c) => c.name)
-        )
+      const result = simulateBattle(
+        teamA,
+        getTeam(next, p1.id, characters).map((c) => c.name),
+        teamB,
+        getTeam(next, p2.id, characters).map((c) => c.name)
       );
+      setBattle(result);
+      setWinnerLabel(next.players[result.winnerTeam === "A" ? 0 : 1].name);
+    } else {
+      setBattle(null);
     }
     setPhase("result");
   }
@@ -121,6 +164,25 @@ export function DraftBoard() {
             className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
           />
         </label>
+        {playerCount === 4 && (
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={teamMode}
+              onChange={(e) => setTeamMode(e.target.checked)}
+            />
+            Team-vs-Team (2 gegen 2: Spieler 1+2 vs. Spieler 3+4)
+          </label>
+        )}
+        <label className="flex flex-col gap-1 text-sm">
+          Zuschauer (Namen, mit Komma getrennt)
+          <input
+            value={spectatorsInput}
+            onChange={(e) => setSpectatorsInput(e.target.value)}
+            placeholder="z. B. Lena, Tom"
+            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
+          />
+        </label>
         <button
           onClick={startDraft}
           className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
@@ -155,7 +217,9 @@ export function DraftBoard() {
           {draft.players.map((p) => (
             <div key={p.id} className="rounded-lg border border-black/10 dark:border-white/10 p-3">
               <p className="mb-2 text-sm font-semibold">
-                {p.name} ({p.pickedCharacterIds.length}/{draft.teamSize})
+                {p.name}
+                {p.team && <span className="text-amber-600"> · Team {p.team}</span>} (
+                {p.pickedCharacterIds.length}/{draft.teamSize})
               </p>
               <ul className="space-y-1 text-sm text-black/70 dark:text-white/60">
                 {p.pickedCharacterIds.map((id) => (
@@ -164,6 +228,12 @@ export function DraftBoard() {
               </ul>
             </div>
           ))}
+          {draft.spectators.length > 0 && (
+            <div className="rounded-lg border border-dashed border-black/15 dark:border-white/15 p-3">
+              <p className="mb-1 text-sm font-semibold">Zuschauer</p>
+              <p className="text-sm text-black/60 dark:text-white/50">{draft.spectators.join(", ")}</p>
+            </div>
+          )}
         </aside>
       </div>
     );
@@ -188,9 +258,7 @@ export function DraftBoard() {
 
         {battle && (
           <div className="rounded-lg border border-amber-500/40 p-4">
-            <p className="mb-2 font-semibold">
-              Kampfsimulation: {draft.players[battle.winnerTeam === "A" ? 0 : 1].name} gewinnt!
-            </p>
+            <p className="mb-2 font-semibold">Kampfsimulation: {winnerLabel} gewinnt!</p>
             <div className="max-h-48 overflow-y-auto text-xs font-mono space-y-0.5">
               {battle.rounds.map((r, i) => (
                 <p key={i}>
@@ -204,7 +272,9 @@ export function DraftBoard() {
         )}
         {!battle && draft.players.length > 2 && (
           <p className="text-sm text-black/60 dark:text-white/50">
-            Die Kampfsimulation unterstützt aktuell 2 Spieler. Mehrspieler-Battle-Royale ist für eine spätere Phase vorgesehen.
+            Die Kampfsimulation unterstützt aktuell 2 Spieler oder 2-vs-2 im
+            Team-Modus. Freie Mehrspieler-Battle-Royale (3 Spieler ohne
+            Teams) ist für eine spätere Phase vorgesehen.
           </p>
         )}
       </div>

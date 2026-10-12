@@ -2,6 +2,8 @@ import Link from "next/link";
 
 const links = [
   { href: "/draft", title: "PvP-Draft gegen Freunde", desc: "Snake-Draft im Hotseat, danach Kampfsimulation." },
+  { href: "/imu", title: "Gegen Imu", desc: "Solo-Draft gegen eine starke KI-Auswahl." },
+  { href: "/zufallsgegner", title: "Gegen Zufallsgegner", desc: "Ranked-Übungsrunde gegen eine leichtere KI." },
   { href: "/tierlisten", title: "Tierlisten", desc: "Charaktere in S–D einstufen und vergleichen." },
 ];
 
