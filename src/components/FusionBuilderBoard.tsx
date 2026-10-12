@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { FUSION_CATEGORIES, computeBounty, formatBerry, rollFusionOption, type FusionOption } from "@/lib/fusionTraits";
+import {
+  FUSION_CATEGORIES,
+  computeBounty,
+  formatBerry,
+  rollFusionOption,
+  type FusionCategoryId,
+  type FusionOption,
+} from "@/lib/fusionTraits";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 
 type Phase = "setup" | "rolling" | "done";
@@ -28,52 +35,61 @@ function saveHistory(record: HistoryRecord) {
   }
 }
 
+function rollCandidates(categoryIds: FusionCategoryId[]): Record<FusionCategoryId, FusionOption> {
+  const result = {} as Record<FusionCategoryId, FusionOption>;
+  for (const id of categoryIds) {
+    result[id] = rollFusionOption(id);
+  }
+  return result;
+}
+
 export function FusionBuilderBoard() {
   const [phase, setPhase] = useState<Phase>("setup");
-  const [categoryIndex, setCategoryIndex] = useState(0);
-  const [candidate, setCandidate] = useState<FusionOption | null>(null);
+  const [candidates, setCandidates] = useState<Record<FusionCategoryId, FusionOption>>(
+    {} as Record<FusionCategoryId, FusionOption>
+  );
   const [picks, setPicks] = useState<FusionOption[]>([]);
   const [history, setHistory] = useState<HistoryRecord[]>(() => loadHistory());
 
-  const category = FUSION_CATEGORIES[categoryIndex];
-
-  function reroll() {
-    playSkip();
-    vibrate(15);
-    setCandidate(rollFusionOption(category.id));
-  }
-
-  function keep() {
-    if (!candidate) return;
-    playAccept();
-    vibrate(25);
-    const next = [...picks, candidate];
-    setPicks(next);
-    if (categoryIndex + 1 < FUSION_CATEGORIES.length) {
-      setCategoryIndex(categoryIndex + 1);
-      setCandidate(rollFusionOption(FUSION_CATEGORIES[categoryIndex + 1].id));
-    } else {
-      const bounty = computeBounty(next);
-      saveHistory({ date: new Date().toLocaleString("de-DE"), bounty });
-      setHistory(loadHistory());
-      setPhase("done");
-    }
-  }
+  const remainingCategories = FUSION_CATEGORIES.filter(
+    (c) => !picks.some((p) => p.categoryId === c.id)
+  );
 
   function start() {
     setPhase("rolling");
-    setCategoryIndex(0);
     setPicks([]);
-    setCandidate(rollFusionOption(FUSION_CATEGORIES[0].id));
+    setCandidates(rollCandidates(FUSION_CATEGORIES.map((c) => c.id)));
+  }
+
+  function choose(categoryId: FusionCategoryId) {
+    const chosen = candidates[categoryId];
+    if (!chosen) return;
+    playAccept();
+    vibrate(25);
+    const nextPicks = [...picks, chosen];
+    setPicks(nextPicks);
+
+    if (nextPicks.length === FUSION_CATEGORIES.length) {
+      const bounty = computeBounty(nextPicks);
+      saveHistory({ date: new Date().toLocaleString("de-DE"), bounty });
+      setHistory(loadHistory());
+      setPhase("done");
+      return;
+    }
+
+    playSkip();
+    vibrate(15);
+    const stillOpenIds = remainingCategories.filter((c) => c.id !== categoryId).map((c) => c.id);
+    setCandidates((prev) => ({ ...prev, ...rollCandidates(stillOpenIds) }));
   }
 
   if (phase === "setup") {
     return (
       <div className="flex flex-col gap-4 max-w-md">
         <p className="text-sm text-black/60 dark:text-white/50">
-          Für jede der {FUSION_CATEGORIES.length} Kategorien (
-          {FUSION_CATEGORIES.map((c) => c.label).join(", ")}) bekommst du einen zufälligen Charakter vorgeschlagen.
-          Behalte seine Eigenschaft oder würfle neu — am Ende verschmelzen alle Picks zu einem Kopfgeld.
+          Alle {FUSION_CATEGORIES.length} Kategorien (
+          {FUSION_CATEGORIES.map((c) => c.label).join(", ")}) liegen gleichzeitig aus. Wähle pro Runde eine davon —
+          die restlichen werden danach neu gewürfelt. Am Ende verschmelzen alle Picks zu einem Kopfgeld.
         </p>
         <button
           onClick={start}
@@ -99,37 +115,46 @@ export function FusionBuilderBoard() {
 
   if (phase === "rolling") {
     return (
-      <div className="flex flex-col gap-6 max-w-xl">
+      <div className="flex flex-col gap-6 max-w-4xl">
         <div className="text-sm text-black/50 dark:text-white/40">
-          Kategorie {categoryIndex + 1} / {FUSION_CATEGORIES.length}
+          Noch {remainingCategories.length} von {FUSION_CATEGORIES.length} Kategorien offen
         </div>
-        <h2 className="text-xl font-semibold">{category.label}</h2>
-        {candidate && (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-6">
-            {candidate.sourceImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={candidate.sourceImageUrl}
-                alt={candidate.sourceName}
-                referrerPolicy="no-referrer"
-                className="h-32 w-auto rounded-lg border border-amber-500/40 object-cover object-top shadow-lg"
-              />
-            ) : (
-              <span className="flex h-32 w-24 items-center justify-center rounded-lg bg-amber-500/15 text-3xl font-bold text-amber-700 dark:text-amber-400">
-                {candidate.sourceName.slice(0, 2).toUpperCase()}
-              </span>
-            )}
-            <p className="text-center text-lg font-semibold">{candidate.traitLabel}</p>
-            <p className="text-sm text-black/60 dark:text-white/50">von {candidate.sourceName}</p>
-          </div>
-        )}
-        <div className="flex gap-3">
-          <button onClick={keep} className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700">
-            ✅ Behalten
-          </button>
-          <button onClick={reroll} className="rounded-md border border-black/15 dark:border-white/15 px-4 py-2 font-medium">
-            🔄 Neu würfeln
-          </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {remainingCategories.map((category) => {
+            const candidate = candidates[category.id];
+            if (!candidate) return null;
+            return (
+              <div
+                key={category.id}
+                className="flex flex-col items-center gap-3 rounded-xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-4"
+              >
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+                  {category.label}
+                </h2>
+                {candidate.sourceImageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={candidate.sourceImageUrl}
+                    alt={candidate.sourceName}
+                    referrerPolicy="no-referrer"
+                    className="h-28 w-auto rounded-lg border border-amber-500/40 object-cover object-top shadow-lg"
+                  />
+                ) : (
+                  <span className="flex h-28 w-20 items-center justify-center rounded-lg bg-amber-500/15 text-2xl font-bold text-amber-700 dark:text-amber-400">
+                    {candidate.sourceName.slice(0, 2).toUpperCase()}
+                  </span>
+                )}
+                <p className="text-center text-base font-semibold">{candidate.traitLabel}</p>
+                <p className="text-xs text-black/60 dark:text-white/50">von {candidate.sourceName}</p>
+                <button
+                  onClick={() => choose(category.id)}
+                  className="mt-1 rounded-md bg-amber-600 text-white px-4 py-2 text-sm font-medium hover:bg-amber-700"
+                >
+                  ✅ Diesen wählen
+                </button>
+              </div>
+            );
+          })}
         </div>
         {picks.length > 0 && (
           <div>
