@@ -22,14 +22,33 @@ export function isSupabaseConfigured(): boolean {
  * nickname + invite code, no real accounts) — anonymous auth still gives
  * every browser a stable auth.uid() that Row Level Security can scope
  * rows to. Returns null when Supabase isn't configured or the call fails.
+ *
+ * The TierListEditor fires off several Supabase calls from separate
+ * effects right on mount (fetching lists, loading the profile), each of
+ * which calls this. Without de-duping, two concurrent callers could both
+ * see "no session yet" and each call signInAnonymously(), which mints TWO
+ * different anonymous identities — whichever request then lands first
+ * writes rows under a user id that doesn't match the session the OTHER
+ * caller is about to use, so its query fails RLS. Caching the in-flight
+ * promise means every caller on this page load shares the same sign-in.
  */
+let sessionPromise: Promise<string | null> | null = null;
+
 export async function ensureSupabaseSession(): Promise<string | null> {
   if (!supabase) return null;
-  const { data } = await supabase.auth.getSession();
-  if (data.session) return data.session.user.id;
-  const { data: signInData, error } = await supabase.auth.signInAnonymously();
-  if (error || !signInData.session) return null;
-  return signInData.session.user.id;
+  if (!sessionPromise) {
+    sessionPromise = (async () => {
+      const { data } = await supabase!.auth.getSession();
+      if (data.session) return data.session.user.id;
+      const { data: signInData, error } = await supabase!.auth.signInAnonymously();
+      if (error || !signInData.session) {
+        sessionPromise = null; // allow a later retry instead of caching a permanent failure
+        return null;
+      }
+      return signInData.session.user.id;
+    })();
+  }
+  return sessionPromise;
 }
 
 export type RemoteTierList = {
