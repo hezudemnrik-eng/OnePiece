@@ -5,6 +5,7 @@ export type BattleFighter = {
   name: string;
   version: CharacterVersion;
   hp: number;
+  attacksPerRound: number;
 };
 
 export type BattleRound = {
@@ -30,6 +31,7 @@ function toFighters(versions: CharacterVersion[], names: string[]): BattleFighte
     name: names[i],
     version,
     hp: MAX_HP_PER_FIGHTER + version.stats.durabilitaet,
+    attacksPerRound: Math.max(1, version.attacksPerRound ?? 1),
   }));
 }
 
@@ -73,35 +75,39 @@ export function simulateBattle(
     if (aliveA.length === 0 || aliveB.length === 0) break;
 
     for (const attacker of aliveA) {
-      const targets = teamB.filter((f) => f.hp > 0);
-      if (targets.length === 0) break;
-      const defender = targets[Math.floor(rng() * targets.length)];
-      const { damage, critical } = rollDamage(attacker, rng);
-      defender.hp = Math.max(0, defender.hp - damage);
-      rounds.push({
-        round: roundNumber,
-        attackerName: attacker.name,
-        defenderName: defender.name,
-        damage,
-        critical,
-        defenderHpAfter: defender.hp,
-      });
+      for (let hit = 0; hit < attacker.attacksPerRound; hit++) {
+        const targets = teamB.filter((f) => f.hp > 0);
+        if (targets.length === 0) break;
+        const defender = targets[Math.floor(rng() * targets.length)];
+        const { damage, critical } = rollDamage(attacker, rng);
+        defender.hp = Math.max(0, defender.hp - damage);
+        rounds.push({
+          round: roundNumber,
+          attackerName: attacker.name,
+          defenderName: defender.name,
+          damage,
+          critical,
+          defenderHpAfter: defender.hp,
+        });
+      }
     }
 
     for (const attacker of teamB.filter((f) => f.hp > 0)) {
-      const targets = teamA.filter((f) => f.hp > 0);
-      if (targets.length === 0) break;
-      const defender = targets[Math.floor(rng() * targets.length)];
-      const { damage, critical } = rollDamage(attacker, rng);
-      defender.hp = Math.max(0, defender.hp - damage);
-      rounds.push({
-        round: roundNumber,
-        attackerName: attacker.name,
-        defenderName: defender.name,
-        damage,
-        critical,
-        defenderHpAfter: defender.hp,
-      });
+      for (let hit = 0; hit < attacker.attacksPerRound; hit++) {
+        const targets = teamA.filter((f) => f.hp > 0);
+        if (targets.length === 0) break;
+        const defender = targets[Math.floor(rng() * targets.length)];
+        const { damage, critical } = rollDamage(attacker, rng);
+        defender.hp = Math.max(0, defender.hp - damage);
+        rounds.push({
+          round: roundNumber,
+          attackerName: attacker.name,
+          defenderName: defender.name,
+          damage,
+          critical,
+          defenderHpAfter: defender.hp,
+        });
+      }
     }
   }
 

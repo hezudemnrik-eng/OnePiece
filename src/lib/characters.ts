@@ -28,6 +28,8 @@ export type CharacterVersion = {
   id: string;
   label: string;
   stats: Stats;
+  /** How many attacks this fighter gets per battle round (default 1). Used by boss fights such as Imu, who fights alone against a full team and would otherwise be hopelessly outnumbered on actions. */
+  attacksPerRound?: number;
 };
 
 export type Character = {

@@ -91,15 +91,22 @@ export function generateAiTeam({
 
 // Imu fights alone as a single boss rather than a generated team (see
 // SoloDraftBoard) — "stark" per the feature questionnaire: noticeably
-// tougher than any roster character (especially the HP-driving
-// durabilitaet stat, pushed well past the normal 1-100 roster range so a
-// focused team of 5 has to actually grind him down), but not scaled so
-// high the fight becomes unwinnable.
-const IMU_BASE_STATS: Stats = { staerke: 99, haki: 99, intelligenz: 90, geschwindigkeit: 80, durabilitaet: 95 };
-const IMU_DIFFICULTY: Record<Difficulty, { statMultiplier: number; durabilitaet: number }> = {
-  leicht: { statMultiplier: 1.0, durabilitaet: 220 },
-  mittel: { statMultiplier: 1.1, durabilitaet: 320 },
-  schwer: { statMultiplier: 1.2, durabilitaet: 420 },
+// tougher than any roster character, but not scaled so high the fight
+// becomes unwinnable.
+//
+// Because the battle sim lets every living fighter attack once per round,
+// a 5-person team lands 5 hits on Imu per round while he, being alone,
+// only ever lands 1 hit back (spread randomly, not focused) — stat bumps
+// alone can't close that gap (a team of 5 top-roster characters killed
+// even a massively stat-boosted, 650-durabilitaet Imu in ~4 rounds in
+// simulation, before he could meaningfully punish them back). So besides
+// higher stats/HP, he also gets extra attacks per round via
+// CharacterVersion.attacksPerRound, closing the action-count gap directly.
+const IMU_BASE_STATS: Stats = { staerke: 105, haki: 105, intelligenz: 95, geschwindigkeit: 90, durabilitaet: 100 };
+const IMU_DIFFICULTY: Record<Difficulty, { statMultiplier: number; durabilitaet: number; attacksPerRound: number }> = {
+  leicht: { statMultiplier: 1.15, durabilitaet: 600, attacksPerRound: 2 },
+  mittel: { statMultiplier: 1.0, durabilitaet: 650, attacksPerRound: 3 },
+  schwer: { statMultiplier: 1.3, durabilitaet: 750, attacksPerRound: 3 },
 };
 
 export function generateImuBoss(difficulty: Difficulty): AiTeam {
@@ -113,6 +120,11 @@ export function generateImuBoss(difficulty: Difficulty): AiTeam {
     geschwindigkeit: Math.round(IMU_BASE_STATS.geschwindigkeit * cfg.statMultiplier),
     durabilitaet: cfg.durabilitaet,
   };
-  const version: CharacterVersion = { id: "imu-boss", label: `Imu (${difficulty})`, stats };
+  const version: CharacterVersion = {
+    id: "imu-boss",
+    label: `Imu (${difficulty})`,
+    stats,
+    attacksPerRound: cfg.attacksPerRound,
+  };
   return { characters: [imuCharacter], versions: [version], names: ["Imu"] };
 }
