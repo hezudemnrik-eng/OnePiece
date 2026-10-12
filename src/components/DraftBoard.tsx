@@ -14,7 +14,11 @@ import {
   type DraftTeam,
 } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
+import { playAccept, playSkip, vibrate } from "@/lib/sfx";
+import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RollPanel } from "./RollPanel";
+import { TimerBar } from "./TimerBar";
+import { VictoryBanner } from "./VictoryBanner";
 
 const PICK_SECONDS = 30;
 
@@ -115,11 +119,15 @@ export function DraftBoard() {
 
   function handleAccept() {
     if (!draft) return;
+    playAccept();
+    vibrate(30);
     applyDraft(acceptRoll(draft));
   }
 
   function handleSkip() {
     if (!draft) return;
+    playSkip();
+    vibrate(15);
     applyDraft(skipRoll(draft));
   }
 
@@ -208,10 +216,10 @@ export function DraftBoard() {
       <div className="grid gap-6 md:grid-cols-[1fr_280px]">
         <div>
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm">
+            <p key={draft.currentPlayerIndex} className="op-turn-pulse text-sm">
               Am Zug: <span className="font-semibold">{player.name}</span> · Runde {draft.round}
             </p>
-            <p className="text-sm font-mono tabular-nums">{secondsLeft}s</p>
+            <TimerBar secondsLeft={secondsLeft} totalSeconds={PICK_SECONDS} />
           </div>
           <RollPanel character={rolled} skipsLeft={player.skipsLeft} onAccept={handleAccept} onSkip={handleSkip} />
         </div>
@@ -225,7 +233,9 @@ export function DraftBoard() {
               </p>
               <ul className="space-y-1 text-sm text-black/70 dark:text-white/60">
                 {p.pickedCharacterIds.map((id) => (
-                  <li key={id}>{characters.find((c) => c.id === id)?.name}</li>
+                  <li key={id} className="op-slide-in">
+                    {characters.find((c) => c.id === id)?.name}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -244,6 +254,7 @@ export function DraftBoard() {
   if (phase === "result" && draft) {
     return (
       <div className="flex flex-col gap-6">
+        {battle && <VictoryBanner won={null} label={`${winnerLabel} gewinnt!`} />}
         <h2 className="text-xl font-semibold">Draft beendet</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {draft.players.map((p) => (
@@ -261,15 +272,7 @@ export function DraftBoard() {
         {battle && (
           <div className="rounded-lg border border-amber-500/40 p-4">
             <p className="mb-2 font-semibold">Kampfsimulation: {winnerLabel} gewinnt!</p>
-            <div className="max-h-48 overflow-y-auto text-xs font-mono space-y-0.5">
-              {battle.rounds.map((r, i) => (
-                <p key={i}>
-                  R{r.round}: {r.attackerName} → {r.defenderName}{" "}
-                  {r.critical ? "KRITISCH " : ""}
-                  -{r.damage} (HP danach: {r.defenderHpAfter})
-                </p>
-              ))}
-            </div>
+            <AnimatedBattleLog battle={battle} />
           </div>
         )}
         {!battle && draft.players.length > 2 && (

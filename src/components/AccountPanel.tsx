@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { characters } from "@/lib/characters";
 import { getCurrentAuthUser, isSupabaseConfigured, signOutUser, type AuthUser } from "@/lib/supabase";
+import { useAnimationsEnabled } from "@/lib/animPrefs";
 
 type Props = {
   /** Called after a successful logout so the parent (AuthGate) can re-check auth state. */
@@ -12,6 +13,7 @@ type Props = {
 export function AccountPanel({ onSignedOut }: Props) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [animationsEnabled, setAnimationsEnabled] = useAnimationsEnabled();
 
   useEffect(() => {
     getCurrentAuthUser().then((u) => {
@@ -32,6 +34,13 @@ export function AccountPanel({ onSignedOut }: Props) {
 
   return (
     <div className="flex items-center gap-2 text-sm">
+      <button
+        onClick={() => setAnimationsEnabled(!animationsEnabled)}
+        title={animationsEnabled ? "Animationen & Sound ausschalten" : "Animationen & Sound einschalten"}
+        className="text-base"
+      >
+        {animationsEnabled ? "✨" : "🔇"}
+      </button>
       {avatar?.imageUrl && (
         // eslint-disable-next-line @next/next/no-img-element
         <img

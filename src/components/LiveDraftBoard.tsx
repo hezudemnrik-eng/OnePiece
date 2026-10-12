@@ -17,6 +17,7 @@ import {
   type DraftTeam,
 } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
+import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import {
   createLiveDraft,
   ensureSupabaseSession,
@@ -27,7 +28,10 @@ import {
   writeLiveDraft,
   type LiveDraftSession,
 } from "@/lib/supabase";
+import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RollPanel } from "./RollPanel";
+import { TimerBar } from "./TimerBar";
+import { VictoryBanner } from "./VictoryBanner";
 
 const PICK_SECONDS = 30;
 const NICKNAME_KEY = "op-nickname";
@@ -235,6 +239,8 @@ export function LiveDraftBoard() {
 
   async function applyAccept() {
     if (!session) return;
+    playAccept();
+    vibrate(30);
     const next = acceptRoll(session.state);
     const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
     if (result.session) setSession(result.session);
@@ -246,6 +252,8 @@ export function LiveDraftBoard() {
 
   async function applySkip() {
     if (!session) return;
+    playSkip();
+    vibrate(15);
     const next = skipRoll(session.state);
     const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
     if (result.session) setSession(result.session);
@@ -494,11 +502,11 @@ export function LiveDraftBoard() {
       <div className="grid gap-6 md:grid-cols-[1fr_280px]">
         <div>
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm">
+            <p key={player.id} className="op-turn-pulse text-sm">
               Am Zug: <span className="font-semibold">{player.name}</span>
               {myTurn && <span className="text-amber-600"> (du!)</span>} · Runde {session.state.round}
             </p>
-            <p className="text-sm font-mono tabular-nums">{secondsLeft}s</p>
+            <TimerBar secondsLeft={secondsLeft} totalSeconds={PICK_SECONDS} />
           </div>
           <RollPanel
             character={rolled}
@@ -521,7 +529,9 @@ export function LiveDraftBoard() {
               </p>
               <ul className="space-y-1 text-sm text-black/70 dark:text-white/60">
                 {p.pickedCharacterIds.map((id) => (
-                  <li key={id}>{characters.find((c) => c.id === id)?.name}</li>
+                  <li key={id} className="op-slide-in">
+                    {characters.find((c) => c.id === id)?.name}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -545,8 +555,16 @@ export function LiveDraftBoard() {
         winnerLabel = session.state.players[session.battle.winnerTeam === "A" ? 0 : 1]?.name ?? "";
       }
     }
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    const myWon =
+      !isSpectator && me && session.battle
+        ? me.team
+          ? me.team === session.battle.winnerTeam
+          : session.state.players.indexOf(me) === (session.battle.winnerTeam === "A" ? 0 : 1)
+        : null;
     return (
       <div className="flex flex-col gap-6">
+        {session.battle && <VictoryBanner won={myWon} label={myWon === null ? `${winnerLabel} gewinnt!` : undefined} />}
         <h2 className="text-xl font-semibold">Draft beendet</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {session.state.players.map((p) => (
@@ -563,14 +581,7 @@ export function LiveDraftBoard() {
         {session.battle ? (
           <div className="rounded-lg border border-amber-500/40 p-4">
             <p className="mb-2 font-semibold">Kampfsimulation: {winnerLabel} gewinnt!</p>
-            <div className="max-h-48 overflow-y-auto text-xs font-mono space-y-0.5">
-              {session.battle.rounds.map((r, i) => (
-                <p key={i}>
-                  R{r.round}: {r.attackerName} → {r.defenderName} {r.critical ? "KRITISCH " : ""}
-                  -{r.damage} (HP danach: {r.defenderHpAfter})
-                </p>
-              ))}
-            </div>
+            <AnimatedBattleLog battle={session.battle} />
           </div>
         ) : (
           <p className="text-sm text-black/50 dark:text-white/40">Kampfsimulation wird berechnet…</p>

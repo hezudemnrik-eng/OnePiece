@@ -6,7 +6,11 @@ import { acceptRoll, autoPick, createDraft, currentPlayer, getTeam, skipRoll, ty
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { generateAiTeam, type AiTeam, type Difficulty } from "@/lib/imu";
 import { recordMatchResult } from "@/lib/supabase";
+import { playAccept, playSkip, vibrate } from "@/lib/sfx";
+import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RollPanel } from "./RollPanel";
+import { TimerBar } from "./TimerBar";
+import { VictoryBanner } from "./VictoryBanner";
 
 const PICK_SECONDS = 30;
 
@@ -105,11 +109,15 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
 
   function handleAccept() {
     if (!draft) return;
+    playAccept();
+    vibrate(30);
     applyDraft(acceptRoll(draft));
   }
 
   function handleSkip() {
     if (!draft) return;
+    playSkip();
+    vibrate(15);
     applyDraft(skipRoll(draft));
   }
 
@@ -178,7 +186,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
           <p className="text-sm">
             Dein Pick: <span className="font-semibold">{player.name}</span> ({player.pickedCharacterIds.length}/{draft.teamSize})
           </p>
-          <p className="text-sm font-mono tabular-nums">{secondsLeft}s</p>
+          <TimerBar secondsLeft={secondsLeft} totalSeconds={PICK_SECONDS} />
         </div>
         <RollPanel character={rolled} skipsLeft={player.skipsLeft} onAccept={handleAccept} onSkip={handleSkip} />
       </div>
@@ -189,6 +197,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     const playerWon = battle.winnerTeam === "A";
     return (
       <div className="flex flex-col gap-6">
+        <VictoryBanner won={playerWon} />
         <h2 className="text-xl font-semibold">
           {playerWon ? `Gewonnen gegen ${opponentName}!` : `${opponentName} hat gewonnen.`}
         </h2>
@@ -212,14 +221,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
         </div>
         <div className="rounded-lg border border-amber-500/40 p-4">
           <p className="mb-2 font-semibold">Kampfverlauf</p>
-          <div className="max-h-48 overflow-y-auto text-xs font-mono space-y-0.5">
-            {battle.rounds.map((r, i) => (
-              <p key={i}>
-                R{r.round}: {r.attackerName} → {r.defenderName} {r.critical ? "KRITISCH " : ""}
-                -{r.damage} (HP danach: {r.defenderHpAfter})
-              </p>
-            ))}
-          </div>
+          <AnimatedBattleLog battle={battle} />
         </div>
         <button
           onClick={playAgain}
