@@ -35,11 +35,31 @@ export function CharacterCard({
         onClick ? "cursor-pointer" : draggable ? "cursor-grab" : ""
       } ${selected ? "ring-2 ring-amber-500" : ""}`}
     >
-      <span
-        className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${TIER_COLORS[character.tier]}`}
-      >
-        {character.tier}
-      </span>
+      <div className="relative shrink-0">
+        {character.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={character.imageUrl}
+            alt={character.name}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            className="h-10 w-10 rounded-full object-cover object-top border border-black/10 dark:border-white/10"
+          />
+        ) : (
+          <span
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold ${TIER_COLORS[character.tier]}`}
+          >
+            {character.tier}
+          </span>
+        )}
+        {character.imageUrl && (
+          <span
+            className={`absolute -bottom-1 -right-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ring-2 ring-white dark:ring-neutral-900 ${TIER_COLORS[character.tier]}`}
+          >
+            {character.tier}
+          </span>
+        )}
+      </div>
       <div className="min-w-0">
         <p className="truncate font-medium">{character.name}</p>
         <p className="truncate text-xs text-black/60 dark:text-white/50">

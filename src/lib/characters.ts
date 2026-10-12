@@ -40,6 +40,8 @@ export type Character = {
   alive: boolean;
   cost: number;
   versions: CharacterVersion[];
+  /** Portrait image URL (One Piece Fandom wiki). Null when no image was found. */
+  imageUrl?: string | null;
 };
 
 export const characters: Character[] = charactersData as Character[];

@@ -9,9 +9,30 @@
     "alive": true,
     "cost": 100,
     "versions": [
-      { "id": "luffy-east-blue", "label": "East Blue", "stats": { "staerke": 40, "haki": 10, "intelligenz": 30, "geschwindigkeit": 45, "durabilitaet": 40 } },
-      { "id": "luffy-gear5", "label": "Gear 5", "stats": { "staerke": 98, "haki": 95, "intelligenz": 55, "geschwindigkeit": 90, "durabilitaet": 95 } }
-    ]
+      {
+        "id": "luffy-east-blue",
+        "label": "East Blue",
+        "stats": {
+          "staerke": 40,
+          "haki": 10,
+          "intelligenz": 30,
+          "geschwindigkeit": 45,
+          "durabilitaet": 40
+        }
+      },
+      {
+        "id": "luffy-gear5",
+        "label": "Gear 5",
+        "stats": {
+          "staerke": 98,
+          "haki": 95,
+          "intelligenz": 55,
+          "geschwindigkeit": 90,
+          "durabilitaet": 95
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/6d/Monkey_D._Luffy_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/191?cb=20260611004637"
   },
   {
     "id": "zoro",
@@ -23,8 +44,19 @@
     "alive": true,
     "cost": 90,
     "versions": [
-      { "id": "zoro-current", "label": "Aktuell (Wano)", "stats": { "staerke": 88, "haki": 85, "intelligenz": 55, "geschwindigkeit": 75, "durabilitaet": 80 } }
-    ]
+      {
+        "id": "zoro-current",
+        "label": "Aktuell (Wano)",
+        "stats": {
+          "staerke": 88,
+          "haki": 85,
+          "intelligenz": 55,
+          "geschwindigkeit": 75,
+          "durabilitaet": 80
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/52/Roronoa_Zoro_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/150?cb=20241029161719"
   },
   {
     "id": "sanji",
@@ -36,8 +68,19 @@
     "alive": true,
     "cost": 80,
     "versions": [
-      { "id": "sanji-current", "label": "Aktuell (Wano)", "stats": { "staerke": 78, "haki": 70, "intelligenz": 60, "geschwindigkeit": 85, "durabilitaet": 65 } }
-    ]
+      {
+        "id": "sanji-current",
+        "label": "Aktuell (Wano)",
+        "stats": {
+          "staerke": 78,
+          "haki": 70,
+          "intelligenz": 60,
+          "geschwindigkeit": 85,
+          "durabilitaet": 65
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b6/Sanji_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/133?cb=20240122012744"
   },
   {
     "id": "nami",
@@ -49,8 +92,19 @@
     "alive": true,
     "cost": 35,
     "versions": [
-      { "id": "nami-current", "label": "Aktuell", "stats": { "staerke": 30, "haki": 10, "intelligenz": 75, "geschwindigkeit": 50, "durabilitaet": 35 } }
-    ]
+      {
+        "id": "nami-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 30,
+          "haki": 10,
+          "intelligenz": 75,
+          "geschwindigkeit": 50,
+          "durabilitaet": 35
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/68/Nami_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/239?cb=20260315214841"
   },
   {
     "id": "usopp",
@@ -62,8 +116,19 @@
     "alive": true,
     "cost": 30,
     "versions": [
-      { "id": "usopp-current", "label": "Aktuell", "stats": { "staerke": 30, "haki": 25, "intelligenz": 60, "geschwindigkeit": 40, "durabilitaet": 30 } }
-    ]
+      {
+        "id": "usopp-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 30,
+          "haki": 25,
+          "intelligenz": 60,
+          "geschwindigkeit": 40,
+          "durabilitaet": 30
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/35/Usopp_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/215?cb=20221127233827"
   },
   {
     "id": "chopper",
@@ -75,8 +140,19 @@
     "alive": true,
     "cost": 35,
     "versions": [
-      { "id": "chopper-monster", "label": "Monster Point", "stats": { "staerke": 60, "haki": 15, "intelligenz": 45, "geschwindigkeit": 45, "durabilitaet": 65 } }
-    ]
+      {
+        "id": "chopper-monster",
+        "label": "Monster Point",
+        "stats": {
+          "staerke": 60,
+          "haki": 15,
+          "intelligenz": 45,
+          "geschwindigkeit": 45,
+          "durabilitaet": 65
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/af/Tony_Tony_Chopper_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/312?cb=20240720150824"
   },
   {
     "id": "robin",
@@ -88,8 +164,19 @@
     "alive": true,
     "cost": 55,
     "versions": [
-      { "id": "robin-current", "label": "Aktuell", "stats": { "staerke": 55, "haki": 40, "intelligenz": 80, "geschwindigkeit": 45, "durabilitaet": 45 } }
-    ]
+      {
+        "id": "robin-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 55,
+          "haki": 40,
+          "intelligenz": 80,
+          "geschwindigkeit": 45,
+          "durabilitaet": 45
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/bc/Nico_Robin_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/223?cb=20260913163501"
   },
   {
     "id": "franky",
@@ -101,8 +188,19 @@
     "alive": true,
     "cost": 50,
     "versions": [
-      { "id": "franky-current", "label": "Aktuell", "stats": { "staerke": 65, "haki": 20, "intelligenz": 55, "geschwindigkeit": 35, "durabilitaet": 75 } }
-    ]
+      {
+        "id": "franky-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 65,
+          "haki": 20,
+          "intelligenz": 55,
+          "geschwindigkeit": 35,
+          "durabilitaet": 75
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/8c/Franky_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20241110020715"
   },
   {
     "id": "brook",
@@ -114,8 +212,19 @@
     "alive": true,
     "cost": 40,
     "versions": [
-      { "id": "brook-current", "label": "Aktuell", "stats": { "staerke": 50, "haki": 50, "intelligenz": 45, "geschwindigkeit": 55, "durabilitaet": 30 } }
-    ]
+      {
+        "id": "brook-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 50,
+          "haki": 50,
+          "intelligenz": 45,
+          "geschwindigkeit": 55,
+          "durabilitaet": 30
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/41/Brook_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/171?cb=20261011171752"
   },
   {
     "id": "jinbe",
@@ -127,8 +236,19 @@
     "alive": true,
     "cost": 70,
     "versions": [
-      { "id": "jinbe-current", "label": "Aktuell", "stats": { "staerke": 75, "haki": 65, "intelligenz": 55, "geschwindigkeit": 50, "durabilitaet": 80 } }
-    ]
+      {
+        "id": "jinbe-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 75,
+          "haki": 65,
+          "intelligenz": 55,
+          "geschwindigkeit": 50,
+          "durabilitaet": 80
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/81/Jinbe_Anime_Infobox.png/revision/latest/scale-to-width-down/313?cb=20170521201349"
   },
   {
     "id": "law",
@@ -140,8 +260,19 @@
     "alive": true,
     "cost": 85,
     "versions": [
-      { "id": "law-current", "label": "Aktuell", "stats": { "staerke": 75, "haki": 75, "intelligenz": 85, "geschwindigkeit": 60, "durabilitaet": 55 } }
-    ]
+      {
+        "id": "law-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 75,
+          "haki": 75,
+          "intelligenz": 85,
+          "geschwindigkeit": 60,
+          "durabilitaet": 55
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/4d/Trafalgar_D._Water_Law_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/177?cb=20230124163510"
   },
   {
     "id": "kid",
@@ -153,8 +284,19 @@
     "alive": true,
     "cost": 80,
     "versions": [
-      { "id": "kid-current", "label": "Aktuell", "stats": { "staerke": 82, "haki": 70, "intelligenz": 50, "geschwindigkeit": 50, "durabilitaet": 70 } }
-    ]
+      {
+        "id": "kid-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 82,
+          "haki": 70,
+          "intelligenz": 50,
+          "geschwindigkeit": 50,
+          "durabilitaet": 70
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/47/Eustass_Kid_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/336?cb=20240505021859"
   },
   {
     "id": "shanks",
@@ -166,8 +308,19 @@
     "alive": true,
     "cost": 98,
     "versions": [
-      { "id": "shanks-current", "label": "Aktuell", "stats": { "staerke": 92, "haki": 97, "intelligenz": 75, "geschwindigkeit": 70, "durabilitaet": 75 } }
-    ]
+      {
+        "id": "shanks-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 92,
+          "haki": 97,
+          "intelligenz": 75,
+          "geschwindigkeit": 70,
+          "durabilitaet": 75
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/66/Shanks_Anime_Infobox.png/revision/latest/scale-to-width-down/279?cb=20240829145447"
   },
   {
     "id": "whitebeard",
@@ -179,8 +332,19 @@
     "alive": false,
     "cost": 95,
     "versions": [
-      { "id": "whitebeard-marineford", "label": "Marineford", "stats": { "staerke": 95, "haki": 90, "intelligenz": 65, "geschwindigkeit": 40, "durabilitaet": 85 } }
-    ]
+      {
+        "id": "whitebeard-marineford",
+        "label": "Marineford",
+        "stats": {
+          "staerke": 95,
+          "haki": 90,
+          "intelligenz": 65,
+          "geschwindigkeit": 40,
+          "durabilitaet": 85
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b7/Edward_Newgate_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20220926165737"
   },
   {
     "id": "ace",
@@ -192,8 +356,19 @@
     "alive": false,
     "cost": 70,
     "versions": [
-      { "id": "ace-marineford", "label": "Marineford", "stats": { "staerke": 75, "haki": 60, "intelligenz": 55, "geschwindigkeit": 65, "durabilitaet": 55 } }
-    ]
+      {
+        "id": "ace-marineford",
+        "label": "Marineford",
+        "stats": {
+          "staerke": 75,
+          "haki": 60,
+          "intelligenz": 55,
+          "geschwindigkeit": 65,
+          "durabilitaet": 55
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/4f/Portgas_D._Ace_Anime_Infobox.png/revision/latest/scale-to-width-down/239?cb=20240629132600"
   },
   {
     "id": "blackbeard",
@@ -205,8 +380,19 @@
     "alive": true,
     "cost": 92,
     "versions": [
-      { "id": "blackbeard-current", "label": "Aktuell", "stats": { "staerke": 88, "haki": 60, "intelligenz": 70, "geschwindigkeit": 45, "durabilitaet": 80 } }
-    ]
+      {
+        "id": "blackbeard-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 88,
+          "haki": 60,
+          "intelligenz": 70,
+          "geschwindigkeit": 45,
+          "durabilitaet": 80
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/ff/Marshall_D._Teach_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/351?cb=20240128044952"
   },
   {
     "id": "akainu",
@@ -218,8 +404,19 @@
     "alive": true,
     "cost": 90,
     "versions": [
-      { "id": "akainu-current", "label": "Aktuell (Fleet Admiral)", "stats": { "staerke": 88, "haki": 75, "intelligenz": 60, "geschwindigkeit": 55, "durabilitaet": 85 } }
-    ]
+      {
+        "id": "akainu-current",
+        "label": "Aktuell (Fleet Admiral)",
+        "stats": {
+          "staerke": 88,
+          "haki": 75,
+          "intelligenz": 60,
+          "geschwindigkeit": 55,
+          "durabilitaet": 85
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d7/Sakazuki_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/239?cb=20220829052511"
   },
   {
     "id": "kizaru",
@@ -231,8 +428,19 @@
     "alive": true,
     "cost": 85,
     "versions": [
-      { "id": "kizaru-current", "label": "Aktuell", "stats": { "staerke": 78, "haki": 70, "intelligenz": 55, "geschwindigkeit": 97, "durabilitaet": 55 } }
-    ]
+      {
+        "id": "kizaru-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 78,
+          "haki": 70,
+          "intelligenz": 55,
+          "geschwindigkeit": 97,
+          "durabilitaet": 55
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/14/Borsalino_Anime_Infobox.png/revision/latest/scale-to-width-down/198?cb=20190603023753"
   },
   {
     "id": "garp",
@@ -244,8 +452,19 @@
     "alive": true,
     "cost": 90,
     "versions": [
-      { "id": "garp-current", "label": "Aktuell", "stats": { "staerke": 90, "haki": 90, "intelligenz": 60, "geschwindigkeit": 55, "durabilitaet": 85 } }
-    ]
+      {
+        "id": "garp-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 90,
+          "haki": 90,
+          "intelligenz": 60,
+          "geschwindigkeit": 55,
+          "durabilitaet": 85
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e1/Monkey_D._Garp_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230207160645"
   },
   {
     "id": "kaido",
@@ -257,8 +476,19 @@
     "alive": true,
     "cost": 96,
     "versions": [
-      { "id": "kaido-current", "label": "Aktuell (Wano)", "stats": { "staerke": 96, "haki": 88, "intelligenz": 55, "geschwindigkeit": 50, "durabilitaet": 98 } }
-    ]
+      {
+        "id": "kaido-current",
+        "label": "Aktuell (Wano)",
+        "stats": {
+          "staerke": 96,
+          "haki": 88,
+          "intelligenz": 55,
+          "geschwindigkeit": 50,
+          "durabilitaet": 98
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/2d/Kaidou_Anime_Infobox.png/revision/latest/scale-to-width-down/386?cb=20231102015517"
   },
   {
     "id": "big-mom",
@@ -270,8 +500,19 @@
     "alive": true,
     "cost": 94,
     "versions": [
-      { "id": "big-mom-current", "label": "Aktuell", "stats": { "staerke": 90, "haki": 85, "intelligenz": 60, "geschwindigkeit": 45, "durabilitaet": 90 } }
-    ]
+      {
+        "id": "big-mom-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 90,
+          "haki": 85,
+          "intelligenz": 60,
+          "geschwindigkeit": 45,
+          "durabilitaet": 90
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d8/Charlotte_Linlin_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20180423150804"
   },
   {
     "id": "doflamingo",
@@ -283,8 +524,19 @@
     "alive": true,
     "cost": 78,
     "versions": [
-      { "id": "doflamingo-current", "label": "Aktuell", "stats": { "staerke": 75, "haki": 55, "intelligenz": 75, "geschwindigkeit": 55, "durabilitaet": 60 } }
-    ]
+      {
+        "id": "doflamingo-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 75,
+          "haki": 55,
+          "intelligenz": 75,
+          "geschwindigkeit": 55,
+          "durabilitaet": 60
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/7e/Donquixote_Doflamingo_Anime_Infobox.png/revision/latest/scale-to-width-down/344?cb=20231017082245"
   },
   {
     "id": "crocodile",
@@ -296,8 +548,19 @@
     "alive": true,
     "cost": 60,
     "versions": [
-      { "id": "crocodile-current", "label": "Aktuell", "stats": { "staerke": 65, "haki": 60, "intelligenz": 70, "geschwindigkeit": 45, "durabilitaet": 50 } }
-    ]
+      {
+        "id": "crocodile-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 65,
+          "haki": 60,
+          "intelligenz": 70,
+          "geschwindigkeit": 45,
+          "durabilitaet": 50
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/fd/Crocodile_Anime_Infobox.png/revision/latest/scale-to-width-down/318?cb=20230125235528"
   },
   {
     "id": "boa-hancock",
@@ -309,8 +572,19 @@
     "alive": true,
     "cost": 65,
     "versions": [
-      { "id": "hancock-current", "label": "Aktuell", "stats": { "staerke": 68, "haki": 55, "intelligenz": 55, "geschwindigkeit": 55, "durabilitaet": 50 } }
-    ]
+      {
+        "id": "hancock-current",
+        "label": "Aktuell",
+        "stats": {
+          "staerke": 68,
+          "haki": 55,
+          "intelligenz": 55,
+          "geschwindigkeit": 55,
+          "durabilitaet": 50
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f0/Boa_Hancock_Anime_Infobox.png/revision/latest/scale-to-width-down/194?cb=20230126022456"
   },
   {
     "id": "imu",
@@ -322,7 +596,18 @@
     "alive": true,
     "cost": 120,
     "versions": [
-      { "id": "imu-current", "label": "Unbekannt", "stats": { "staerke": 99, "haki": 99, "intelligenz": 90, "geschwindigkeit": 80, "durabilitaet": 95 } }
-    ]
+      {
+        "id": "imu-current",
+        "label": "Unbekannt",
+        "stats": {
+          "staerke": 99,
+          "haki": 99,
+          "intelligenz": 90,
+          "geschwindigkeit": 80,
+          "durabilitaet": 95
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d4/Nerona_Imu_Manga_Infobox.png/revision/latest/scale-to-width-down/310?cb=20260419150637"
   }
 ]

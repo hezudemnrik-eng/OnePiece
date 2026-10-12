@@ -17,6 +17,15 @@ export function RollPanel({ character, skipsLeft, onAccept, onSkip, readOnly = f
       <p className="text-sm text-black/60 dark:text-white/50">
         {readOnly ? "Gerade gerollt" : "Dein gerollter Charakter"}
       </p>
+      {character.imageUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={character.imageUrl}
+          alt={character.name}
+          referrerPolicy="no-referrer"
+          className="h-40 w-auto rounded-lg border border-black/10 dark:border-white/10 object-cover object-top shadow"
+        />
+      )}
       <div className="w-full max-w-xs">
         <CharacterCard character={character} />
       </div>
