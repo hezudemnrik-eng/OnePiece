@@ -5,6 +5,7 @@ import { characters, getDefaultVersion } from "@/lib/characters";
 import { acceptRoll, autoPick, createDraft, currentPlayer, getTeam, skipRoll, type DraftState } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { generateAiTeam, type AiTeam, type Difficulty } from "@/lib/imu";
+import { recordMatchResult } from "@/lib/supabase";
 import { RollPanel } from "./RollPanel";
 
 const PICK_SECONDS = 30;
@@ -73,6 +74,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     saveRun(storageKey, run);
     setRuns(loadRuns(storageKey));
     setPhase("result");
+    recordMatchResult(opponentName === "Imu" ? "imu" : "zufallsgegner", opponentName, run.result);
   }
 
   function applyDraft(next: DraftState) {

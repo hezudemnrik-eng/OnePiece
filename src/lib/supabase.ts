@@ -408,3 +408,149 @@ export async function fetchPublicListsByShareCode(
     })),
   };
 }
+
+export type MatchMode = "imu" | "zufallsgegner" | "live-draft";
+
+/** Appends one match result for the signed-in user (solo-vs-AI and live-draft only — see migration 0007). */
+export async function recordMatchResult(
+  mode: MatchMode,
+  opponentLabel: string,
+  result: "win" | "loss"
+): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("match_results").insert({ user_id: userId, mode, opponent_label: opponentLabel, result });
+}
+
+export type LeaderboardEntry = {
+  userId: string;
+  username: string;
+  avatarCharacterId: string | null;
+  wins: number;
+  losses: number;
+};
+
+/** Aggregates match_results + profiles into a per-player win/loss leaderboard. Small friend-group scale — fine to aggregate client-side. */
+export async function fetchLeaderboard(): Promise<LeaderboardEntry[]> {
+  if (!supabase) return [];
+  const { data: results } = await supabase.from("match_results").select("user_id, result");
+  if (!results || results.length === 0) return [];
+
+  const tally = new Map<string, { wins: number; losses: number }>();
+  for (const r of results) {
+    const entry = tally.get(r.user_id) ?? { wins: 0, losses: 0 };
+    if (r.result === "win") entry.wins++;
+    else entry.losses++;
+    tally.set(r.user_id, entry);
+  }
+
+  const userIds = Array.from(tally.keys());
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, username, avatar_character_id")
+    .in("id", userIds);
+
+  return userIds
+    .map((userId) => {
+      const profile = profiles?.find((p) => p.id === userId);
+      const { wins, losses } = tally.get(userId)!;
+      return { userId, username: profile?.username ?? "?", avatarCharacterId: profile?.avatar_character_id ?? null, wins, losses };
+    })
+    .filter((e) => e.username !== "?")
+    .sort((a, b) => b.wins - a.wins || a.losses - b.losses);
+}
+
+export type RecentMatch = {
+  mode: MatchMode;
+  opponentLabel: string;
+  result: "win" | "loss";
+  createdAt: string;
+};
+
+/** The signed-in user's most recent matches, newest first. */
+export async function fetchMyRecentMatches(limit = 5): Promise<RecentMatch[]> {
+  if (!supabase) return [];
+  const userId = await ensureSupabaseSession();
+  if (!userId) return [];
+  const { data } = await supabase
+    .from("match_results")
+    .select("mode, opponent_label, result, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((r) => ({
+    mode: r.mode as MatchMode,
+    opponentLabel: r.opponent_label,
+    result: r.result as "win" | "loss",
+    createdAt: r.created_at,
+  }));
+}
+
+export type OnlineProfile = {
+  userId: string;
+  username: string;
+  avatarCharacterId: string | null;
+};
+
+/** Everyone else in the friend group active in the last 2 minutes (based on the AuthGate heartbeat). */
+export async function fetchOnlineFriends(): Promise<OnlineProfile[]> {
+  if (!supabase) return [];
+  const myUserId = await ensureSupabaseSession();
+  const twoMinAgo = new Date(Date.now() - 2 * 60_000).toISOString();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, username, avatar_character_id, last_seen")
+    .not("username", "is", null)
+    .gte("last_seen", twoMinAgo);
+  return (data ?? [])
+    .filter((p) => p.id !== myUserId)
+    .map((p) => ({ userId: p.id, username: p.username as string, avatarCharacterId: p.avatar_character_id }));
+}
+
+export type OpenLiveDraft = {
+  id: string;
+  inviteCode: string;
+  hostId: string;
+  phase: LiveDraftSession["phase"];
+  playerCount: number;
+  maxPlayers: number;
+  updatedAt: string;
+  /** True when the signed-in user already holds a seat in this session. */
+  isMine: boolean;
+};
+
+/**
+ * Live draft sessions relevant to the signed-in user's home overview: open
+ * lobbies anyone can join, plus in-progress drafts they're already seated
+ * in (so they can jump back in). Fetches the most recently active sessions
+ * and filters client-side — fine at this app's scale.
+ */
+export async function fetchRelevantLiveDrafts(): Promise<OpenLiveDraft[]> {
+  if (!supabase) return [];
+  const myUserId = await ensureSupabaseSession();
+  const { data } = await supabase
+    .from("draft_sessions")
+    .select("id, invite_code, host_id, phase, state, max_players, updated_at")
+    .neq("phase", "result")
+    .order("updated_at", { ascending: false })
+    .limit(30);
+  if (!data) return [];
+
+  return data
+    .map((s) => {
+      const players = (s.state as LiveDraftSession["state"]).players;
+      const isMine = players.some((p) => p.userId === myUserId);
+      return {
+        id: s.id,
+        inviteCode: s.invite_code,
+        hostId: s.host_id,
+        phase: s.phase,
+        playerCount: players.filter((p) => p.userId).length,
+        maxPlayers: s.max_players,
+        updatedAt: s.updated_at,
+        isMine,
+      };
+    })
+    .filter((s) => s.isMine || s.phase === "lobby");
+}

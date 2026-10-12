@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { characters, getDefaultVersion, type Character } from "@/lib/characters";
 import {
   acceptRoll,
@@ -21,6 +22,7 @@ import {
   ensureSupabaseSession,
   fetchLiveDraftByCode,
   fetchLiveDraftById,
+  recordMatchResult,
   subscribeLiveDraft,
   writeLiveDraft,
   type LiveDraftSession,
@@ -45,6 +47,8 @@ function charactersFromIds(ids: string[]): Character[] {
 }
 
 export function LiveDraftBoard() {
+  const searchParams = useSearchParams();
+  const autoJoinedRef = useRef(false);
   const [view, setView] = useState<View>("loading");
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [nickname, setNickname] = useState(() => loadNickname());
@@ -68,6 +72,7 @@ export function LiveDraftBoard() {
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoPickFiredRef = useRef(false);
+  const matchRecordedRef = useRef(false);
 
   function detachPolling() {
     if (pollIntervalRef.current) {
@@ -98,6 +103,17 @@ export function LiveDraftBoard() {
       cancelled = true;
     };
   }, []);
+
+  // Lets the Übersicht's "weiterspielen" links (/draft/live?code=XXXX) jump
+  // straight back into a lobby or in-progress draft without retyping the code.
+  useEffect(() => {
+    if (!myUserId || autoJoinedRef.current) return;
+    const code = searchParams.get("code");
+    if (!code) return;
+    autoJoinedRef.current = true;
+    handleJoin(code);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myUserId]);
 
   useEffect(() => {
     const id = setInterval(() => setNowTick(Date.now()), 1000);
@@ -164,10 +180,10 @@ export function LiveDraftBoard() {
     attach(created);
   }
 
-  async function handleJoin() {
+  async function handleJoin(codeOverride?: string) {
     if (!myUserId) return;
     setErrorMsg("");
-    const found = await fetchLiveDraftByCode(codeInput);
+    const found = await fetchLiveDraftByCode(codeOverride ?? codeInput);
     if (!found) {
       setErrorMsg("Kein Draft mit diesem Code gefunden.");
       return;
@@ -289,6 +305,20 @@ export function LiveDraftBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.state.finished, session?.phase, myUserId]);
 
+  // Every participant's own browser records its own win/loss once — not
+  // just the host's — so the friend leaderboard reflects everyone.
+  useEffect(() => {
+    if (!session || session.phase !== "result" || !session.battle || !myUserId || isSpectator) return;
+    if (matchRecordedRef.current) return;
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    if (!me) return;
+    matchRecordedRef.current = true;
+    const won = me.team ? me.team === session.battle.winnerTeam : session.state.players.indexOf(me) === (session.battle.winnerTeam === "A" ? 0 : 1);
+    const opponents = session.state.players.filter((p) => p.id !== me.id).map((p) => p.name).join(", ");
+    recordMatchResult("live-draft", opponents, won ? "win" : "loss");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.state.finished, session?.phase, myUserId]);
+
   function backToHome() {
     unsubscribeRef.current?.();
     unsubscribeRef.current = null;
@@ -397,7 +427,7 @@ export function LiveDraftBoard() {
         {errorMsg && <p className="text-sm text-amber-600">{errorMsg}</p>}
         <div className="flex gap-3">
           <button
-            onClick={handleJoin}
+            onClick={() => handleJoin()}
             className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
           >
             Beitreten
