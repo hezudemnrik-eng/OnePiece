@@ -35,14 +35,17 @@ export function CrewBuilderBoard() {
   const [candidate, setCandidate] = useState<Character | null>(null);
   const [picks, setPicks] = useState<CrewPick[]>([]);
   const [rerolls, setRerolls] = useState(0);
+  const [rerollUsedThisRound, setRerollUsedThisRound] = useState(false);
   const [history, setHistory] = useState<HistoryRecord[]>(() => loadHistory());
 
   const currentRole = CREW_ROLES[roleIndex];
 
   function reroll() {
+    if (rerollUsedThisRound) return;
     playSkip();
     vibrate(15);
     setRerolls((r) => r + 1);
+    setRerollUsedThisRound(true);
     setCandidate(rollCandidate([...picks.map((p) => p.character.id), ...(candidate ? [candidate.id] : [])]));
   }
 
@@ -54,6 +57,7 @@ export function CrewBuilderBoard() {
     setPicks(next);
     if (roleIndex + 1 < CREW_ROLES.length) {
       setRoleIndex(roleIndex + 1);
+      setRerollUsedThisRound(false);
       setCandidate(rollCandidate(next.map((p) => p.character.id)));
     } else {
       const summary = summarizeCrew(next);
@@ -73,6 +77,7 @@ export function CrewBuilderBoard() {
     setRoleIndex(0);
     setPicks([]);
     setRerolls(0);
+    setRerollUsedThisRound(false);
     setCandidate(rollCandidate([]));
   }
 
@@ -81,7 +86,7 @@ export function CrewBuilderBoard() {
       <div className="flex flex-col gap-4 max-w-md">
         <p className="text-sm text-black/60 dark:text-white/50">
           Für jede der {CREW_ROLES.length} Rollen bekommst du einen zufälligen Charakter vorgeschlagen. Du entscheidest:
-          behalten oder neu würfeln.
+          behalten oder neu würfeln — maximal einmal pro Rolle.
         </p>
         <button
           onClick={start}
@@ -146,9 +151,11 @@ export function CrewBuilderBoard() {
           </button>
           <button
             onClick={reroll}
-            className="rounded-md border border-black/15 dark:border-white/15 px-4 py-2 font-medium"
+            disabled={rerollUsedThisRound}
+            title={rerollUsedThisRound ? "Nur ein Reroll pro Rolle erlaubt" : undefined}
+            className="rounded-md border border-black/15 dark:border-white/15 px-4 py-2 font-medium disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            🔄 Neu würfeln
+            🔄 {rerollUsedThisRound ? "Reroll verbraucht" : "Neu würfeln"}
           </button>
         </div>
         {picks.length > 0 && (
