@@ -37,7 +37,7 @@ export function TierListEditor() {
     () => allLists["Meine Tierliste"] ?? {}
   );
   const [compareWith, setCompareWith] = useState<string>("");
-  const [syncState, setSyncState] = useState<"off" | "loading" | "synced">(
+  const [syncState, setSyncState] = useState<"off" | "loading" | "synced" | "auth-error">(
     isSupabaseConfigured() ? "loading" : "off"
   );
 
@@ -48,8 +48,12 @@ export function TierListEditor() {
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
     let cancelled = false;
-    fetchMyTierLists().then((remoteLists) => {
+    fetchMyTierLists().then(({ userId, lists: remoteLists }) => {
       if (cancelled) return;
+      if (!userId) {
+        setSyncState("auth-error");
+        return;
+      }
       setAllLists((prev) => {
         const merged = { ...prev };
         const flags: PublicFlags = {};
@@ -144,6 +148,13 @@ export function TierListEditor() {
           {syncState === "loading" && "Synchronisiere…"}
           {syncState === "synced" && "Synchronisiert ✓"}
           {syncState === "off" && "Nur lokal (Supabase nicht konfiguriert)"}
+          {syncState === "auth-error" && (
+            <span className="text-amber-600">
+              Nur lokal – Supabase-Anmeldung fehlgeschlagen. Bitte in den
+              Supabase-Projekteinstellungen unter Authentication → Sign In
+              Methods &bdquo;Anonymous Sign-Ins&ldquo; aktivieren.
+            </span>
+          )}
         </p>
       </div>
 
