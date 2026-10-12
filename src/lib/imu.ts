@@ -88,3 +88,31 @@ export function generateAiTeam({
 
   return { characters: team, versions, names: team.map((c) => c.name) };
 }
+
+// Imu fights alone as a single boss rather than a generated team (see
+// SoloDraftBoard) — "stark" per the feature questionnaire: noticeably
+// tougher than any roster character (especially the HP-driving
+// durabilitaet stat, pushed well past the normal 1-100 roster range so a
+// focused team of 5 has to actually grind him down), but not scaled so
+// high the fight becomes unwinnable.
+const IMU_BASE_STATS: Stats = { staerke: 99, haki: 99, intelligenz: 90, geschwindigkeit: 80, durabilitaet: 95 };
+const IMU_DIFFICULTY: Record<Difficulty, { statMultiplier: number; durabilitaet: number }> = {
+  leicht: { statMultiplier: 1.0, durabilitaet: 220 },
+  mittel: { statMultiplier: 1.1, durabilitaet: 320 },
+  schwer: { statMultiplier: 1.2, durabilitaet: 420 },
+};
+
+export function generateImuBoss(difficulty: Difficulty): AiTeam {
+  const imuCharacter = characters.find((c) => c.id === "imu");
+  if (!imuCharacter) throw new Error("Imu character data missing");
+  const cfg = IMU_DIFFICULTY[difficulty];
+  const stats: Stats = {
+    staerke: Math.round(IMU_BASE_STATS.staerke * cfg.statMultiplier),
+    haki: Math.round(IMU_BASE_STATS.haki * cfg.statMultiplier),
+    intelligenz: Math.round(IMU_BASE_STATS.intelligenz * cfg.statMultiplier),
+    geschwindigkeit: Math.round(IMU_BASE_STATS.geschwindigkeit * cfg.statMultiplier),
+    durabilitaet: cfg.durabilitaet,
+  };
+  const version: CharacterVersion = { id: "imu-boss", label: `Imu (${difficulty})`, stats };
+  return { characters: [imuCharacter], versions: [version], names: ["Imu"] };
+}

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { characters, getDefaultVersion } from "@/lib/characters";
 import { acceptRoll, autoPick, createDraft, currentPlayer, getTeam, skipRoll, type DraftState } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
-import { generateAiTeam, type AiTeam, type Difficulty } from "@/lib/imu";
+import { generateAiTeam, generateImuBoss, type AiTeam, type Difficulty } from "@/lib/imu";
 import { recordMatchResult } from "@/lib/supabase";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
@@ -62,8 +62,10 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     setPhase("drafting");
   }
 
+  const isBossFight = opponentName === "Imu";
+
   function finishWithTeam(next: DraftState) {
-    const ai = generateAiTeam({ teamSize, difficulty, topShare, flatBonus });
+    const ai = isBossFight ? generateImuBoss(difficulty) : generateAiTeam({ teamSize, difficulty, topShare, flatBonus });
     setOpponentTeam(ai);
     const player = next.players[0];
     const playerVersions = getTeam(next, player.id, characters).map(getDefaultVersion);
@@ -195,12 +197,18 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
 
   if (phase === "result" && draft && opponentTeam && battle) {
     const playerWon = battle.winnerTeam === "A";
+    const imuChar = isBossFight ? opponentTeam.characters[0] : null;
     return (
       <div className="flex flex-col gap-6">
         <VictoryBanner won={playerWon} />
         <h2 className="text-xl font-semibold">
           {playerWon ? `Gewonnen gegen ${opponentName}!` : `${opponentName} hat gewonnen.`}
         </h2>
+        {playerWon && isBossFight && (
+          <p className="-mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-sm font-medium text-amber-700 dark:text-amber-400">
+            🏆 Imu-Bezwinger
+          </p>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-lg border border-black/10 dark:border-white/10 p-3">
             <p className="mb-2 font-semibold">{draft.players[0].name}</p>
@@ -210,8 +218,19 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
               ))}
             </ul>
           </div>
-          <div className="rounded-lg border border-black/10 dark:border-white/10 p-3">
+          <div
+            className={`rounded-lg border p-3 ${isBossFight ? "op-s-tier-glow border-amber-500/50 bg-gradient-to-b from-amber-500/10 to-transparent" : "border-black/10 dark:border-white/10"}`}
+          >
             <p className="mb-2 font-semibold">{opponentName}</p>
+            {imuChar?.imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imuChar.imageUrl}
+                alt={imuChar.name}
+                referrerPolicy="no-referrer"
+                className="mb-2 h-32 w-auto rounded-lg border border-amber-500/40 object-cover object-top shadow-lg"
+              />
+            )}
             <ul className="space-y-1 text-sm">
               {opponentTeam.names.map((name, i) => (
                 <li key={i}>{name}</li>
