@@ -65,7 +65,15 @@ export function LiveDraftBoard() {
   const [joinAsSpectator, setJoinAsSpectator] = useState(false);
 
   const unsubscribeRef = useRef<(() => void) | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoPickFiredRef = useRef(false);
+
+  function detachPolling() {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+  }
 
   useEffect(() => {
     try {
@@ -102,10 +110,41 @@ export function LiveDraftBoard() {
       setSession(updated);
       autoPickFiredRef.current = false;
     });
-    setView(s.phase === "lobby" ? "lobby" : s.phase === "drafting" ? "drafting" : "result");
+
+    // Realtime push isn't guaranteed — the project's Realtime service can
+    // be unhealthy independently of the database itself (seen in testing:
+    // a Cloudflare edge error on the websocket handshake while REST calls
+    // worked fine). Poll as a redundant fallback; once realtime is
+    // healthy this is just a harmless no-op most ticks (same updated_at).
+    detachPolling();
+    pollIntervalRef.current = setInterval(async () => {
+      const latest = await fetchLiveDraftById(s.id);
+      if (latest) {
+        setSession((prev) => (prev && prev.updated_at === latest.updated_at ? prev : latest));
+      }
+    }, 2500);
   }
 
-  useEffect(() => () => unsubscribeRef.current?.(), []);
+  useEffect(
+    () => () => {
+      unsubscribeRef.current?.();
+      detachPolling();
+    },
+    []
+  );
+
+  // Derived, not stored: once a session exists, which screen shows is
+  // purely a function of its phase, computed fresh every render. Storing
+  // it as separate state that an effect copies session.phase into would
+  // need to fire on every realtime push and poll tick just to stay in
+  // sync — a textbook case of state that should just be computed instead.
+  const effectiveView: View = session
+    ? session.phase === "lobby"
+      ? "lobby"
+      : session.phase === "drafting"
+        ? "drafting"
+        : "result"
+    : view;
 
   async function handleCreate() {
     if (!myUserId) return;
@@ -241,16 +280,17 @@ export function LiveDraftBoard() {
   function backToHome() {
     unsubscribeRef.current?.();
     unsubscribeRef.current = null;
+    detachPolling();
     setSession(null);
     setErrorMsg("");
     setView("home");
   }
 
-  if (view === "loading") {
+  if (effectiveView === "loading") {
     return <p className="text-sm text-black/60 dark:text-white/50">Verbinde…</p>;
   }
 
-  if (view === "home") {
+  if (effectiveView === "home") {
     return (
       <div className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
@@ -279,7 +319,7 @@ export function LiveDraftBoard() {
     );
   }
 
-  if (view === "create-form") {
+  if (effectiveView === "create-form") {
     return (
       <div className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
@@ -326,7 +366,7 @@ export function LiveDraftBoard() {
     );
   }
 
-  if (view === "join-form") {
+  if (effectiveView === "join-form") {
     return (
       <div className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
@@ -358,7 +398,7 @@ export function LiveDraftBoard() {
     );
   }
 
-  if (view === "lobby" && session) {
+  if (effectiveView === "lobby" && session) {
     const full = isLobbyFull(session.state);
     const isHost = session.host_id === myUserId;
     return (
@@ -399,7 +439,7 @@ export function LiveDraftBoard() {
     );
   }
 
-  if (view === "drafting" && session) {
+  if (effectiveView === "drafting" && session) {
     const player = currentPlayer(session.state);
     const myTurn = !isSpectator && player.userId === myUserId;
     const elapsed = Math.floor((nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000);
@@ -445,7 +485,7 @@ export function LiveDraftBoard() {
     );
   }
 
-  if (view === "result" && session) {
+  if (effectiveView === "result" && session) {
     const isTeamMode = session.state.players.some((p) => p.team);
     let winnerLabel = "";
     if (session.battle) {
