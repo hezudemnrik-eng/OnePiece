@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { characters, getDefaultVersion, type Character } from "@/lib/characters";
 import {
+  acceptRoll,
   autoPick,
   claimSeat,
   createDraft,
@@ -11,7 +12,7 @@ import {
   getTeam,
   getTeamSidePicks,
   isLobbyFull,
-  pick,
+  skipRoll,
   type DraftTeam,
 } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
@@ -24,7 +25,7 @@ import {
   writeLiveDraft,
   type LiveDraftSession,
 } from "@/lib/supabase";
-import { CharacterCard } from "./CharacterCard";
+import { RollPanel } from "./RollPanel";
 
 const PICK_SECONDS = 30;
 const NICKNAME_KEY = "op-nickname";
@@ -216,9 +217,20 @@ export function LiveDraftBoard() {
     if (result.session) setSession(result.session);
   }
 
-  async function applyPick(characterId: string) {
+  async function applyAccept() {
     if (!session) return;
-    const next = pick(session.state, characterId);
+    const next = acceptRoll(session.state);
+    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
+    if (result.session) setSession(result.session);
+    else if (result.conflict) {
+      const refetched = await fetchLiveDraftById(session.id);
+      if (refetched) setSession(refetched);
+    }
+  }
+
+  async function applySkip() {
+    if (!session) return;
+    const next = skipRoll(session.state);
     const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
     if (result.session) setSession(result.session);
     else if (result.conflict) {
@@ -444,6 +456,9 @@ export function LiveDraftBoard() {
     const myTurn = !isSpectator && player.userId === myUserId;
     const elapsed = Math.floor((nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000);
     const secondsLeft = Math.max(0, PICK_SECONDS - elapsed);
+    const rolled = session.state.rolledCharacterId
+      ? characters.find((c) => c.id === session.state.rolledCharacterId) ?? null
+      : null;
 
     return (
       <div className="grid gap-6 md:grid-cols-[1fr_280px]">
@@ -455,12 +470,13 @@ export function LiveDraftBoard() {
             </p>
             <p className="text-sm font-mono tabular-nums">{secondsLeft}s</p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {session.state.availableCharacterIds.map((id) => {
-              const c = characters.find((ch) => ch.id === id) as Character;
-              return <CharacterCard key={id} character={c} onClick={myTurn ? applyPick : undefined} />;
-            })}
-          </div>
+          <RollPanel
+            character={rolled}
+            skipsLeft={player.skipsLeft}
+            onAccept={applyAccept}
+            onSkip={applySkip}
+            readOnly={!myTurn}
+          />
           {!myTurn && !isSpectator && (
             <p className="mt-3 text-sm text-black/50 dark:text-white/40">Warte, bis {player.name} gezogen hat…</p>
           )}

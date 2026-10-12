@@ -3,17 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import { characters, getDefaultVersion, type Character } from "@/lib/characters";
 import {
+  acceptRoll,
   autoPick,
   createDraft,
   currentPlayer,
   getTeam,
   getTeamSidePicks,
-  pick,
+  skipRoll,
   type DraftState,
   type DraftTeam,
 } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
-import { CharacterCard } from "./CharacterCard";
+import { RollPanel } from "./RollPanel";
 
 const PICK_SECONDS = 30;
 
@@ -112,9 +113,14 @@ export function DraftBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, draft?.currentPlayerIndex, draft?.finished]);
 
-  function handlePick(characterId: string) {
+  function handleAccept() {
     if (!draft) return;
-    applyDraft(pick(draft, characterId));
+    applyDraft(acceptRoll(draft));
+  }
+
+  function handleSkip() {
+    if (!draft) return;
+    applyDraft(skipRoll(draft));
   }
 
   if (phase === "setup") {
@@ -195,6 +201,9 @@ export function DraftBoard() {
 
   if (phase === "drafting" && draft) {
     const player = currentPlayer(draft);
+    const rolled = draft.rolledCharacterId
+      ? characters.find((c) => c.id === draft.rolledCharacterId) ?? null
+      : null;
     return (
       <div className="grid gap-6 md:grid-cols-[1fr_280px]">
         <div>
@@ -204,14 +213,7 @@ export function DraftBoard() {
             </p>
             <p className="text-sm font-mono tabular-nums">{secondsLeft}s</p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {draft.availableCharacterIds.map((id) => {
-              const c = characters.find((ch) => ch.id === id) as Character;
-              return (
-                <CharacterCard key={id} character={c} onClick={handlePick} />
-              );
-            })}
-          </div>
+          <RollPanel character={rolled} skipsLeft={player.skipsLeft} onAccept={handleAccept} onSkip={handleSkip} />
         </div>
         <aside className="flex flex-col gap-4">
           {draft.players.map((p) => (

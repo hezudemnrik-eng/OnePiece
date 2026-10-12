@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { characters, getDefaultVersion, type Character } from "@/lib/characters";
-import { autoPick, createDraft, currentPlayer, getTeam, pick, type DraftState } from "@/lib/draft";
+import { characters, getDefaultVersion } from "@/lib/characters";
+import { acceptRoll, autoPick, createDraft, currentPlayer, getTeam, skipRoll, type DraftState } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { generateAiTeam, type AiTeam, type Difficulty } from "@/lib/imu";
-import { CharacterCard } from "./CharacterCard";
+import { RollPanel } from "./RollPanel";
 
 const PICK_SECONDS = 30;
 
@@ -101,9 +101,14 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, draft?.currentPlayerIndex, draft?.finished]);
 
-  function handlePick(characterId: string) {
+  function handleAccept() {
     if (!draft) return;
-    applyDraft(pick(draft, characterId));
+    applyDraft(acceptRoll(draft));
+  }
+
+  function handleSkip() {
+    if (!draft) return;
+    applyDraft(skipRoll(draft));
   }
 
   function playAgain() {
@@ -162,6 +167,9 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
 
   if (phase === "drafting" && draft) {
     const player = currentPlayer(draft);
+    const rolled = draft.rolledCharacterId
+      ? characters.find((c) => c.id === draft.rolledCharacterId) ?? null
+      : null;
     return (
       <div>
         <div className="mb-4 flex items-center justify-between">
@@ -170,12 +178,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
           </p>
           <p className="text-sm font-mono tabular-nums">{secondsLeft}s</p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {draft.availableCharacterIds.map((id) => {
-            const c = characters.find((ch) => ch.id === id) as Character;
-            return <CharacterCard key={id} character={c} onClick={handlePick} />;
-          })}
-        </div>
+        <RollPanel character={rolled} skipsLeft={player.skipsLeft} onAccept={handleAccept} onSkip={handleSkip} />
       </div>
     );
   }

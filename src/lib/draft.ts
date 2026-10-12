@@ -10,6 +10,8 @@ export type DraftPlayer = {
   team?: DraftTeam;
   /** Supabase auth.uid() of whoever claimed this seat, for live drafts; undefined/null = open seat. */
   userId?: string | null;
+  /** How many more times this player may reroll their current offered character. */
+  skipsLeft: number;
 };
 
 export type DraftState = {
@@ -27,22 +29,36 @@ export type DraftState = {
    * its own clock from whenever it happened to render. Unused in hotseat
    * mode (each browser already has a single, authoritative local timer). */
   turnStartedAt: string;
+  /** The character currently offered to the player on turn — accept it or
+   * reroll (skipRoll). Null once the draft has finished. */
+  rolledCharacterId: string | null;
+  /** How many rerolls each player starts a draft with. */
+  maxSkips: number;
 };
+
+function rollRandom(pool: string[], rng: () => number): string | null {
+  if (pool.length === 0) return null;
+  return pool[Math.floor(rng() * pool.length)];
+}
 
 export function createDraft(
   playerNames: string[],
   allCharacterIds: string[],
   teamSize: number,
-  options: { teams?: DraftTeam[]; spectators?: string[] } = {}
+  options: { teams?: DraftTeam[]; spectators?: string[]; maxSkips?: number; rng?: () => number } = {}
 ): DraftState {
+  const maxSkips = options.maxSkips ?? 3;
+  const rng = options.rng ?? Math.random;
+  const availableCharacterIds = [...allCharacterIds];
   return {
     players: playerNames.map((name, i) => ({
       id: `p${i + 1}`,
       name,
       pickedCharacterIds: [],
       team: options.teams?.[i],
+      skipsLeft: maxSkips,
     })),
-    availableCharacterIds: [...allCharacterIds],
+    availableCharacterIds,
     teamSize,
     currentPlayerIndex: 0,
     round: 1,
@@ -50,6 +66,8 @@ export function createDraft(
     finished: false,
     spectators: options.spectators ?? [],
     turnStartedAt: new Date().toISOString(),
+    rolledCharacterId: rollRandom(availableCharacterIds, rng),
+    maxSkips,
   };
 }
 
@@ -79,7 +97,7 @@ export function currentPlayer(state: DraftState): DraftPlayer {
   return state.players[state.currentPlayerIndex];
 }
 
-function advanceTurn(state: DraftState): DraftState {
+function advanceTurn(state: DraftState, rng: () => number): DraftState {
   const playerCount = state.players.length;
   let { currentPlayerIndex, round, direction } = state;
 
@@ -92,9 +110,7 @@ function advanceTurn(state: DraftState): DraftState {
     currentPlayerIndex = nextIndex;
   }
 
-  const finished = state.players.every(
-    (p) => p.pickedCharacterIds.length >= state.teamSize
-  );
+  const finished = state.players.every((p) => p.pickedCharacterIds.length >= state.teamSize);
 
   return {
     ...state,
@@ -103,33 +119,41 @@ function advanceTurn(state: DraftState): DraftState {
     direction,
     finished,
     turnStartedAt: new Date().toISOString(),
+    rolledCharacterId: finished ? null : rollRandom(state.availableCharacterIds, rng),
   };
 }
 
-export function pick(state: DraftState, characterId: string): DraftState {
-  if (state.finished) return state;
-  if (!state.availableCharacterIds.includes(characterId)) return state;
-
+/** Accepts the currently offered (rolled) character for the player on turn. */
+export function acceptRoll(state: DraftState, rng: () => number = Math.random): DraftState {
+  if (state.finished || !state.rolledCharacterId) return state;
+  const characterId = state.rolledCharacterId;
   const player = currentPlayer(state);
   if (player.pickedCharacterIds.length >= state.teamSize) return state;
 
   const players = state.players.map((p) =>
-    p.id === player.id
-      ? { ...p, pickedCharacterIds: [...p.pickedCharacterIds, characterId] }
-      : p
+    p.id === player.id ? { ...p, pickedCharacterIds: [...p.pickedCharacterIds, characterId] } : p
   );
-  const availableCharacterIds = state.availableCharacterIds.filter(
-    (id) => id !== characterId
-  );
+  const availableCharacterIds = state.availableCharacterIds.filter((id) => id !== characterId);
 
-  return advanceTurn({ ...state, players, availableCharacterIds });
+  return advanceTurn({ ...state, players, availableCharacterIds }, rng);
 }
 
-/** Auto-pick a random available character for the current player, used when their pick timer runs out. */
+/** Rerolls the offered character for the player on turn, spending one of their skips. No-op once skips run out. */
+export function skipRoll(state: DraftState, rng: () => number = Math.random): DraftState {
+  if (state.finished || !state.rolledCharacterId) return state;
+  const player = currentPlayer(state);
+  if (player.skipsLeft <= 0) return state;
+
+  const players = state.players.map((p) => (p.id === player.id ? { ...p, skipsLeft: p.skipsLeft - 1 } : p));
+  const otherChoices = state.availableCharacterIds.filter((id) => id !== state.rolledCharacterId);
+  const rolledCharacterId = rollRandom(otherChoices.length > 0 ? otherChoices : state.availableCharacterIds, rng);
+
+  return { ...state, players, rolledCharacterId, turnStartedAt: new Date().toISOString() };
+}
+
+/** Used when the pick timer runs out: the player gets whatever was currently offered. */
 export function autoPick(state: DraftState, rng: () => number = Math.random): DraftState {
-  if (state.finished || state.availableCharacterIds.length === 0) return state;
-  const index = Math.floor(rng() * state.availableCharacterIds.length);
-  return pick(state, state.availableCharacterIds[index]);
+  return acceptRoll(state, rng);
 }
 
 export function getTeam(state: DraftState, playerId: string, allCharacters: Character[]): Character[] {
