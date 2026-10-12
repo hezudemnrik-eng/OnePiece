@@ -24,6 +24,10 @@ const MODES: { href: string; icon: string; title: string; desc: string; matchMod
   { href: "/draft/live", icon: "🌐", title: "Live-Draft (mehrere Geräte)", desc: "Lobby mit Code teilen, jeder draftet von seinem Gerät.", matchMode: "live-draft" },
   { href: "/imu", icon: "👁️", title: "Gegen Imu", desc: "Solo-Draft gegen einen übermächtigen Boss-Gegner.", matchMode: "imu" },
   { href: "/zufallsgegner", icon: "🎲", title: "Gegen Zufallsgegner", desc: "Ranked-Übungsrunde gegen eine leichtere KI.", matchMode: "zufallsgegner" },
+  { href: "/duell", icon: "⚡", title: "Gegeneinander", desc: "1-gegen-1-Duell: zwei Charaktere, ein Sieger." },
+  { href: "/crew", icon: "🧭", title: "Crew zusammenstellen", desc: "Pro Rolle einen zufälligen Charakter behalten oder neu würfeln, bis die Crew steht." },
+  { href: "/fusion", icon: "🧬", title: "Fusions-Pirat", desc: "Teufelsfrucht, Haki, Body, Weapon, Race, Sensei & Mind würfeln — am Ende gibt's ein Kopfgeld." },
+  { href: "/blind-ranking", icon: "🙈", title: "Blind Ranking", desc: "Verdeckte Charaktere nach Thema einordnen, erst danach wird aufgedeckt." },
   { href: "/quiz", icon: "❓", title: "One-Piece-Quiz", desc: "Trivia zu Charakteren, Crews & Teufelsfrüchten — solo oder mit Freunden." },
   { href: "/tierlisten", icon: "📜", title: "Tierlisten", desc: "Charaktere, Arcs, Inseln & mehr in S–D einstufen und vergleichen." },
 ];

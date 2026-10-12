@@ -8,7 +8,7 @@ import { useAnimationsEnabled } from "@/lib/animPrefs";
 
 type Phase = "setup" | "playing" | "result";
 
-const COUNT_CHOICES = [5, 10, 20];
+const COUNT_CHOICES = [5, 10, 20, 50, 100];
 
 export function QuizSoloBoard() {
   const [phase, setPhase] = useState<Phase>("setup");
