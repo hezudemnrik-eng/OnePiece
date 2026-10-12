@@ -50,10 +50,10 @@ export function LiveDraftBoard() {
   const [session, setSession] = useState<LiveDraftSession | null>(null);
   const [isSpectator, setIsSpectator] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  // Starts at 0, not Date.now(): Next.js 16's prerender flags a
-  // nondeterministic value read during the initial render of a client
-  // component. The effect below sets the real value immediately on mount.
-  const [nowTick, setNowTick] = useState(0);
+  // The window check keeps this 0 (deterministic) during Next.js 16's
+  // prerender of the static shell; on the client it's a real timestamp
+  // from the very first render, so no separate effect has to set it.
+  const [nowTick, setNowTick] = useState(() => (typeof window === "undefined" ? 0 : Date.now()));
 
   // create-form fields
   const [playerCount, setPlayerCount] = useState(2);
@@ -80,7 +80,9 @@ export function LiveDraftBoard() {
     ensureSupabaseSession().then((id) => {
       if (!cancelled) {
         setMyUserId(id);
-        setView("home");
+        // Only move off the loading screen — if the session took a moment
+        // and the user already clicked into create/join, don't stomp that.
+        setView((v) => (v === "loading" ? "home" : v));
       }
     });
     return () => {
@@ -89,7 +91,6 @@ export function LiveDraftBoard() {
   }, []);
 
   useEffect(() => {
-    setNowTick(Date.now());
     const id = setInterval(() => setNowTick(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
