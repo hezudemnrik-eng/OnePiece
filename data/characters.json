@@ -609,5 +609,5957 @@
       }
     ],
     "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d4/Nerona_Imu_Manga_Infobox.png/revision/latest/scale-to-width-down/310?cb=20260419150637"
+  },
+  {
+    "id": "sengoku",
+    "name": "Sengoku",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": "Hito Hito no Mi, Modell: Daibutsu",
+    "alive": true,
+    "cost": 106,
+    "versions": [
+      {
+        "id": "sengoku-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 90,
+          "haki": 85,
+          "intelligenz": 95,
+          "geschwindigkeit": 91,
+          "durabilitaet": 95
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/24/Sengoku_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/290?cb=20210208064630"
+  },
+  {
+    "id": "aokiji",
+    "name": "Kuzan (Aokiji)",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": "Hie Hie no Mi",
+    "alive": true,
+    "cost": 92,
+    "versions": [
+      {
+        "id": "aokiji-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 91,
+          "haki": 86,
+          "intelligenz": 99,
+          "geschwindigkeit": 87,
+          "durabilitaet": 86
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d6/Kuzan_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/326?cb=20240811021341"
+  },
+  {
+    "id": "fujitora",
+    "name": "Issho (Fujitora)",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": "Zushi Zushi no Mi",
+    "alive": true,
+    "cost": 93,
+    "versions": [
+      {
+        "id": "fujitora-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 91,
+          "haki": 89,
+          "intelligenz": 92,
+          "geschwindigkeit": 92,
+          "durabilitaet": 93
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e8/Issho_Anime_Infobox.png/revision/latest/scale-to-width-down/246?cb=20220718140829"
+  },
+  {
+    "id": "ryokugyu",
+    "name": "Aramaki (Ryokugyu)",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 115,
+    "versions": [
+      {
+        "id": "ryokugyu-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 91,
+          "haki": 89,
+          "intelligenz": 92,
+          "geschwindigkeit": 90,
+          "durabilitaet": 95
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/05/Aramaki_Anime_Infobox.png/revision/latest/scale-to-width-down/233?cb=20240930142146"
+  },
+  {
+    "id": "smoker",
+    "name": "Smoker",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "A",
+    "devilFruit": "Moku Moku no Mi",
+    "alive": true,
+    "cost": 72,
+    "versions": [
+      {
+        "id": "smoker-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 79,
+          "haki": 80,
+          "intelligenz": 81,
+          "geschwindigkeit": 71,
+          "durabilitaet": 74
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c4/Smoker_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/306?cb=20221101011905"
+  },
+  {
+    "id": "tashigi",
+    "name": "Tashigi",
+    "crew": "Marine",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 38,
+    "versions": [
+      {
+        "id": "tashigi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 47,
+          "haki": 50,
+          "intelligenz": 38,
+          "geschwindigkeit": 41,
+          "durabilitaet": 50
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/1e/Tashigi_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/261?cb=20251127120726"
+  },
+  {
+    "id": "hina",
+    "name": "Hina",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 61,
+    "versions": [
+      {
+        "id": "hina-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 63,
+          "haki": 65,
+          "intelligenz": 54,
+          "geschwindigkeit": 64,
+          "durabilitaet": 63
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/0d/Hina_Anime_Infobox.png/revision/latest/scale-to-width-down/333?cb=20231125233601"
+  },
+  {
+    "id": "coby",
+    "name": "Coby",
+    "crew": "Marine",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 37,
+    "versions": [
+      {
+        "id": "coby-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 36,
+          "haki": 49,
+          "intelligenz": 35,
+          "geschwindigkeit": 48,
+          "durabilitaet": 39
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b8/Koby_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/300?cb=20241114130518"
+  },
+  {
+    "id": "helmeppo",
+    "name": "Helmeppo",
+    "crew": "Marine",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 23,
+    "versions": [
+      {
+        "id": "helmeppo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 18,
+          "haki": 24,
+          "intelligenz": 25,
+          "geschwindigkeit": 27,
+          "durabilitaet": 17
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/a3/Helmeppo_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/212?cb=20230723204723"
+  },
+  {
+    "id": "momonga",
+    "name": "Momonga",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 45,
+    "versions": [
+      {
+        "id": "momonga-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 65,
+          "haki": 61,
+          "intelligenz": 58,
+          "geschwindigkeit": 52,
+          "durabilitaet": 56
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e8/Momonga_Anime_Infobox.png/revision/latest/scale-to-width-down/340?cb=20221101021448"
+  },
+  {
+    "id": "sentomaru",
+    "name": "Sentomaru",
+    "crew": "Marine",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 58,
+    "versions": [
+      {
+        "id": "sentomaru-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 65,
+          "haki": 54,
+          "intelligenz": 59,
+          "geschwindigkeit": 59,
+          "durabilitaet": 63
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/97/Sentomaru_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20241117020846"
+  },
+  {
+    "id": "strawberry",
+    "name": "Strawberry",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 62,
+    "versions": [
+      {
+        "id": "strawberry-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 65,
+          "haki": 58,
+          "intelligenz": 66,
+          "geschwindigkeit": 67,
+          "durabilitaet": 59
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f2/Strawberry_Anime_Infobox.png/revision/latest/scale-to-width-down/385?cb=20221101021505"
+  },
+  {
+    "id": "tsuru",
+    "name": "Tsuru",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "A",
+    "devilFruit": "Baku Baku no Mi",
+    "alive": true,
+    "cost": 80,
+    "versions": [
+      {
+        "id": "tsuru-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 82,
+          "haki": 81,
+          "intelligenz": 72,
+          "geschwindigkeit": 75,
+          "durabilitaet": 78
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/91/Tsuru_Anime_Infobox.png/revision/latest/scale-to-width-down/278?cb=20240730231455"
+  },
+  {
+    "id": "onigumo",
+    "name": "Onigumo",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 33,
+    "versions": [
+      {
+        "id": "onigumo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 45,
+          "haki": 39,
+          "intelligenz": 50,
+          "geschwindigkeit": 39,
+          "durabilitaet": 36
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/dc/Onigumo_Anime_Infobox.png/revision/latest/scale-to-width-down/166?cb=20221123171305"
+  },
+  {
+    "id": "zephyr",
+    "name": "Zephyr (Z)",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 69,
+    "versions": [
+      {
+        "id": "zephyr-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 73,
+          "haki": 77,
+          "intelligenz": 82,
+          "geschwindigkeit": 74,
+          "durabilitaet": 69
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/0f/Z_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20130704135054"
+  },
+  {
+    "id": "dragon",
+    "name": "Monkey D. Dragon",
+    "crew": "Revolutionsarmee",
+    "role": "Kapitän",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 89,
+    "versions": [
+      {
+        "id": "dragon-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 87,
+          "haki": 91,
+          "intelligenz": 94,
+          "geschwindigkeit": 92,
+          "durabilitaet": 98
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f5/Monkey_D._Dragon_Anime_Infobox.png/revision/latest/scale-to-width-down/274?cb=20250621010227"
+  },
+  {
+    "id": "sabo",
+    "name": "Sabo",
+    "crew": "Revolutionsarmee",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Mera Mera no Mi",
+    "alive": true,
+    "cost": 81,
+    "versions": [
+      {
+        "id": "sabo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 75,
+          "haki": 70,
+          "intelligenz": 70,
+          "geschwindigkeit": 76,
+          "durabilitaet": 74
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c2/Sabo_Anime_Infobox.png/revision/latest/scale-to-width-down/264?cb=20230804035141"
+  },
+  {
+    "id": "ivankov",
+    "name": "Emporio Ivankov",
+    "crew": "Revolutionsarmee",
+    "role": "Sonstige",
+    "tier": "A",
+    "devilFruit": "Horu Horu no Mi",
+    "alive": true,
+    "cost": 82,
+    "versions": [
+      {
+        "id": "ivankov-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 75,
+          "haki": 79,
+          "intelligenz": 82,
+          "geschwindigkeit": 71,
+          "durabilitaet": 83
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/de/Emporio_Ivankov_Anime_Infobox.png/revision/latest/scale-to-width-down/261?cb=20180624120810"
+  },
+  {
+    "id": "inazuma",
+    "name": "Inazuma",
+    "crew": "Revolutionsarmee",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": "Choki Choki no Mi",
+    "alive": true,
+    "cost": 52,
+    "versions": [
+      {
+        "id": "inazuma-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 53,
+          "haki": 56,
+          "intelligenz": 64,
+          "geschwindigkeit": 57,
+          "durabilitaet": 60
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d8/Inazuma_Anime_Infobox.png/revision/latest/scale-to-width-down/170?cb=20221031183404"
+  },
+  {
+    "id": "karasu",
+    "name": "Karasu",
+    "crew": "Revolutionsarmee",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 26,
+    "versions": [
+      {
+        "id": "karasu-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 49,
+          "haki": 46,
+          "intelligenz": 42,
+          "geschwindigkeit": 50,
+          "durabilitaet": 45
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/9a/Karasu_Anime_Infobox.png/revision/latest/scale-to-width-down/353?cb=20190414113619"
+  },
+  {
+    "id": "morley",
+    "name": "Morley",
+    "crew": "Revolutionsarmee",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 51,
+    "versions": [
+      {
+        "id": "morley-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 57,
+          "haki": 59,
+          "intelligenz": 59,
+          "geschwindigkeit": 54,
+          "durabilitaet": 63
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/48/Morley_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230517025343"
+  },
+  {
+    "id": "lindbergh",
+    "name": "Lindbergh",
+    "crew": "Revolutionsarmee",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 37,
+    "versions": [
+      {
+        "id": "lindbergh-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 46,
+          "haki": 36,
+          "intelligenz": 38,
+          "geschwindigkeit": 39,
+          "durabilitaet": 38
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e1/Lindbergh_Anime_Infobox.png/revision/latest/scale-to-width-down/394?cb=20190414113604"
+  },
+  {
+    "id": "belo-betty",
+    "name": "Belo Betty",
+    "crew": "Revolutionsarmee",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 31,
+    "versions": [
+      {
+        "id": "belo-betty-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 46,
+          "haki": 36,
+          "intelligenz": 43,
+          "geschwindigkeit": 48,
+          "durabilitaet": 46
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/dd/Belo_Betty_Anime_Infobox.png/revision/latest/scale-to-width-down/200?cb=20240903112156"
+  },
+  {
+    "id": "koala",
+    "name": "Koala",
+    "crew": "Revolutionsarmee",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 33,
+    "versions": [
+      {
+        "id": "koala-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 35,
+          "haki": 35,
+          "intelligenz": 50,
+          "geschwindigkeit": 50,
+          "durabilitaet": 45
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/3d/Koala_Anime_Infobox.png/revision/latest/scale-to-width-down/247?cb=20140928211728"
+  },
+  {
+    "id": "mihawk",
+    "name": "Dracule Mihawk",
+    "crew": "Ohne Crew",
+    "role": "Kämpfer",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 98,
+    "versions": [
+      {
+        "id": "mihawk-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 86,
+          "haki": 95,
+          "intelligenz": 90,
+          "geschwindigkeit": 91,
+          "durabilitaet": 94
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/bf/Dracule_Mihawk_Anime_Infobox.png/revision/latest/scale-to-width-down/257?cb=20151222105910"
+  },
+  {
+    "id": "bartholomew-kuma",
+    "name": "Bartholomew Kuma",
+    "crew": "Revolutionsarmee",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": "Nikyu Nikyu no Mi",
+    "alive": false,
+    "cost": 110,
+    "versions": [
+      {
+        "id": "bartholomew-kuma-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 93,
+          "haki": 87,
+          "intelligenz": 86,
+          "geschwindigkeit": 95,
+          "durabilitaet": 94
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/8d/Bartholomew_Kuma_Anime_Infobox.png/revision/latest/scale-to-width-down/238?cb=20221012030835"
+  },
+  {
+    "id": "moria",
+    "name": "Gecko Moria",
+    "crew": "Moria-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Kage Kage no Mi",
+    "alive": true,
+    "cost": 78,
+    "versions": [
+      {
+        "id": "moria-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 69,
+          "haki": 77,
+          "intelligenz": 70,
+          "geschwindigkeit": 75,
+          "durabilitaet": 75
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/be/Gecko_Moria_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20181127062446"
+  },
+  {
+    "id": "buggy",
+    "name": "Buggy",
+    "crew": "Buggy-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Bara Bara no Mi",
+    "alive": true,
+    "cost": 77,
+    "versions": [
+      {
+        "id": "buggy-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 70,
+          "haki": 81,
+          "intelligenz": 78,
+          "geschwindigkeit": 75,
+          "durabilitaet": 75
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f7/Buggy_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20240813025900"
+  },
+  {
+    "id": "benn-beckman",
+    "name": "Benn Beckman",
+    "crew": "Rotbart-Piraten",
+    "role": "Erster Offizier",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 82,
+    "versions": [
+      {
+        "id": "benn-beckman-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 78,
+          "haki": 79,
+          "intelligenz": 76,
+          "geschwindigkeit": 81,
+          "durabilitaet": 79
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/12/Benn_Beckman_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20240623091906"
+  },
+  {
+    "id": "lucky-roux",
+    "name": "Lucky Roux",
+    "crew": "Rotbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 46,
+    "versions": [
+      {
+        "id": "lucky-roux-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 61,
+          "haki": 58,
+          "intelligenz": 66,
+          "geschwindigkeit": 56,
+          "durabilitaet": 60
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/59/Lucky_Roux_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/351?cb=20220613165554"
+  },
+  {
+    "id": "yasopp",
+    "name": "Yasopp",
+    "crew": "Rotbart-Piraten",
+    "role": "Scharfschütze",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 61,
+    "versions": [
+      {
+        "id": "yasopp-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 64,
+          "haki": 53,
+          "intelligenz": 58,
+          "geschwindigkeit": 54,
+          "durabilitaet": 58
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/15/Yasopp_Anime_Infobox.png/revision/latest/scale-to-width-down/287?cb=20240623091749"
+  },
+  {
+    "id": "rockstar",
+    "name": "Rockstar",
+    "crew": "Rotbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 37,
+    "versions": [
+      {
+        "id": "rockstar-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 35,
+          "haki": 38,
+          "intelligenz": 41,
+          "geschwindigkeit": 50,
+          "durabilitaet": 47
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/8c/Rockstar_Anime_Infobox.png/revision/latest/scale-to-width-down/385?cb=20160929234330"
+  },
+  {
+    "id": "marco",
+    "name": "Marco",
+    "crew": "Weißbart-Piraten",
+    "role": "Erster Offizier",
+    "tier": "S",
+    "devilFruit": "Tori Tori no Mi, Modell: Phönix",
+    "alive": true,
+    "cost": 114,
+    "versions": [
+      {
+        "id": "marco-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 87,
+          "haki": 93,
+          "intelligenz": 99,
+          "geschwindigkeit": 92,
+          "durabilitaet": 92
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/4a/Polo_Marco_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/143?cb=20221010015200"
+  },
+  {
+    "id": "jozu",
+    "name": "Jozu",
+    "crew": "Weißbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 80,
+    "versions": [
+      {
+        "id": "jozu-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 84,
+          "haki": 78,
+          "intelligenz": 75,
+          "geschwindigkeit": 72,
+          "durabilitaet": 71
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/61/Jozu_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20220702104233"
+  },
+  {
+    "id": "vista",
+    "name": "Vista",
+    "crew": "Weißbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 65,
+    "versions": [
+      {
+        "id": "vista-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 79,
+          "haki": 71,
+          "intelligenz": 80,
+          "geschwindigkeit": 79,
+          "durabilitaet": 71
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/78/Vista_Anime_Infobox.png/revision/latest/scale-to-width-down/271?cb=20180131180522"
+  },
+  {
+    "id": "izo",
+    "name": "Izo",
+    "crew": "Weißbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 63,
+    "versions": [
+      {
+        "id": "izo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 60,
+          "haki": 65,
+          "intelligenz": 65,
+          "geschwindigkeit": 64,
+          "durabilitaet": 58
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/81/Izou_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/254?cb=20210919035558"
+  },
+  {
+    "id": "katakuri",
+    "name": "Charlotte Katakuri",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "S",
+    "devilFruit": "Mochi Mochi no Mi",
+    "alive": true,
+    "cost": 97,
+    "versions": [
+      {
+        "id": "katakuri-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 86,
+          "haki": 96,
+          "intelligenz": 89,
+          "geschwindigkeit": 93,
+          "durabilitaet": 91
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/2e/Charlotte_Katakuri_Anime_Infobox.png/revision/latest/scale-to-width-down/267?cb=20230204155539"
+  },
+  {
+    "id": "smoothie",
+    "name": "Charlotte Smoothie",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Shibo Shibo no Mi",
+    "alive": true,
+    "cost": 79,
+    "versions": [
+      {
+        "id": "smoothie-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 82,
+          "haki": 79,
+          "intelligenz": 78,
+          "geschwindigkeit": 82,
+          "durabilitaet": 78
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c5/Charlotte_Smoothie_Anime_Infobox.png/revision/latest/scale-to-width-down/171?cb=20180423150946"
+  },
+  {
+    "id": "cracker",
+    "name": "Charlotte Cracker",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Bisu Bisu no Mi",
+    "alive": true,
+    "cost": 70,
+    "versions": [
+      {
+        "id": "cracker-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 84,
+          "haki": 84,
+          "intelligenz": 72,
+          "geschwindigkeit": 72,
+          "durabilitaet": 82
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/64/Charlotte_Cracker_Anime_Infobox.png/revision/latest/scale-to-width-down/238?cb=20170730021804"
+  },
+  {
+    "id": "perospero",
+    "name": "Charlotte Perospero",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Pero Pero no Mi",
+    "alive": true,
+    "cost": 82,
+    "versions": [
+      {
+        "id": "perospero-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 77,
+          "haki": 77,
+          "intelligenz": 80,
+          "geschwindigkeit": 76,
+          "durabilitaet": 78
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/7e/Charlotte_Perospero_Anime_Infobox.png/revision/latest/scale-to-width-down/309?cb=20211101122146"
+  },
+  {
+    "id": "daifuku",
+    "name": "Charlotte Daifuku",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 53,
+    "versions": [
+      {
+        "id": "daifuku-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 63,
+          "haki": 54,
+          "intelligenz": 57,
+          "geschwindigkeit": 56,
+          "durabilitaet": 59
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/cd/Charlotte_Daifuku_Anime_Infobox.png/revision/latest/scale-to-width-down/318?cb=20230215154338"
+  },
+  {
+    "id": "oven",
+    "name": "Charlotte Oven",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Netsu Netsu no Mi",
+    "alive": true,
+    "cost": 56,
+    "versions": [
+      {
+        "id": "oven-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 57,
+          "haki": 58,
+          "intelligenz": 64,
+          "geschwindigkeit": 61,
+          "durabilitaet": 64
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f0/Charlotte_Oven_Anime_Infobox.png/revision/latest/scale-to-width-down/209?cb=20181028111159"
+  },
+  {
+    "id": "compote",
+    "name": "Charlotte Compote",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 35,
+    "versions": [
+      {
+        "id": "compote-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 42,
+          "haki": 44,
+          "intelligenz": 48,
+          "geschwindigkeit": 49,
+          "durabilitaet": 47
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/a5/Charlotte_Compote_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230702183151"
+  },
+  {
+    "id": "galette",
+    "name": "Charlotte Galette",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 43,
+    "versions": [
+      {
+        "id": "galette-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 40,
+          "haki": 35,
+          "intelligenz": 51,
+          "geschwindigkeit": 36,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/71/Charlotte_Galette_Anime_Infobox.png/revision/latest/scale-to-width-down/318?cb=20180721222625"
+  },
+  {
+    "id": "pudding",
+    "name": "Charlotte Pudding",
+    "crew": "Big-Mom-Piraten",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": "Memo Memo no Mi",
+    "alive": true,
+    "cost": 64,
+    "versions": [
+      {
+        "id": "pudding-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 58,
+          "haki": 55,
+          "intelligenz": 60,
+          "geschwindigkeit": 65,
+          "durabilitaet": 63
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/60/Charlotte_Pudding_Anime_Infobox.png/revision/latest/scale-to-width-down/208?cb=20250106015531"
+  },
+  {
+    "id": "chiffon",
+    "name": "Charlotte Chiffon",
+    "crew": "Big-Mom-Piraten",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 43,
+    "versions": [
+      {
+        "id": "chiffon-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 42,
+          "haki": 46,
+          "intelligenz": 37,
+          "geschwindigkeit": 49,
+          "durabilitaet": 35
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/6d/Charlotte_Chiffon_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20170409062554"
+  },
+  {
+    "id": "amande",
+    "name": "Charlotte Amande",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 28,
+    "versions": [
+      {
+        "id": "amande-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 40,
+          "haki": 39,
+          "intelligenz": 48,
+          "geschwindigkeit": 48,
+          "durabilitaet": 41
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b9/Charlotte_Amande_Anime_Infobox.png/revision/latest/scale-to-width-down/370?cb=20171016155845"
+  },
+  {
+    "id": "brulee",
+    "name": "Charlotte Brulee",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Mira Mira no Mi",
+    "alive": true,
+    "cost": 49,
+    "versions": [
+      {
+        "id": "brulee-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 60,
+          "haki": 57,
+          "intelligenz": 57,
+          "geschwindigkeit": 64,
+          "durabilitaet": 53
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d9/Charlotte_Br%C3%BBl%C3%A9e_Anime_Infobox.png/revision/latest/scale-to-width-down/209?cb=20170611174235"
+  },
+  {
+    "id": "mont-dor",
+    "name": "Charlotte Mont-d'Or",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 58,
+    "versions": [
+      {
+        "id": "mont-dor-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 54,
+          "haki": 63,
+          "intelligenz": 63,
+          "geschwindigkeit": 64,
+          "durabilitaet": 59
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d4/Charlotte_Mont-d%27Or_Anime_Infobox.png/revision/latest/scale-to-width-down/172?cb=20180325090436"
+  },
+  {
+    "id": "opera",
+    "name": "Charlotte Opera",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 41,
+    "versions": [
+      {
+        "id": "opera-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 37,
+          "haki": 51,
+          "intelligenz": 45,
+          "geschwindigkeit": 38,
+          "durabilitaet": 47
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/56/Charlotte_Opera_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20170528044001"
+  },
+  {
+    "id": "flampe",
+    "name": "Charlotte Flampe",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 18,
+    "versions": [
+      {
+        "id": "flampe-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 31,
+          "haki": 29,
+          "intelligenz": 15,
+          "geschwindigkeit": 34,
+          "durabilitaet": 33
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/91/Charlotte_Flampe_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20190203105539"
+  },
+  {
+    "id": "pekoms",
+    "name": "Pekoms",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Neko Neko no Mi, Modell: Leopard",
+    "alive": true,
+    "cost": 51,
+    "versions": [
+      {
+        "id": "pekoms-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 56,
+          "haki": 52,
+          "intelligenz": 66,
+          "geschwindigkeit": 63,
+          "durabilitaet": 56
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/15/Pekoms_Anime_Infobox.png/revision/latest/scale-to-width-down/209?cb=20221107145536"
+  },
+  {
+    "id": "tamago",
+    "name": "Baron Tamago",
+    "crew": "Big-Mom-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": "Tori Tori no Mi, Modell: Huhn",
+    "alive": true,
+    "cost": 35,
+    "versions": [
+      {
+        "id": "tamago-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 47,
+          "haki": 41,
+          "intelligenz": 42,
+          "geschwindigkeit": 50,
+          "durabilitaet": 37
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/49/Tamago_Anime_Infobox.png/revision/latest/scale-to-width-down/258?cb=20171126235414"
+  },
+  {
+    "id": "streusen",
+    "name": "Streusen",
+    "crew": "Big-Mom-Piraten",
+    "role": "Koch",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 36,
+    "versions": [
+      {
+        "id": "streusen-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 50,
+          "haki": 39,
+          "intelligenz": 51,
+          "geschwindigkeit": 42,
+          "durabilitaet": 43
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/34/Streusen_Anime_Infobox.png/revision/latest/scale-to-width-down/307?cb=20180423083412"
+  },
+  {
+    "id": "king",
+    "name": "King",
+    "crew": "Beast-Piraten",
+    "role": "Erster Offizier",
+    "tier": "S",
+    "devilFruit": "Ryu Ryu no Mi, Modell: Pteranodon",
+    "alive": true,
+    "cost": 93,
+    "versions": [
+      {
+        "id": "king-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 86,
+          "haki": 99,
+          "intelligenz": 90,
+          "geschwindigkeit": 91,
+          "durabilitaet": 96
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/8f/King_Anime_Infobox.png/revision/latest/scale-to-width-down/240?cb=20230423142631"
+  },
+  {
+    "id": "queen",
+    "name": "Queen",
+    "crew": "Beast-Piraten",
+    "role": "Kämpfer",
+    "tier": "S",
+    "devilFruit": "Ryu Ryu no Mi, Modell: Brachiosaurus",
+    "alive": true,
+    "cost": 116,
+    "versions": [
+      {
+        "id": "queen-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 94,
+          "haki": 87,
+          "intelligenz": 96,
+          "geschwindigkeit": 95,
+          "durabilitaet": 89
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/52/Queen_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20200920174728"
+  },
+  {
+    "id": "jack",
+    "name": "Jack",
+    "crew": "Beast-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Zou Zou no Mi, Modell: Mammut",
+    "alive": true,
+    "cost": 75,
+    "versions": [
+      {
+        "id": "jack-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 69,
+          "haki": 78,
+          "intelligenz": 70,
+          "geschwindigkeit": 72,
+          "durabilitaet": 77
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/3f/Jack_Anime_Infobox.png/revision/latest/scale-to-width-down/316?cb=20161009223938"
+  },
+  {
+    "id": "whos-who",
+    "name": "Who's-Who",
+    "crew": "Beast-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Neko Neko no Mi, Modell: Säbelzahntiger",
+    "alive": true,
+    "cost": 78,
+    "versions": [
+      {
+        "id": "whos-who-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 72,
+          "haki": 74,
+          "intelligenz": 73,
+          "geschwindigkeit": 74,
+          "durabilitaet": 78
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/94/Who%27s-Who_Anime_Infobox.png/revision/latest/scale-to-width-down/269?cb=20211201215156"
+  },
+  {
+    "id": "ulti",
+    "name": "Ulti",
+    "crew": "Beast-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Ryu Ryu no Mi, Modell: Pachycephalosaurus",
+    "alive": true,
+    "cost": 51,
+    "versions": [
+      {
+        "id": "ulti-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 58,
+          "haki": 63,
+          "intelligenz": 56,
+          "geschwindigkeit": 53,
+          "durabilitaet": 63
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/dc/Ulti_Anime_Infobox.png/revision/latest/scale-to-width-down/193?cb=20240831170217"
+  },
+  {
+    "id": "page-one",
+    "name": "Page One",
+    "crew": "Beast-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Ryu Ryu no Mi, Modell: Spinosaurus",
+    "alive": true,
+    "cost": 56,
+    "versions": [
+      {
+        "id": "page-one-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 56,
+          "haki": 54,
+          "intelligenz": 55,
+          "geschwindigkeit": 54,
+          "durabilitaet": 54
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/46/Page_One_Anime_Infobox.png/revision/latest/scale-to-width-down/304?cb=20211128115519"
+  },
+  {
+    "id": "sasaki",
+    "name": "Sasaki",
+    "crew": "Beast-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Ryu Ryu no Mi, Modell: Triceratops",
+    "alive": true,
+    "cost": 58,
+    "versions": [
+      {
+        "id": "sasaki-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 62,
+          "haki": 54,
+          "intelligenz": 59,
+          "geschwindigkeit": 53,
+          "durabilitaet": 62
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d7/Sasaki_Anime_Infobox.png/revision/latest/scale-to-width-down/305?cb=20211205140441"
+  },
+  {
+    "id": "black-maria",
+    "name": "Black Maria",
+    "crew": "Beast-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Kumo Kumo no Mi, Modell: Rosenspinne",
+    "alive": true,
+    "cost": 63,
+    "versions": [
+      {
+        "id": "black-maria-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 55,
+          "haki": 60,
+          "intelligenz": 52,
+          "geschwindigkeit": 53,
+          "durabilitaet": 63
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e2/Black_Maria_Anime_Infobox.png/revision/latest/scale-to-width-down/357?cb=20210808144206"
+  },
+  {
+    "id": "van-augur",
+    "name": "Van Augur",
+    "crew": "Schwarzbart-Piraten",
+    "role": "Scharfschütze",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 49,
+    "versions": [
+      {
+        "id": "van-augur-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 60,
+          "haki": 65,
+          "intelligenz": 55,
+          "geschwindigkeit": 61,
+          "durabilitaet": 55
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/95/Van_Augur_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/396?cb=20240211025011"
+  },
+  {
+    "id": "jesus-burgess",
+    "name": "Jesus Burgess",
+    "crew": "Schwarzbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 77,
+    "versions": [
+      {
+        "id": "jesus-burgess-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 80,
+          "haki": 84,
+          "intelligenz": 69,
+          "geschwindigkeit": 73,
+          "durabilitaet": 72
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/43/Jesus_Burgess_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/388?cb=20240128022349"
+  },
+  {
+    "id": "avalo-pizarro",
+    "name": "Avalo Pizarro",
+    "crew": "Schwarzbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 54,
+    "versions": [
+      {
+        "id": "avalo-pizarro-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 61,
+          "haki": 54,
+          "intelligenz": 58,
+          "geschwindigkeit": 53,
+          "durabilitaet": 60
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/ef/Avalo_Pizarro_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/369?cb=20200112042123"
+  },
+  {
+    "id": "catarina-devon",
+    "name": "Catarina Devon",
+    "crew": "Schwarzbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Neko Neko no Mi, Modell: Schwarzpanther",
+    "alive": true,
+    "cost": 46,
+    "versions": [
+      {
+        "id": "catarina-devon-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 57,
+          "haki": 61,
+          "intelligenz": 61,
+          "geschwindigkeit": 56,
+          "durabilitaet": 62
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/4a/Catarina_Devon_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/359?cb=20200112041332"
+  },
+  {
+    "id": "vasco-shot",
+    "name": "Vasco Shot",
+    "crew": "Schwarzbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 63,
+    "versions": [
+      {
+        "id": "vasco-shot-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 60,
+          "haki": 58,
+          "intelligenz": 66,
+          "geschwindigkeit": 64,
+          "durabilitaet": 63
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/66/Vasco_Shot_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20240728020838"
+  },
+  {
+    "id": "laffitte",
+    "name": "Laffitte",
+    "crew": "Schwarzbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 58,
+    "versions": [
+      {
+        "id": "laffitte-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 56,
+          "haki": 63,
+          "intelligenz": 53,
+          "geschwindigkeit": 63,
+          "durabilitaet": 55
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/00/Laffitte_Anime_Infobox.png/revision/latest/scale-to-width-down/180?cb=20161029211833"
+  },
+  {
+    "id": "doc-q",
+    "name": "Doc Q",
+    "crew": "Schwarzbart-Piraten",
+    "role": "Arzt",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 41,
+    "versions": [
+      {
+        "id": "doc-q-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 43,
+          "haki": 42,
+          "intelligenz": 39,
+          "geschwindigkeit": 50,
+          "durabilitaet": 50
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c4/Doc_Q_Anime_Infobox.png/revision/latest/scale-to-width-down/307?cb=20240211200456"
+  },
+  {
+    "id": "stronger",
+    "name": "Stronger",
+    "crew": "Schwarzbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 42,
+    "versions": [
+      {
+        "id": "stronger-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 42,
+          "haki": 44,
+          "intelligenz": 40,
+          "geschwindigkeit": 41,
+          "durabilitaet": 39
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d3/Stronger_Anime_Infobox.png/revision/latest/scale-to-width-down/256?cb=20231222225633"
+  },
+  {
+    "id": "shiryu",
+    "name": "Shiryu",
+    "crew": "Schwarzbart-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Suke Suke no Mi",
+    "alive": true,
+    "cost": 69,
+    "versions": [
+      {
+        "id": "shiryu-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 84,
+          "haki": 83,
+          "intelligenz": 83,
+          "geschwindigkeit": 74,
+          "durabilitaet": 69
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/4a/Shiryu_Anime_Infobox.png/revision/latest/scale-to-width-down/374?cb=20240728020909"
+  },
+  {
+    "id": "killer",
+    "name": "Killer",
+    "crew": "Kid-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 75,
+    "versions": [
+      {
+        "id": "killer-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 71,
+          "haki": 81,
+          "intelligenz": 72,
+          "geschwindigkeit": 83,
+          "durabilitaet": 76
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/70/Killer_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/379?cb=20210815025653"
+  },
+  {
+    "id": "hawkins",
+    "name": "Basil Hawkins",
+    "crew": "Hawkins-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Wara Wara no Mi",
+    "alive": true,
+    "cost": 73,
+    "versions": [
+      {
+        "id": "hawkins-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 76,
+          "haki": 84,
+          "intelligenz": 79,
+          "geschwindigkeit": 83,
+          "durabilitaet": 76
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f8/Basil_Hawkins_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230906163534"
+  },
+  {
+    "id": "apoo",
+    "name": "Scratchmen Apoo",
+    "crew": "On-Air-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Oto Oto no Mi",
+    "alive": true,
+    "cost": 69,
+    "versions": [
+      {
+        "id": "apoo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 84,
+          "haki": 73,
+          "intelligenz": 82,
+          "geschwindigkeit": 73,
+          "durabilitaet": 68
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d0/Scratchmen_Apoo_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/367?cb=20210426143015"
+  },
+  {
+    "id": "x-drake",
+    "name": "X Drake",
+    "crew": "Drake-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Ryu Ryu no Mi, Modell: Allosaurus",
+    "alive": true,
+    "cost": 74,
+    "versions": [
+      {
+        "id": "x-drake-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 81,
+          "haki": 69,
+          "intelligenz": 69,
+          "geschwindigkeit": 72,
+          "durabilitaet": 68
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/04/X_Drake_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/237?cb=20200209080003"
+  },
+  {
+    "id": "urouge",
+    "name": "Urouge",
+    "crew": "Faulenzer-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 72,
+    "versions": [
+      {
+        "id": "urouge-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 77,
+          "haki": 71,
+          "intelligenz": 70,
+          "geschwindigkeit": 70,
+          "durabilitaet": 73
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/fb/Urouge_Anime_Infobox.png/revision/latest/scale-to-width-down/292?cb=20230126223235"
+  },
+  {
+    "id": "bonney",
+    "name": "Jewelry Bonney",
+    "crew": "Bonney-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Toshi Toshi no Mi",
+    "alive": true,
+    "cost": 83,
+    "versions": [
+      {
+        "id": "bonney-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 79,
+          "haki": 82,
+          "intelligenz": 76,
+          "geschwindigkeit": 77,
+          "durabilitaet": 72
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/62/Jewelry_Bonney_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/266?cb=20230123001318"
+  },
+  {
+    "id": "bege",
+    "name": "Capone \"Gang\" Bege",
+    "crew": "Feuertank-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Shiro Shiro no Mi",
+    "alive": true,
+    "cost": 68,
+    "versions": [
+      {
+        "id": "bege-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 68,
+          "haki": 79,
+          "intelligenz": 70,
+          "geschwindigkeit": 73,
+          "durabilitaet": 83
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/99/Capone_Bege_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/245?cb=20160911163015"
+  },
+  {
+    "id": "bepo",
+    "name": "Bepo",
+    "crew": "Herz-Piraten",
+    "role": "Steuermann",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 39,
+    "versions": [
+      {
+        "id": "bepo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 50,
+          "haki": 37,
+          "intelligenz": 47,
+          "geschwindigkeit": 36,
+          "durabilitaet": 51
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/5f/Bepo_Anime_Infobox.png/revision/latest/scale-to-width-down/262?cb=20231210123641"
+  },
+  {
+    "id": "shachi",
+    "name": "Shachi",
+    "crew": "Herz-Piraten",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 19,
+    "versions": [
+      {
+        "id": "shachi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 26,
+          "haki": 30,
+          "intelligenz": 34,
+          "geschwindigkeit": 23,
+          "durabilitaet": 30
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/5f/Shachi_Anime_Infobox.png/revision/latest/scale-to-width-down/137?cb=20130425024908"
+  },
+  {
+    "id": "penguin",
+    "name": "Penguin",
+    "crew": "Herz-Piraten",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 18,
+    "versions": [
+      {
+        "id": "penguin-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 30,
+          "haki": 25,
+          "intelligenz": 33,
+          "geschwindigkeit": 28,
+          "durabilitaet": 33
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/8a/Penguin_Anime_Infobox.png/revision/latest/scale-to-width-down/228?cb=20240128193140"
+  },
+  {
+    "id": "ikkaku",
+    "name": "Ikkaku",
+    "crew": "Herz-Piraten",
+    "role": "Arzt",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 19,
+    "versions": [
+      {
+        "id": "ikkaku-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 33,
+          "haki": 30,
+          "intelligenz": 24,
+          "geschwindigkeit": 28,
+          "durabilitaet": 32
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/7a/Ikkaku_Anime_Infobox.png/revision/latest/scale-to-width-down/234?cb=20221023211801"
+  },
+  {
+    "id": "clione",
+    "name": "Clione",
+    "crew": "Herz-Piraten",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 22,
+    "versions": [
+      {
+        "id": "clione-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 32,
+          "haki": 19,
+          "intelligenz": 22,
+          "geschwindigkeit": 31,
+          "durabilitaet": 29
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e5/Clione_Anime_Infobox.png/revision/latest/scale-to-width-down/334?cb=20161104132821"
+  },
+  {
+    "id": "heat",
+    "name": "Heat",
+    "crew": "Kid-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 36,
+    "versions": [
+      {
+        "id": "heat-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 38,
+          "haki": 40,
+          "intelligenz": 45,
+          "geschwindigkeit": 43,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/30/Heat_Anime_Infobox.png/revision/latest/scale-to-width-down/294?cb=20231216144053"
+  },
+  {
+    "id": "wire",
+    "name": "Wire",
+    "crew": "Kid-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 31,
+    "versions": [
+      {
+        "id": "wire-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 38,
+          "haki": 44,
+          "intelligenz": 48,
+          "geschwindigkeit": 50,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/3d/Wire_Anime_Infobox.png/revision/latest/scale-to-width-down/198?cb=20240731170205"
+  },
+  {
+    "id": "mr-1",
+    "name": "Mr. 1 (Daz Bones)",
+    "crew": "Baroque Works",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Supa Supa no Mi",
+    "alive": true,
+    "cost": 79,
+    "versions": [
+      {
+        "id": "mr-1-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 82,
+          "haki": 77,
+          "intelligenz": 74,
+          "geschwindigkeit": 81,
+          "durabilitaet": 69
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e9/Daz_Bonez_Anime_Infobox.png/revision/latest/scale-to-width-down/186?cb=20221102004113"
+  },
+  {
+    "id": "mr-2",
+    "name": "Mr. 2 Bon Clay",
+    "crew": "Baroque Works",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Mane Mane no Mi",
+    "alive": true,
+    "cost": 62,
+    "versions": [
+      {
+        "id": "mr-2-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 64,
+          "haki": 56,
+          "intelligenz": 54,
+          "geschwindigkeit": 61,
+          "durabilitaet": 58
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/0e/Bentham_Anime_Infobox.png/revision/latest/scale-to-width-down/224?cb=20160929070742"
+  },
+  {
+    "id": "mr-3",
+    "name": "Mr. 3 (Galdino)",
+    "crew": "Baroque Works",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": "Doru Doru no Mi",
+    "alive": true,
+    "cost": 33,
+    "versions": [
+      {
+        "id": "mr-3-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 36,
+          "haki": 41,
+          "intelligenz": 48,
+          "geschwindigkeit": 49,
+          "durabilitaet": 38
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/13/Galdino_Anime_Infobox.png/revision/latest/scale-to-width-down/310?cb=20221003165116"
+  },
+  {
+    "id": "mr-4",
+    "name": "Mr. 4",
+    "crew": "Baroque Works",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 36,
+    "versions": [
+      {
+        "id": "mr-4-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 50,
+          "haki": 35,
+          "intelligenz": 43,
+          "geschwindigkeit": 45,
+          "durabilitaet": 42
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/da/Babe_Anime_Infobox.png/revision/latest/scale-to-width-down/259?cb=20230121225303"
+  },
+  {
+    "id": "miss-merry-christmas",
+    "name": "Miss Merry Christmas",
+    "crew": "Baroque Works",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 12,
+    "versions": [
+      {
+        "id": "miss-merry-christmas-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 33,
+          "haki": 32,
+          "intelligenz": 15,
+          "geschwindigkeit": 26,
+          "durabilitaet": 17
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f4/Drophy_Anime_Infobox.png/revision/latest/scale-to-width-down/292?cb=20230624124714"
+  },
+  {
+    "id": "mr-5",
+    "name": "Mr. 5",
+    "crew": "Baroque Works",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": "Bomu Bomu no Mi",
+    "alive": true,
+    "cost": 27,
+    "versions": [
+      {
+        "id": "mr-5-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 38,
+          "haki": 48,
+          "intelligenz": 45,
+          "geschwindigkeit": 50,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/14/Gem_Anime_Infobox.png/revision/latest/scale-to-width-down/261?cb=20221003165534"
+  },
+  {
+    "id": "miss-valentine",
+    "name": "Miss Valentine",
+    "crew": "Baroque Works",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": "Kiro Kiro no Mi",
+    "alive": true,
+    "cost": 21,
+    "versions": [
+      {
+        "id": "miss-valentine-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 34,
+          "haki": 16,
+          "intelligenz": 33,
+          "geschwindigkeit": 25,
+          "durabilitaet": 22
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/bc/Mikita_Anime_Infobox.png/revision/latest/scale-to-width-down/168?cb=20230417164634"
+  },
+  {
+    "id": "miss-doublefinger",
+    "name": "Miss Doublefinger",
+    "crew": "Baroque Works",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 42,
+    "versions": [
+      {
+        "id": "miss-doublefinger-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 41,
+          "haki": 47,
+          "intelligenz": 41,
+          "geschwindigkeit": 42,
+          "durabilitaet": 43
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/60/Zala_Anime_Infobox.png/revision/latest/scale-to-width-down/197?cb=20221003164424"
+  },
+  {
+    "id": "miss-goldenweek",
+    "name": "Miss Goldenweek",
+    "crew": "Baroque Works",
+    "role": "Sonstige",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 18,
+    "versions": [
+      {
+        "id": "miss-goldenweek-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 27,
+          "haki": 15,
+          "intelligenz": 18,
+          "geschwindigkeit": 20,
+          "durabilitaet": 24
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b4/Marianne_Anime_Infobox.png/revision/latest/scale-to-width-down/247?cb=20250115010211"
+  },
+  {
+    "id": "rob-lucci",
+    "name": "Rob Lucci",
+    "crew": "CP0",
+    "role": "Kämpfer",
+    "tier": "S",
+    "devilFruit": "Neko Neko no Mi, Modell: Leopard",
+    "alive": true,
+    "cost": 89,
+    "versions": [
+      {
+        "id": "rob-lucci-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 97,
+          "haki": 86,
+          "intelligenz": 95,
+          "geschwindigkeit": 95,
+          "durabilitaet": 95
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d7/Rob_Lucci_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/215?cb=20230102052113"
+  },
+  {
+    "id": "kaku",
+    "name": "Kaku",
+    "crew": "CP0",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Zou Zou no Mi, Modell: Giraffe",
+    "alive": true,
+    "cost": 72,
+    "versions": [
+      {
+        "id": "kaku-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 73,
+          "haki": 81,
+          "intelligenz": 73,
+          "geschwindigkeit": 70,
+          "durabilitaet": 80
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/09/Kaku_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/267?cb=20221127204534"
+  },
+  {
+    "id": "kalifa",
+    "name": "Kalifa",
+    "crew": "CP9",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Awa Awa no Mi",
+    "alive": true,
+    "cost": 59,
+    "versions": [
+      {
+        "id": "kalifa-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 55,
+          "haki": 66,
+          "intelligenz": 65,
+          "geschwindigkeit": 59,
+          "durabilitaet": 61
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b3/Kalifa_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/182?cb=20240915021516"
+  },
+  {
+    "id": "jabra",
+    "name": "Jabra",
+    "crew": "CP9",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Inu Inu no Mi, Modell: Wolf",
+    "alive": true,
+    "cost": 56,
+    "versions": [
+      {
+        "id": "jabra-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 58,
+          "haki": 59,
+          "intelligenz": 52,
+          "geschwindigkeit": 54,
+          "durabilitaet": 52
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/12/Jabra_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/315?cb=20240915021445"
+  },
+  {
+    "id": "kumadori",
+    "name": "Kumadori",
+    "crew": "CP9",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 60,
+    "versions": [
+      {
+        "id": "kumadori-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 53,
+          "haki": 62,
+          "intelligenz": 62,
+          "geschwindigkeit": 54,
+          "durabilitaet": 60
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/86/Kumadori_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/341?cb=20240915021726"
+  },
+  {
+    "id": "blueno",
+    "name": "Blueno",
+    "crew": "CP9",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Doa Doa no Mi",
+    "alive": true,
+    "cost": 53,
+    "versions": [
+      {
+        "id": "blueno-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 56,
+          "haki": 61,
+          "intelligenz": 60,
+          "geschwindigkeit": 56,
+          "durabilitaet": 53
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/2b/Blueno_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20240915021752"
+  },
+  {
+    "id": "fukurou",
+    "name": "Fukurou",
+    "crew": "CP9",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 35,
+    "versions": [
+      {
+        "id": "fukurou-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 39,
+          "haki": 39,
+          "intelligenz": 50,
+          "geschwindigkeit": 43,
+          "durabilitaet": 39
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e0/Fukurou_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/266?cb=20240901020742"
+  },
+  {
+    "id": "spandam",
+    "name": "Spandam",
+    "crew": "CP9",
+    "role": "Sonstige",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 15,
+    "versions": [
+      {
+        "id": "spandam-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 20,
+          "haki": 27,
+          "intelligenz": 27,
+          "geschwindigkeit": 29,
+          "durabilitaet": 16
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e7/Spandam_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/323?cb=20230913231907"
+  },
+  {
+    "id": "stussy",
+    "name": "Stussy",
+    "crew": "CP0",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 56,
+    "versions": [
+      {
+        "id": "stussy-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 63,
+          "haki": 62,
+          "intelligenz": 56,
+          "geschwindigkeit": 61,
+          "durabilitaet": 54
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/ee/Stussy_Anime_Infobox.png/revision/latest/scale-to-width-down/336?cb=20240512081047"
+  },
+  {
+    "id": "trebol",
+    "name": "Trebol",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Beta Beta no Mi",
+    "alive": true,
+    "cost": 68,
+    "versions": [
+      {
+        "id": "trebol-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 70,
+          "haki": 79,
+          "intelligenz": 76,
+          "geschwindigkeit": 74,
+          "durabilitaet": 81
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f5/Trebol_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20221117040446"
+  },
+  {
+    "id": "diamante",
+    "name": "Diamante",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Gamu Gamu no Mi",
+    "alive": true,
+    "cost": 78,
+    "versions": [
+      {
+        "id": "diamante-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 69,
+          "haki": 84,
+          "intelligenz": 84,
+          "geschwindigkeit": 72,
+          "durabilitaet": 84
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/72/Diamante_Anime_Infobox.png/revision/latest/scale-to-width-down/308?cb=20151011043134"
+  },
+  {
+    "id": "pica",
+    "name": "Pica",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Ishi Ishi no Mi",
+    "alive": true,
+    "cost": 75,
+    "versions": [
+      {
+        "id": "pica-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 80,
+          "haki": 69,
+          "intelligenz": 70,
+          "geschwindigkeit": 79,
+          "durabilitaet": 76
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/a4/Pica_Anime_Infobox.png/revision/latest/scale-to-width-down/372?cb=20221117040111"
+  },
+  {
+    "id": "senor-pink",
+    "name": "Senor Pink",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 54,
+    "versions": [
+      {
+        "id": "senor-pink-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 61,
+          "haki": 64,
+          "intelligenz": 54,
+          "geschwindigkeit": 60,
+          "durabilitaet": 58
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/48/Senor_Pink_Anime_Infobox.png/revision/latest/scale-to-width-down/344?cb=20241014120619"
+  },
+  {
+    "id": "vergo",
+    "name": "Vergo",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": "Mogu Mogu no Mi",
+    "alive": false,
+    "cost": 79,
+    "versions": [
+      {
+        "id": "vergo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 83,
+          "haki": 80,
+          "intelligenz": 68,
+          "geschwindigkeit": 81,
+          "durabilitaet": 83
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/cf/Vergo_Anime_Infobox.png/revision/latest/scale-to-width-down/176?cb=20230101232239"
+  },
+  {
+    "id": "baby-5",
+    "name": "Baby 5",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": "Buki Buki no Mi",
+    "alive": true,
+    "cost": 29,
+    "versions": [
+      {
+        "id": "baby-5-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 36,
+          "haki": 43,
+          "intelligenz": 37,
+          "geschwindigkeit": 48,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e1/Baby_5_Anime_Infobox.png/revision/latest/scale-to-width-down/173?cb=20221011013323"
+  },
+  {
+    "id": "buffalo",
+    "name": "Buffalo",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": "Ushi Ushi no Mi, Modell: Bison",
+    "alive": true,
+    "cost": 43,
+    "versions": [
+      {
+        "id": "buffalo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 40,
+          "haki": 49,
+          "intelligenz": 49,
+          "geschwindigkeit": 38,
+          "durabilitaet": 48
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/ab/Buffalo_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20131104002420"
+  },
+  {
+    "id": "gladius",
+    "name": "Gladius",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": "Supa Bakudan no Mi",
+    "alive": true,
+    "cost": 27,
+    "versions": [
+      {
+        "id": "gladius-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 38,
+          "haki": 40,
+          "intelligenz": 41,
+          "geschwindigkeit": 47,
+          "durabilitaet": 41
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/3d/Gladius_Anime_Infobox.png/revision/latest/scale-to-width-down/316?cb=20231025224459"
+  },
+  {
+    "id": "dellinger",
+    "name": "Dellinger",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 32,
+    "versions": [
+      {
+        "id": "dellinger-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 42,
+          "haki": 39,
+          "intelligenz": 36,
+          "geschwindigkeit": 47,
+          "durabilitaet": 43
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/8b/Dellinger_Anime_Infobox.png/revision/latest/scale-to-width-down/149?cb=20150415222442"
+  },
+  {
+    "id": "lao-g",
+    "name": "Lao G",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 41,
+    "versions": [
+      {
+        "id": "lao-g-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 43,
+          "haki": 38,
+          "intelligenz": 43,
+          "geschwindigkeit": 51,
+          "durabilitaet": 36
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/52/Lao_G_Anime_Infobox.png/revision/latest/scale-to-width-down/207?cb=20141202204639"
+  },
+  {
+    "id": "machvise",
+    "name": "Machvise",
+    "crew": "Donquixote-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 34,
+    "versions": [
+      {
+        "id": "machvise-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 51,
+          "haki": 44,
+          "intelligenz": 39,
+          "geschwindigkeit": 44,
+          "durabilitaet": 39
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/6e/Machvise_Anime_Infobox.png/revision/latest/scale-to-width-down/344?cb=20140916075009"
+  },
+  {
+    "id": "jora",
+    "name": "Jora",
+    "crew": "Donquixote-Piraten",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 36,
+    "versions": [
+      {
+        "id": "jora-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 50,
+          "haki": 50,
+          "intelligenz": 48,
+          "geschwindigkeit": 46,
+          "durabilitaet": 42
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/21/Giolla_Anime_Infobox.png/revision/latest/scale-to-width-down/236?cb=20221117034510"
+  },
+  {
+    "id": "giolla",
+    "name": "Giolla",
+    "crew": "Donquixote-Piraten",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": "Art Art no Mi",
+    "alive": true,
+    "cost": 40,
+    "versions": [
+      {
+        "id": "giolla-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 43,
+          "haki": 42,
+          "intelligenz": 37,
+          "geschwindigkeit": 42,
+          "durabilitaet": 44
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/21/Giolla_Anime_Infobox.png/revision/latest/scale-to-width-down/236?cb=20221117034510"
+  },
+  {
+    "id": "sugar",
+    "name": "Sugar",
+    "crew": "Donquixote-Piraten",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": "Hobi Hobi no Mi",
+    "alive": true,
+    "cost": 35,
+    "versions": [
+      {
+        "id": "sugar-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 40,
+          "haki": 50,
+          "intelligenz": 36,
+          "geschwindigkeit": 40,
+          "durabilitaet": 51
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e9/Sugar_Anime_Infobox.png/revision/latest/scale-to-width-down/240?cb=20141005232110"
+  },
+  {
+    "id": "corazon",
+    "name": "Donquixote Rosinante (Corazon)",
+    "crew": "Donquixote-Piraten",
+    "role": "Sonstige",
+    "tier": "A",
+    "devilFruit": "Nagi Nagi no Mi",
+    "alive": false,
+    "cost": 68,
+    "versions": [
+      {
+        "id": "corazon-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 77,
+          "haki": 81,
+          "intelligenz": 79,
+          "geschwindigkeit": 82,
+          "durabilitaet": 72
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/71/Donquixote_Rosinante_Anime_Infobox.png/revision/latest/scale-to-width-down/270?cb=20150802160734"
+  },
+  {
+    "id": "judge",
+    "name": "Vinsmoke Judge",
+    "crew": "Germa 66",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 72,
+    "versions": [
+      {
+        "id": "judge-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 74,
+          "haki": 77,
+          "intelligenz": 84,
+          "geschwindigkeit": 80,
+          "durabilitaet": 79
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/6f/Vinsmoke_Judge_Anime_Infobox.png/revision/latest/scale-to-width-down/250?cb=20170626124958"
+  },
+  {
+    "id": "reiju",
+    "name": "Vinsmoke Reiju",
+    "crew": "Germa 66",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 58,
+    "versions": [
+      {
+        "id": "reiju-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 57,
+          "haki": 54,
+          "intelligenz": 53,
+          "geschwindigkeit": 64,
+          "durabilitaet": 53
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/a3/Vinsmoke_Reiju_Anime_Infobox.png/revision/latest/scale-to-width-down/167?cb=20231211104854"
+  },
+  {
+    "id": "ichiji",
+    "name": "Vinsmoke Ichiji",
+    "crew": "Germa 66",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 58,
+    "versions": [
+      {
+        "id": "ichiji-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 55,
+          "haki": 52,
+          "intelligenz": 57,
+          "geschwindigkeit": 59,
+          "durabilitaet": 60
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/7c/Vinsmoke_Ichiji_Anime_Infobox.png/revision/latest/scale-to-width-down/217?cb=20260923024233"
+  },
+  {
+    "id": "niji",
+    "name": "Vinsmoke Niji",
+    "crew": "Germa 66",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 56,
+    "versions": [
+      {
+        "id": "niji-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 57,
+          "haki": 55,
+          "intelligenz": 59,
+          "geschwindigkeit": 64,
+          "durabilitaet": 53
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d6/Vinsmoke_Niji_Anime_Infobox.png/revision/latest/scale-to-width-down/294?cb=20180618054009"
+  },
+  {
+    "id": "yonji",
+    "name": "Vinsmoke Yonji",
+    "crew": "Germa 66",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 59,
+    "versions": [
+      {
+        "id": "yonji-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 61,
+          "haki": 55,
+          "intelligenz": 57,
+          "geschwindigkeit": 58,
+          "durabilitaet": 54
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e7/Vinsmoke_Yonji_Anime_Infobox.png/revision/latest/scale-to-width-down/212?cb=20170416175856"
+  },
+  {
+    "id": "neptune",
+    "name": "Neptune",
+    "crew": "Ryugu-Königreich",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 48,
+    "versions": [
+      {
+        "id": "neptune-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 56,
+          "haki": 63,
+          "intelligenz": 63,
+          "geschwindigkeit": 66,
+          "durabilitaet": 65
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/40/Neptune_Anime_Infobox.png/revision/latest/scale-to-width-down/333?cb=20131206042454"
+  },
+  {
+    "id": "shirahoshi",
+    "name": "Shirahoshi",
+    "crew": "Ryugu-Königreich",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 26,
+    "versions": [
+      {
+        "id": "shirahoshi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 51,
+          "haki": 51,
+          "intelligenz": 40,
+          "geschwindigkeit": 39,
+          "durabilitaet": 44
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c1/Shirahoshi_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20240814220909"
+  },
+  {
+    "id": "fisher-tiger",
+    "name": "Fisher Tiger",
+    "crew": "Sonnenpiraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 73,
+    "versions": [
+      {
+        "id": "fisher-tiger-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 73,
+          "haki": 81,
+          "intelligenz": 83,
+          "geschwindigkeit": 75,
+          "durabilitaet": 72
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c5/Fisher_Tiger_Anime_Infobox.png/revision/latest/scale-to-width-down/322?cb=20230214162116"
+  },
+  {
+    "id": "hody-jones",
+    "name": "Hody Jones",
+    "crew": "Neue Fischmenschen-Piraten",
+    "role": "Kapitän",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 51,
+    "versions": [
+      {
+        "id": "hody-jones-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 63,
+          "haki": 57,
+          "intelligenz": 57,
+          "geschwindigkeit": 57,
+          "durabilitaet": 64
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f3/Hody_Jones_Anime_Infobox.png/revision/latest/scale-to-width-down/376?cb=20230609234039"
+  },
+  {
+    "id": "vander-decken",
+    "name": "Vander Decken IX",
+    "crew": "Flying-Dutchman-Piraten",
+    "role": "Kapitän",
+    "tier": "C",
+    "devilFruit": "Mato Mato no Mi",
+    "alive": true,
+    "cost": 28,
+    "versions": [
+      {
+        "id": "vander-decken-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 39,
+          "haki": 48,
+          "intelligenz": 35,
+          "geschwindigkeit": 40,
+          "durabilitaet": 38
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d3/Vander_Decken_IX_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20130504034305"
+  },
+  {
+    "id": "arlong",
+    "name": "Arlong",
+    "crew": "Arlong-Piraten",
+    "role": "Kapitän",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 51,
+    "versions": [
+      {
+        "id": "arlong-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 57,
+          "haki": 58,
+          "intelligenz": 52,
+          "geschwindigkeit": 64,
+          "durabilitaet": 57
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/01/Arlong_Anime_Infobox.png/revision/latest/scale-to-width-down/302?cb=20230403145629"
+  },
+  {
+    "id": "madam-shyarly",
+    "name": "Madam Shyarly",
+    "crew": "Ryugu-Königreich",
+    "role": "Sonstige",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 15,
+    "versions": [
+      {
+        "id": "madam-shyarly-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 25,
+          "haki": 30,
+          "intelligenz": 22,
+          "geschwindigkeit": 15,
+          "durabilitaet": 32
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/61/Shyarly_Anime_Infobox.png/revision/latest/scale-to-width-down/318?cb=20131112030157"
+  },
+  {
+    "id": "pappug",
+    "name": "Pappug",
+    "crew": "Ryugu-Königreich",
+    "role": "Sonstige",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 14,
+    "versions": [
+      {
+        "id": "pappug-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 26,
+          "haki": 29,
+          "intelligenz": 23,
+          "geschwindigkeit": 17,
+          "durabilitaet": 21
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/32/Pappag_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/363?cb=20140413064635"
+  },
+  {
+    "id": "oden",
+    "name": "Kozuki Oden",
+    "crew": "Kozuki-Familie",
+    "role": "Kapitän",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 101,
+    "versions": [
+      {
+        "id": "oden-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 91,
+          "haki": 86,
+          "intelligenz": 98,
+          "geschwindigkeit": 95,
+          "durabilitaet": 92
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/7a/Kouzuki_Oden_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20210425071747"
+  },
+  {
+    "id": "momonosuke",
+    "name": "Kozuki Momonosuke",
+    "crew": "Kozuki-Familie",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": "Uo Uo no Mi, Modell: Seiryu",
+    "alive": true,
+    "cost": 39,
+    "versions": [
+      {
+        "id": "momonosuke-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 44,
+          "haki": 42,
+          "intelligenz": 50,
+          "geschwindigkeit": 36,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/8b/Kouzuki_Momonosuke_Anime_Infobox.png/revision/latest/scale-to-width-down/307?cb=20240904123638"
+  },
+  {
+    "id": "hiyori",
+    "name": "Kozuki Hiyori (Komurasaki)",
+    "crew": "Kozuki-Familie",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 41,
+    "versions": [
+      {
+        "id": "hiyori-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 47,
+          "haki": 37,
+          "intelligenz": 37,
+          "geschwindigkeit": 38,
+          "durabilitaet": 43
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/97/Kouzuki_Hiyori_Anime_Infobox.png/revision/latest/scale-to-width-down/313?cb=20200811195812"
+  },
+  {
+    "id": "kinemon",
+    "name": "Kin'emon",
+    "crew": "Kozuki-Familie",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Fuku Fuku no Mi",
+    "alive": true,
+    "cost": 55,
+    "versions": [
+      {
+        "id": "kinemon-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 63,
+          "haki": 52,
+          "intelligenz": 57,
+          "geschwindigkeit": 54,
+          "durabilitaet": 65
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/ec/Kin%27emon_Anime_Infobox.png/revision/latest/scale-to-width-down/216?cb=20191124100115"
+  },
+  {
+    "id": "kanjuro",
+    "name": "Kanjuro",
+    "crew": "Kozuki-Familie",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Kuro Kuro no Mi",
+    "alive": false,
+    "cost": 50,
+    "versions": [
+      {
+        "id": "kanjuro-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 58,
+          "haki": 54,
+          "intelligenz": 60,
+          "geschwindigkeit": 61,
+          "durabilitaet": 58
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/ad/Kurozumi_Kanjuro_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20150503144042"
+  },
+  {
+    "id": "raizo",
+    "name": "Raizo",
+    "crew": "Kozuki-Familie",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 53,
+    "versions": [
+      {
+        "id": "raizo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 62,
+          "haki": 61,
+          "intelligenz": 64,
+          "geschwindigkeit": 64,
+          "durabilitaet": 58
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/23/Raizo_Anime_Infobox.png/revision/latest/scale-to-width-down/328?cb=20161218152812"
+  },
+  {
+    "id": "kawamatsu",
+    "name": "Kawamatsu",
+    "crew": "Kozuki-Familie",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 47,
+    "versions": [
+      {
+        "id": "kawamatsu-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 58,
+          "haki": 58,
+          "intelligenz": 60,
+          "geschwindigkeit": 65,
+          "durabilitaet": 54
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/5e/Kawamatsu_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20201215013006"
+  },
+  {
+    "id": "inuarashi",
+    "name": "Inuarashi",
+    "crew": "Mokomo-Dukedom",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 77,
+    "versions": [
+      {
+        "id": "inuarashi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 78,
+          "haki": 74,
+          "intelligenz": 73,
+          "geschwindigkeit": 69,
+          "durabilitaet": 83
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/9f/Inuarashi_Anime_Infobox.png/revision/latest/scale-to-width-down/253?cb=20250516022630"
+  },
+  {
+    "id": "nekomamushi",
+    "name": "Nekomamushi",
+    "crew": "Mokomo-Dukedom",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 68,
+    "versions": [
+      {
+        "id": "nekomamushi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 76,
+          "haki": 82,
+          "intelligenz": 68,
+          "geschwindigkeit": 76,
+          "durabilitaet": 82
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/a2/Nekomamushi_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20220419121421"
+  },
+  {
+    "id": "orochi",
+    "name": "Kurozumi Orochi",
+    "crew": "Orochi-Shogunat",
+    "role": "Sonstige",
+    "tier": "A",
+    "devilFruit": "Hebi Hebi no Mi, Modell: Yamata no Orochi",
+    "alive": false,
+    "cost": 84,
+    "versions": [
+      {
+        "id": "orochi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 77,
+          "haki": 79,
+          "intelligenz": 81,
+          "geschwindigkeit": 75,
+          "durabilitaet": 72
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/49/Kurozumi_Orochi_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230911061118"
+  },
+  {
+    "id": "yamato",
+    "name": "Yamato",
+    "crew": "Kozuki-Familie",
+    "role": "Kämpfer",
+    "tier": "S",
+    "devilFruit": "Inu Inu no Mi, Modell: Okuchi no Makami",
+    "alive": true,
+    "cost": 119,
+    "versions": [
+      {
+        "id": "yamato-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 87,
+          "haki": 99,
+          "intelligenz": 92,
+          "geschwindigkeit": 93,
+          "durabilitaet": 96
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/bd/Yamato_Anime_Infobox.png/revision/latest/scale-to-width-down/269?cb=20260126165014"
+  },
+  {
+    "id": "shinobu",
+    "name": "Shinobu",
+    "crew": "Kozuki-Familie",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 44,
+    "versions": [
+      {
+        "id": "shinobu-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 41,
+          "haki": 46,
+          "intelligenz": 50,
+          "geschwindigkeit": 48,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/3f/Shinobu_Anime_Infobox.png/revision/latest/scale-to-width-down/231?cb=20241015051553"
+  },
+  {
+    "id": "kiku",
+    "name": "Kiku",
+    "crew": "Kozuki-Familie",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 52,
+    "versions": [
+      {
+        "id": "kiku-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 58,
+          "haki": 63,
+          "intelligenz": 53,
+          "geschwindigkeit": 61,
+          "durabilitaet": 55
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/12/Kikunojo_Anime_Infobox.png/revision/latest/scale-to-width-down/348?cb=20200620104530"
+  },
+  {
+    "id": "yasuie",
+    "name": "Shimotsuki Yasuie",
+    "crew": "Kozuki-Familie",
+    "role": "Sonstige",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 15,
+    "versions": [
+      {
+        "id": "yasuie-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 24,
+          "haki": 25,
+          "intelligenz": 33,
+          "geschwindigkeit": 27,
+          "durabilitaet": 17
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/42/Shimotsuki_Yasuie_Anime_Infobox.png/revision/latest/scale-to-width-down/255?cb=20200809091513"
+  },
+  {
+    "id": "ryuma",
+    "name": "Ryuma",
+    "crew": "Wano",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 77,
+    "versions": [
+      {
+        "id": "ryuma-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 74,
+          "haki": 71,
+          "intelligenz": 74,
+          "geschwindigkeit": 69,
+          "durabilitaet": 84
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/6a/Shimotsuki_Ryuma_Anime_Infobox.png/revision/latest/scale-to-width-down/239?cb=20240121155620"
+  },
+  {
+    "id": "saturn",
+    "name": "Jaygarcia Saturn",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 96,
+    "versions": [
+      {
+        "id": "saturn-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 90,
+          "haki": 98,
+          "intelligenz": 87,
+          "geschwindigkeit": 96,
+          "durabilitaet": 87
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/ae/Jaygarcia_Saturn_Anime_Infobox.png/revision/latest/scale-to-width-down/328?cb=20250409120617"
+  },
+  {
+    "id": "mars",
+    "name": "Marcus Mars",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 109,
+    "versions": [
+      {
+        "id": "mars-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 90,
+          "haki": 98,
+          "intelligenz": 91,
+          "geschwindigkeit": 90,
+          "durabilitaet": 97
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/ea/Marcus_Mars_Anime_Infobox.png/revision/latest/scale-to-width-down/221?cb=20230617153420"
+  },
+  {
+    "id": "nusjuro",
+    "name": "Ethanbaron V. Nusjuro",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 115,
+    "versions": [
+      {
+        "id": "nusjuro-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 86,
+          "haki": 96,
+          "intelligenz": 87,
+          "geschwindigkeit": 92,
+          "durabilitaet": 95
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e0/Ethanbaron_V._Nusjuro_Anime_Infobox.png/revision/latest/scale-to-width-down/281?cb=20230308192359"
+  },
+  {
+    "id": "peter",
+    "name": "Shepherd Ju Peter",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 119,
+    "versions": [
+      {
+        "id": "peter-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 92,
+          "haki": 89,
+          "intelligenz": 90,
+          "geschwindigkeit": 98,
+          "durabilitaet": 91
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b6/Shepherd_Ju_Peter_Anime_Infobox.png/revision/latest/scale-to-width-down/209?cb=20230308192302"
+  },
+  {
+    "id": "warcury",
+    "name": "Topman Warcury",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 86,
+    "versions": [
+      {
+        "id": "warcury-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 99,
+          "haki": 92,
+          "intelligenz": 98,
+          "geschwindigkeit": 91,
+          "durabilitaet": 94
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b4/Topman_Warcury_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20250914161645"
+  },
+  {
+    "id": "roger",
+    "name": "Gol D. Roger",
+    "crew": "Roger-Piraten",
+    "role": "Kapitän",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 110,
+    "versions": [
+      {
+        "id": "roger-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 95,
+          "haki": 90,
+          "intelligenz": 97,
+          "geschwindigkeit": 91,
+          "durabilitaet": 88
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/24/Gol_D._Roger_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230612100153"
+  },
+  {
+    "id": "rayleigh",
+    "name": "Silvers Rayleigh",
+    "crew": "Roger-Piraten",
+    "role": "Erster Offizier",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 113,
+    "versions": [
+      {
+        "id": "rayleigh-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 92,
+          "haki": 88,
+          "intelligenz": 91,
+          "geschwindigkeit": 91,
+          "durabilitaet": 89
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b1/Silvers_Rayleigh_Anime_Infobox.png/revision/latest/scale-to-width-down/209?cb=20230601221758"
+  },
+  {
+    "id": "scopper-gaban",
+    "name": "Scopper Gaban",
+    "crew": "Roger-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 50,
+    "versions": [
+      {
+        "id": "scopper-gaban-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 60,
+          "haki": 58,
+          "intelligenz": 67,
+          "geschwindigkeit": 57,
+          "durabilitaet": 63
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f0/Scopper_Gaban_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20260712160645"
+  },
+  {
+    "id": "crocus",
+    "name": "Crocus",
+    "crew": "Roger-Piraten",
+    "role": "Arzt",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 38,
+    "versions": [
+      {
+        "id": "crocus-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 37,
+          "haki": 51,
+          "intelligenz": 46,
+          "geschwindigkeit": 44,
+          "durabilitaet": 36
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/34/Crocus_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230403010215"
+  },
+  {
+    "id": "rocks",
+    "name": "Rocks D. Xebec",
+    "crew": "Rocks-Piraten",
+    "role": "Kapitän",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 88,
+    "versions": [
+      {
+        "id": "rocks-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 90,
+          "haki": 97,
+          "intelligenz": 96,
+          "geschwindigkeit": 99,
+          "durabilitaet": 97
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/fb/Rocks_D._Xebec_Manga_Infobox.png/revision/latest/scale-to-width-down/400?cb=20260228213945"
+  },
+  {
+    "id": "shiki",
+    "name": "Golden Lion Shiki",
+    "crew": "Shiki-Piraten",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Fuwa Fuwa no Mi",
+    "alive": true,
+    "cost": 68,
+    "versions": [
+      {
+        "id": "shiki-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 72,
+          "haki": 77,
+          "intelligenz": 84,
+          "geschwindigkeit": 75,
+          "durabilitaet": 76
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/32/Shiki_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230826192523"
+  },
+  {
+    "id": "john",
+    "name": "Captain John",
+    "crew": "John-Piraten",
+    "role": "Kapitän",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 50,
+    "versions": [
+      {
+        "id": "john-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 58,
+          "haki": 55,
+          "intelligenz": 60,
+          "geschwindigkeit": 55,
+          "durabilitaet": 54
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b1/John_Anime_Infobox.png/revision/latest/scale-to-width-down/349?cb=20250803182808"
+  },
+  {
+    "id": "vegapunk",
+    "name": "Dr. Vegapunk",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 66,
+    "versions": [
+      {
+        "id": "vegapunk-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 73,
+          "haki": 74,
+          "intelligenz": 69,
+          "geschwindigkeit": 69,
+          "durabilitaet": 80
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b9/Vegapunk_Anime_Infobox.png/revision/latest/scale-to-width-down/177?cb=20240428020834"
+  },
+  {
+    "id": "vegapunk-shaka",
+    "name": "Vegapunk Shaka",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 57,
+    "versions": [
+      {
+        "id": "vegapunk-shaka-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 61,
+          "haki": 53,
+          "intelligenz": 57,
+          "geschwindigkeit": 66,
+          "durabilitaet": 60
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/0f/Shaka_Anime_Infobox.png/revision/latest/scale-to-width-down/153?cb=20240303030112"
+  },
+  {
+    "id": "vegapunk-lilith",
+    "name": "Vegapunk Lilith",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 57,
+    "versions": [
+      {
+        "id": "vegapunk-lilith-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 54,
+          "haki": 57,
+          "intelligenz": 58,
+          "geschwindigkeit": 58,
+          "durabilitaet": 53
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/63/Lilith_Anime_Infobox.png/revision/latest/scale-to-width-down/290?cb=20240609022158"
+  },
+  {
+    "id": "vegapunk-edison",
+    "name": "Vegapunk Edison",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 45,
+    "versions": [
+      {
+        "id": "vegapunk-edison-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 54,
+          "haki": 62,
+          "intelligenz": 67,
+          "geschwindigkeit": 63,
+          "durabilitaet": 58
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/8f/Edison_Anime_Infobox.png/revision/latest/scale-to-width-down/362?cb=20240428152557"
+  },
+  {
+    "id": "vegapunk-pythagoras",
+    "name": "Vegapunk Pythagoras",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 39,
+    "versions": [
+      {
+        "id": "vegapunk-pythagoras-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 43,
+          "haki": 40,
+          "intelligenz": 35,
+          "geschwindigkeit": 37,
+          "durabilitaet": 49
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c1/Pythagoras_Anime_Infobox.png/revision/latest/scale-to-width-down/243?cb=20240602020823"
+  },
+  {
+    "id": "vegapunk-york",
+    "name": "Vegapunk York",
+    "crew": "Weltregierung",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 33,
+    "versions": [
+      {
+        "id": "vegapunk-york-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 42,
+          "haki": 41,
+          "intelligenz": 42,
+          "geschwindigkeit": 49,
+          "durabilitaet": 43
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/99/York_Anime_Infobox.png/revision/latest/scale-to-width-down/240?cb=20240714022211"
+  },
+  {
+    "id": "vegapunk-atlas",
+    "name": "Vegapunk Atlas",
+    "crew": "Weltregierung",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 59,
+    "versions": [
+      {
+        "id": "vegapunk-atlas-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 67,
+          "haki": 53,
+          "intelligenz": 64,
+          "geschwindigkeit": 57,
+          "durabilitaet": 65
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/a4/Atlas_Anime_Infobox.png/revision/latest/scale-to-width-down/214?cb=20240602021244"
+  },
+  {
+    "id": "alvida",
+    "name": "Alvida",
+    "crew": "Alvida-Piraten",
+    "role": "Kapitän",
+    "tier": "D",
+    "devilFruit": "Sube Sube no Mi",
+    "alive": true,
+    "cost": 22,
+    "versions": [
+      {
+        "id": "alvida-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 25,
+          "haki": 18,
+          "intelligenz": 17,
+          "geschwindigkeit": 29,
+          "durabilitaet": 23
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/cd/Alvida_Anime_Infobox.png/revision/latest/scale-to-width-down/231?cb=20221116234952"
+  },
+  {
+    "id": "kuro",
+    "name": "Kuro",
+    "crew": "Katzenbande",
+    "role": "Kapitän",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 32,
+    "versions": [
+      {
+        "id": "kuro-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 43,
+          "haki": 50,
+          "intelligenz": 47,
+          "geschwindigkeit": 40,
+          "durabilitaet": 41
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/7e/Kuro_Anime_Infobox.png/revision/latest/scale-to-width-down/252?cb=20231006042805"
+  },
+  {
+    "id": "don-krieg",
+    "name": "Don Krieg",
+    "crew": "Krieg-Piraten",
+    "role": "Kapitän",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 39,
+    "versions": [
+      {
+        "id": "don-krieg-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 48,
+          "haki": 49,
+          "intelligenz": 46,
+          "geschwindigkeit": 38,
+          "durabilitaet": 48
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/bb/Krieg_Anime_Infobox.png/revision/latest/scale-to-width-down/319?cb=20230123170612"
+  },
+  {
+    "id": "morgan",
+    "name": "Axt-Hand Morgan",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 27,
+    "versions": [
+      {
+        "id": "morgan-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 42,
+          "haki": 39,
+          "intelligenz": 38,
+          "geschwindigkeit": 50,
+          "durabilitaet": 37
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e5/Morgan_Anime_Infobox.png/revision/latest/scale-to-width-down/295?cb=20160802223743"
+  },
+  {
+    "id": "jango",
+    "name": "Jango",
+    "crew": "Buggy-Piraten",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 16,
+    "versions": [
+      {
+        "id": "jango-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 28,
+          "haki": 28,
+          "intelligenz": 30,
+          "geschwindigkeit": 17,
+          "durabilitaet": 32
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/de/Jango_Anime_Infobox.png/revision/latest/scale-to-width-down/253?cb=20241006021207"
+  },
+  {
+    "id": "cabaji",
+    "name": "Cabaji",
+    "crew": "Buggy-Piraten",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 14,
+    "versions": [
+      {
+        "id": "cabaji-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 22,
+          "haki": 20,
+          "intelligenz": 18,
+          "geschwindigkeit": 26,
+          "durabilitaet": 31
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/6c/Cabaji_Anime_Infobox.png/revision/latest/scale-to-width-down/197?cb=20220921023133"
+  },
+  {
+    "id": "mohji",
+    "name": "Mohji",
+    "crew": "Buggy-Piraten",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 21,
+    "versions": [
+      {
+        "id": "mohji-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 22,
+          "haki": 28,
+          "intelligenz": 32,
+          "geschwindigkeit": 21,
+          "durabilitaet": 32
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/09/Mohji_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20200821151313"
+  },
+  {
+    "id": "richie",
+    "name": "Richie",
+    "crew": "Buggy-Piraten",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 22,
+    "versions": [
+      {
+        "id": "richie-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 30,
+          "haki": 23,
+          "intelligenz": 33,
+          "geschwindigkeit": 17,
+          "durabilitaet": 32
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/ca/Richie_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/288?cb=20200111094000"
+  },
+  {
+    "id": "enel",
+    "name": "Enel",
+    "crew": "Enel-Armee",
+    "role": "Kapitän",
+    "tier": "A",
+    "devilFruit": "Goro Goro no Mi",
+    "alive": true,
+    "cost": 74,
+    "versions": [
+      {
+        "id": "enel-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 71,
+          "haki": 80,
+          "intelligenz": 71,
+          "geschwindigkeit": 78,
+          "durabilitaet": 76
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/ad/Enel_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230520213625"
+  },
+  {
+    "id": "wiper",
+    "name": "Wiper",
+    "crew": "Shandia",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 42,
+    "versions": [
+      {
+        "id": "wiper-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 50,
+          "haki": 50,
+          "intelligenz": 47,
+          "geschwindigkeit": 41,
+          "durabilitaet": 36
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b9/Wyper_Manga_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/210?cb=20231126004333"
+  },
+  {
+    "id": "gan-fall",
+    "name": "Gan Fall",
+    "crew": "Skypiea",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 31,
+    "versions": [
+      {
+        "id": "gan-fall-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 36,
+          "haki": 48,
+          "intelligenz": 44,
+          "geschwindigkeit": 44,
+          "durabilitaet": 46
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/5f/Gan_Fall_Anime_Infobox.png/revision/latest/scale-to-width-down/285?cb=20221111195904"
+  },
+  {
+    "id": "perona",
+    "name": "Perona",
+    "crew": "Moria-Piraten",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": "Horo Horo no Mi",
+    "alive": true,
+    "cost": 37,
+    "versions": [
+      {
+        "id": "perona-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 44,
+          "haki": 37,
+          "intelligenz": 41,
+          "geschwindigkeit": 43,
+          "durabilitaet": 49
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/4a/Perona_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/188?cb=20260921004558"
+  },
+  {
+    "id": "absalom",
+    "name": "Absalom",
+    "crew": "Moria-Piraten",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Suke Suke no Mi",
+    "alive": false,
+    "cost": 52,
+    "versions": [
+      {
+        "id": "absalom-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 60,
+          "haki": 62,
+          "intelligenz": 59,
+          "geschwindigkeit": 58,
+          "durabilitaet": 52
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/56/Absalom_Anime_Infobox.png/revision/latest/scale-to-width-down/341?cb=20230101154942"
+  },
+  {
+    "id": "hogback",
+    "name": "Hogback",
+    "crew": "Moria-Piraten",
+    "role": "Arzt",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 38,
+    "versions": [
+      {
+        "id": "hogback-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 50,
+          "haki": 40,
+          "intelligenz": 43,
+          "geschwindigkeit": 50,
+          "durabilitaet": 41
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/4a/Hogback_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20240720150902"
+  },
+  {
+    "id": "oars",
+    "name": "Oars",
+    "crew": "Moria-Piraten",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 84,
+    "versions": [
+      {
+        "id": "oars-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 78,
+          "haki": 70,
+          "intelligenz": 70,
+          "geschwindigkeit": 79,
+          "durabilitaet": 74
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/55/Oars_Anime_Infobox.png/revision/latest/scale-to-width-down/374?cb=20230528185603"
+  },
+  {
+    "id": "caesar-clown",
+    "name": "Caesar Clown",
+    "crew": "Wissenschaftler",
+    "role": "Sonstige",
+    "tier": "A",
+    "devilFruit": "Gasu Gasu no Mi",
+    "alive": true,
+    "cost": 76,
+    "versions": [
+      {
+        "id": "caesar-clown-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 68,
+          "haki": 69,
+          "intelligenz": 79,
+          "geschwindigkeit": 80,
+          "durabilitaet": 78
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/a6/Caesar_Clown_Anime_Infobox.png/revision/latest/scale-to-width-down/326?cb=20221101011307"
+  },
+  {
+    "id": "monet",
+    "name": "Monet",
+    "crew": "Donquixote-Piraten",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": "Yuki Yuki no Mi",
+    "alive": false,
+    "cost": 36,
+    "versions": [
+      {
+        "id": "monet-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 44,
+          "haki": 50,
+          "intelligenz": 48,
+          "geschwindigkeit": 49,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/98/Monet_Anime_Infobox.png/revision/latest/scale-to-width-down/257?cb=20140616000310"
+  },
+  {
+    "id": "pedro",
+    "name": "Pedro",
+    "crew": "Mokomo-Dukedom",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 49,
+    "versions": [
+      {
+        "id": "pedro-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 61,
+          "haki": 56,
+          "intelligenz": 56,
+          "geschwindigkeit": 57,
+          "durabilitaet": 60
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c8/Pedro_Anime_Infobox.png/revision/latest/scale-to-width-down/322?cb=20170423080015"
+  },
+  {
+    "id": "wanda",
+    "name": "Wanda",
+    "crew": "Mokomo-Dukedom",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 34,
+    "versions": [
+      {
+        "id": "wanda-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 45,
+          "haki": 46,
+          "intelligenz": 37,
+          "geschwindigkeit": 44,
+          "durabilitaet": 46
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/75/Wanda_Anime_Infobox.png/revision/latest/scale-to-width-down/207?cb=20160829034647"
+  },
+  {
+    "id": "carrot",
+    "name": "Carrot",
+    "crew": "Mokomo-Dukedom",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 38,
+    "versions": [
+      {
+        "id": "carrot-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 47,
+          "haki": 36,
+          "intelligenz": 46,
+          "geschwindigkeit": 42,
+          "durabilitaet": 44
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e2/Carrot_Anime_Infobox.png/revision/latest/scale-to-width-down/150?cb=20180826142459"
+  },
+  {
+    "id": "rebecca",
+    "name": "Rebecca",
+    "crew": "Dressrosa",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 38,
+    "versions": [
+      {
+        "id": "rebecca-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 46,
+          "haki": 36,
+          "intelligenz": 47,
+          "geschwindigkeit": 42,
+          "durabilitaet": 45
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f6/Rebecca_Anime_Infobox.png/revision/latest/scale-to-width-down/192?cb=20190519094508"
+  },
+  {
+    "id": "riku-doldo",
+    "name": "Riku Doldo III",
+    "crew": "Dressrosa",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 35,
+    "versions": [
+      {
+        "id": "riku-doldo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 44,
+          "haki": 43,
+          "intelligenz": 41,
+          "geschwindigkeit": 36,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/48/Riku_Doldo_III_Anime_Infobox.png/revision/latest/scale-to-width-down/210?cb=20230114034249"
+  },
+  {
+    "id": "viola",
+    "name": "Viola (Riku Scarlett)",
+    "crew": "Dressrosa",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Giro Giro no Mi",
+    "alive": true,
+    "cost": 63,
+    "versions": [
+      {
+        "id": "viola-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 59,
+          "haki": 55,
+          "intelligenz": 56,
+          "geschwindigkeit": 53,
+          "durabilitaet": 64
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d7/Viola_Anime_Infobox.png/revision/latest/scale-to-width-down/250?cb=20221027021751"
+  },
+  {
+    "id": "cavendish",
+    "name": "Cavendish",
+    "crew": "Beautiful-Pirates",
+    "role": "Kapitän",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 62,
+    "versions": [
+      {
+        "id": "cavendish-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 67,
+          "haki": 57,
+          "intelligenz": 61,
+          "geschwindigkeit": 52,
+          "durabilitaet": 65
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/a1/Cavendish_Anime_Infobox.png/revision/latest/scale-to-width-down/206?cb=20140224010824"
+  },
+  {
+    "id": "bartolomeo",
+    "name": "Bartolomeo",
+    "crew": "Barto-Club",
+    "role": "Kapitän",
+    "tier": "B",
+    "devilFruit": "Bari Bari no Mi",
+    "alive": true,
+    "cost": 57,
+    "versions": [
+      {
+        "id": "bartolomeo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 64,
+          "haki": 59,
+          "intelligenz": 64,
+          "geschwindigkeit": 64,
+          "durabilitaet": 64
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/eb/Bartolomeo_Anime_Infobox.png/revision/latest/scale-to-width-down/176?cb=20221027202808"
+  },
+  {
+    "id": "sai",
+    "name": "Sai",
+    "crew": "Happo Navy",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 37,
+    "versions": [
+      {
+        "id": "sai-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 42,
+          "haki": 39,
+          "intelligenz": 50,
+          "geschwindigkeit": 45,
+          "durabilitaet": 51
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/db/Sai_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230301234122"
+  },
+  {
+    "id": "kyros",
+    "name": "Kyros",
+    "crew": "Dressrosa",
+    "role": "Kämpfer",
+    "tier": "A",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 67,
+    "versions": [
+      {
+        "id": "kyros-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 81,
+          "haki": 70,
+          "intelligenz": 68,
+          "geschwindigkeit": 76,
+          "durabilitaet": 74
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c4/Kyros_Anime_Infobox.png/revision/latest/scale-to-width-down/183?cb=20221018190117"
+  },
+  {
+    "id": "leo",
+    "name": "Leo",
+    "crew": "Tontatta-Königreich",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 13,
+    "versions": [
+      {
+        "id": "leo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 28,
+          "haki": 20,
+          "intelligenz": 33,
+          "geschwindigkeit": 28,
+          "durabilitaet": 29
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/be/Leo_Anime_Infobox.png/revision/latest?cb=20200422024534"
+  },
+  {
+    "id": "disco",
+    "name": "Disco",
+    "crew": "Sklavenhändler",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 41,
+    "versions": [
+      {
+        "id": "disco-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 38,
+          "haki": 45,
+          "intelligenz": 35,
+          "geschwindigkeit": 47,
+          "durabilitaet": 41
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/52/Disco_Manga_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/318?cb=20240429004117"
+  },
+  {
+    "id": "duval",
+    "name": "Duval",
+    "crew": "Flying-Fish-Reiter",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 31,
+    "versions": [
+      {
+        "id": "duval-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 47,
+          "haki": 48,
+          "intelligenz": 45,
+          "geschwindigkeit": 36,
+          "durabilitaet": 42
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/86/Duval_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230707025409"
+  },
+  {
+    "id": "marigold",
+    "name": "Marigold",
+    "crew": "Kuja-Piratinnen",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 61,
+    "versions": [
+      {
+        "id": "marigold-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 63,
+          "haki": 59,
+          "intelligenz": 66,
+          "geschwindigkeit": 53,
+          "durabilitaet": 54
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/6c/Boa_Marigold_Anime_Infobox.png/revision/latest/scale-to-width-down/356?cb=20150903140509"
+  },
+  {
+    "id": "sandersonia",
+    "name": "Sandersonia",
+    "crew": "Kuja-Piratinnen",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 61,
+    "versions": [
+      {
+        "id": "sandersonia-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 59,
+          "haki": 65,
+          "intelligenz": 53,
+          "geschwindigkeit": 66,
+          "durabilitaet": 59
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/8c/Boa_Sandersonia_Anime_Infobox.png/revision/latest/scale-to-width-down/270?cb=20141017161424"
+  },
+  {
+    "id": "magellan",
+    "name": "Magellan",
+    "crew": "Impel Down",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": "Doku Doku no Mi",
+    "alive": true,
+    "cost": 104,
+    "versions": [
+      {
+        "id": "magellan-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 88,
+          "haki": 93,
+          "intelligenz": 92,
+          "geschwindigkeit": 95,
+          "durabilitaet": 88
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/9e/Magellan_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20251102163212"
+  },
+  {
+    "id": "hannyabal",
+    "name": "Hannyabal",
+    "crew": "Impel Down",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 29,
+    "versions": [
+      {
+        "id": "hannyabal-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 51,
+          "haki": 49,
+          "intelligenz": 38,
+          "geschwindigkeit": 42,
+          "durabilitaet": 44
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/86/Hannyabal_Manga_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/251?cb=20230920224617"
+  },
+  {
+    "id": "sadi",
+    "name": "Sadi-chan",
+    "crew": "Impel Down",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 37,
+    "versions": [
+      {
+        "id": "sadi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 43,
+          "haki": 36,
+          "intelligenz": 48,
+          "geschwindigkeit": 37,
+          "durabilitaet": 41
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/38/Sadi_Anime_Infobox.png/revision/latest/scale-to-width-down/252?cb=20221023232535"
+  },
+  {
+    "id": "domino",
+    "name": "Domino",
+    "crew": "Impel Down",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 41,
+    "versions": [
+      {
+        "id": "domino-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 44,
+          "haki": 42,
+          "intelligenz": 43,
+          "geschwindigkeit": 37,
+          "durabilitaet": 37
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/11/Domino_Manga_Post_Timeskip_Infobox.png/revision/latest?cb=20170312041522"
+  },
+  {
+    "id": "dorry",
+    "name": "Dorry",
+    "crew": "Elbaph",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 60,
+    "versions": [
+      {
+        "id": "dorry-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 58,
+          "haki": 66,
+          "intelligenz": 61,
+          "geschwindigkeit": 56,
+          "durabilitaet": 57
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/2d/Dorry_Anime_Infobox.png/revision/latest/scale-to-width-down/318?cb=20250927120409"
+  },
+  {
+    "id": "brogy",
+    "name": "Brogy",
+    "crew": "Elbaph",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 58,
+    "versions": [
+      {
+        "id": "brogy-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 52,
+          "haki": 56,
+          "intelligenz": 58,
+          "geschwindigkeit": 61,
+          "durabilitaet": 57
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/bf/Brogy_Anime_Infobox.png/revision/latest/scale-to-width-down/376?cb=20250824161255"
+  },
+  {
+    "id": "oimo",
+    "name": "Oimo",
+    "crew": "Tontatta/Riesen",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 42,
+    "versions": [
+      {
+        "id": "oimo-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 40,
+          "haki": 37,
+          "intelligenz": 37,
+          "geschwindigkeit": 45,
+          "durabilitaet": 48
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c3/Oimo_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20231013231633"
+  },
+  {
+    "id": "kashii",
+    "name": "Kashii",
+    "crew": "Tontatta/Riesen",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 36,
+    "versions": [
+      {
+        "id": "kashii-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 43,
+          "haki": 48,
+          "intelligenz": 37,
+          "geschwindigkeit": 41,
+          "durabilitaet": 49
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/72/Kashii_Anime_Infobox.png/revision/latest/scale-to-width-down/326?cb=20170529154313"
+  },
+  {
+    "id": "cobra",
+    "name": "Nefertari Cobra",
+    "crew": "Alabasta",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 38,
+    "versions": [
+      {
+        "id": "cobra-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 50,
+          "haki": 42,
+          "intelligenz": 43,
+          "geschwindigkeit": 43,
+          "durabilitaet": 37
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/7f/Nefertari_Cobra_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/340?cb=20170219154108"
+  },
+  {
+    "id": "vivi",
+    "name": "Nefertari Vivi",
+    "crew": "Alabasta",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 38,
+    "versions": [
+      {
+        "id": "vivi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 45,
+          "haki": 44,
+          "intelligenz": 49,
+          "geschwindigkeit": 42,
+          "durabilitaet": 44
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/09/Nefertari_Vivi_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/146?cb=20190505023647"
+  },
+  {
+    "id": "igaram",
+    "name": "Igaram",
+    "crew": "Alabasta",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 19,
+    "versions": [
+      {
+        "id": "igaram-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 27,
+          "haki": 20,
+          "intelligenz": 18,
+          "geschwindigkeit": 32,
+          "durabilitaet": 30
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/a4/Igaram_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/382?cb=20190625115148"
+  },
+  {
+    "id": "chaka",
+    "name": "Chaka",
+    "crew": "Alabasta",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": "Inu Inu no Mi, Modell: Schakal",
+    "alive": true,
+    "cost": 41,
+    "versions": [
+      {
+        "id": "chaka-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 37,
+          "haki": 44,
+          "intelligenz": 49,
+          "geschwindigkeit": 45,
+          "durabilitaet": 44
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/73/Chaka_Anime_Infobox.png/revision/latest/scale-to-width-down/396?cb=20240922030609"
+  },
+  {
+    "id": "pell",
+    "name": "Pell",
+    "crew": "Alabasta",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": "Tori Tori no Mi, Modell: Falke",
+    "alive": true,
+    "cost": 56,
+    "versions": [
+      {
+        "id": "pell-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 61,
+          "haki": 53,
+          "intelligenz": 53,
+          "geschwindigkeit": 53,
+          "durabilitaet": 64
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/be/Pell_Anime_Infobox.png/revision/latest/scale-to-width-down/335?cb=20240903112506"
+  },
+  {
+    "id": "toto",
+    "name": "Toto",
+    "crew": "Alabasta",
+    "role": "Sonstige",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 13,
+    "versions": [
+      {
+        "id": "toto-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 18,
+          "haki": 17,
+          "intelligenz": 15,
+          "geschwindigkeit": 21,
+          "durabilitaet": 29
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/aa/Toto_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/358?cb=20171228110457"
+  },
+  {
+    "id": "kuina",
+    "name": "Kuina",
+    "crew": "Shimotsuki-Dojo",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 14,
+    "versions": [
+      {
+        "id": "kuina-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 21,
+          "haki": 32,
+          "intelligenz": 23,
+          "geschwindigkeit": 15,
+          "durabilitaet": 32
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/c1/Shimotsuki_Kuina_Anime_Infobox.png/revision/latest/scale-to-width-down/254?cb=20241110050028"
+  },
+  {
+    "id": "bellamy",
+    "name": "Bellamy",
+    "crew": "Bellamy-Piraten",
+    "role": "Kapitän",
+    "tier": "C",
+    "devilFruit": "Bane Bane no Mi",
+    "alive": true,
+    "cost": 38,
+    "versions": [
+      {
+        "id": "bellamy-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 37,
+          "haki": 45,
+          "intelligenz": 45,
+          "geschwindigkeit": 38,
+          "durabilitaet": 49
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/27/Bellamy_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/139?cb=20230116235201"
+  },
+  {
+    "id": "caribou",
+    "name": "Caribou",
+    "crew": "Caribou-Piraten",
+    "role": "Kapitän",
+    "tier": "C",
+    "devilFruit": "Numa Numa no Mi",
+    "alive": true,
+    "cost": 26,
+    "versions": [
+      {
+        "id": "caribou-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 49,
+          "haki": 48,
+          "intelligenz": 35,
+          "geschwindigkeit": 47,
+          "durabilitaet": 48
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/76/Caribou_Anime_Infobox.png/revision/latest/scale-to-width-down/329?cb=20221124030700"
+  },
+  {
+    "id": "iceburg",
+    "name": "Iceburg",
+    "crew": "Galley-La",
+    "role": "Zimmermann",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 25,
+    "versions": [
+      {
+        "id": "iceburg-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 45,
+          "haki": 51,
+          "intelligenz": 38,
+          "geschwindigkeit": 36,
+          "durabilitaet": 47
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/00/Iceburg_Anime_Infobox.png/revision/latest/scale-to-width-down/324?cb=20230620131854"
+  },
+  {
+    "id": "paulie",
+    "name": "Paulie",
+    "crew": "Galley-La",
+    "role": "Zimmermann",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 41,
+    "versions": [
+      {
+        "id": "paulie-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 43,
+          "haki": 36,
+          "intelligenz": 44,
+          "geschwindigkeit": 42,
+          "durabilitaet": 39
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/62/Paulie_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20251102160614"
+  },
+  {
+    "id": "tilestone",
+    "name": "Tilestone",
+    "crew": "Galley-La",
+    "role": "Zimmermann",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 11,
+    "versions": [
+      {
+        "id": "tilestone-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 18,
+          "haki": 26,
+          "intelligenz": 21,
+          "geschwindigkeit": 16,
+          "durabilitaet": 26
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b8/Tilestone_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20250223233624"
+  },
+  {
+    "id": "jaguar-saul",
+    "name": "Jaguar D. Saul",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": "Hie Hie no Mi",
+    "alive": false,
+    "cost": 60,
+    "versions": [
+      {
+        "id": "jaguar-saul-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 54,
+          "haki": 64,
+          "intelligenz": 55,
+          "geschwindigkeit": 67,
+          "durabilitaet": 54
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/c/cc/Jaguar_D._Saul_Anime_Infobox.png/revision/latest/scale-to-width-down/266?cb=20260802161348"
+  },
+  {
+    "id": "olvia",
+    "name": "Nico Olvia",
+    "crew": "Ohara",
+    "role": "Archäologe",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 43,
+    "versions": [
+      {
+        "id": "olvia-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 40,
+          "haki": 47,
+          "intelligenz": 40,
+          "geschwindigkeit": 50,
+          "durabilitaet": 37
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/fc/Nico_Olvia_Anime_Infobox.png/revision/latest/scale-to-width-down/220?cb=20180131184905"
+  },
+  {
+    "id": "clover",
+    "name": "Professor Clover",
+    "crew": "Ohara",
+    "role": "Archäologe",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 35,
+    "versions": [
+      {
+        "id": "clover-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 36,
+          "haki": 43,
+          "intelligenz": 50,
+          "geschwindigkeit": 41,
+          "durabilitaet": 43
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/3c/Clou_D._Clover_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20221112234508"
+  },
+  {
+    "id": "rouge",
+    "name": "Portgas D. Rouge",
+    "crew": "Ohne Crew",
+    "role": "Sonstige",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 20,
+    "versions": [
+      {
+        "id": "rouge-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 17,
+          "haki": 18,
+          "intelligenz": 19,
+          "geschwindigkeit": 28,
+          "durabilitaet": 34
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/9/9c/Portgas_D._Rouge_Anime_Infobox.png/revision/latest/scale-to-width-down/292?cb=20240731221040"
+  },
+  {
+    "id": "kong",
+    "name": "Kong",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 56,
+    "versions": [
+      {
+        "id": "kong-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 66,
+          "haki": 60,
+          "intelligenz": 57,
+          "geschwindigkeit": 53,
+          "durabilitaet": 53
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/6/6b/Kong_Anime_Infobox.png/revision/latest/scale-to-width-down/379?cb=20220920203131"
+  },
+  {
+    "id": "denjiro",
+    "name": "Denjiro",
+    "crew": "Kozuki-Familie",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 45,
+    "versions": [
+      {
+        "id": "denjiro-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 59,
+          "haki": 58,
+          "intelligenz": 60,
+          "geschwindigkeit": 57,
+          "durabilitaet": 54
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/7e/Denjiro_Anime_Infobox.png/revision/latest/scale-to-width-down/258?cb=20210718045127"
+  },
+  {
+    "id": "ashura-doji",
+    "name": "Ashura Doji",
+    "crew": "Wano",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 55,
+    "versions": [
+      {
+        "id": "ashura-doji-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 58,
+          "haki": 52,
+          "intelligenz": 57,
+          "geschwindigkeit": 60,
+          "durabilitaet": 66
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/44/Ashura_Doji_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20191201102956"
+  },
+  {
+    "id": "tenguyama-hitetsu",
+    "name": "Tenguyama Hitetsu",
+    "crew": "Wano",
+    "role": "Zimmermann",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 14,
+    "versions": [
+      {
+        "id": "tenguyama-hitetsu-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 33,
+          "haki": 27,
+          "intelligenz": 16,
+          "geschwindigkeit": 19,
+          "durabilitaet": 21
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/06/Kouzuki_Sukiyaki_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20231110021918"
+  },
+  {
+    "id": "shutenmaru",
+    "name": "Shutenmaru",
+    "crew": "Wano",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 41,
+    "versions": [
+      {
+        "id": "shutenmaru-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 42,
+          "haki": 42,
+          "intelligenz": 45,
+          "geschwindigkeit": 45,
+          "durabilitaet": 51
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/44/Ashura_Doji_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20191201102956"
+  },
+  {
+    "id": "higuma",
+    "name": "Higuma",
+    "crew": "Berganwohner-Banditen",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 14,
+    "versions": [
+      {
+        "id": "higuma-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 29,
+          "haki": 28,
+          "intelligenz": 17,
+          "geschwindigkeit": 32,
+          "durabilitaet": 27
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e2/Higuma_Anime_Infobox.png/revision/latest/scale-to-width-down/229?cb=20260930012451"
+  },
+  {
+    "id": "gaimon",
+    "name": "Gaimon",
+    "crew": "Ohne Crew",
+    "role": "Sonstige",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 16,
+    "versions": [
+      {
+        "id": "gaimon-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 33,
+          "haki": 27,
+          "intelligenz": 30,
+          "geschwindigkeit": 32,
+          "durabilitaet": 24
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b2/Gaimon_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20221107181308"
+  },
+  {
+    "id": "nojiko",
+    "name": "Nojiko",
+    "crew": "Cocoyasi-Dorf",
+    "role": "Sonstige",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 20,
+    "versions": [
+      {
+        "id": "nojiko-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 23,
+          "haki": 31,
+          "intelligenz": 16,
+          "geschwindigkeit": 26,
+          "durabilitaet": 34
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/2d/Nojiko_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/111?cb=20251109161125"
+  },
+  {
+    "id": "kureha",
+    "name": "Dr. Kureha",
+    "crew": "Drum-Königreich",
+    "role": "Arzt",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 56,
+    "versions": [
+      {
+        "id": "kureha-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 67,
+          "haki": 65,
+          "intelligenz": 59,
+          "geschwindigkeit": 53,
+          "durabilitaet": 65
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/1/1b/Kureha_Anime_Infobox.png/revision/latest/scale-to-width-down/199?cb=20150819163116"
+  },
+  {
+    "id": "dalton",
+    "name": "Dalton",
+    "crew": "Drum-Königreich",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": "Ushi Ushi no Mi, Modell: Bison",
+    "alive": true,
+    "cost": 27,
+    "versions": [
+      {
+        "id": "dalton-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 42,
+          "haki": 49,
+          "intelligenz": 35,
+          "geschwindigkeit": 48,
+          "durabilitaet": 44
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/07/Dalton_Anime_Infobox.png/revision/latest/scale-to-width-down/388?cb=20230101225126"
+  },
+  {
+    "id": "wapol",
+    "name": "Wapol",
+    "crew": "Drum-Königreich",
+    "role": "Kapitän",
+    "tier": "C",
+    "devilFruit": "Baku Baku no Mi",
+    "alive": true,
+    "cost": 39,
+    "versions": [
+      {
+        "id": "wapol-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 42,
+          "haki": 36,
+          "intelligenz": 50,
+          "geschwindigkeit": 45,
+          "durabilitaet": 47
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/3/33/Wapol_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/358?cb=20190519090502"
+  },
+  {
+    "id": "montblanc-cricket",
+    "name": "Montblanc Cricket",
+    "crew": "Cricket-Piraten",
+    "role": "Kapitän",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 34,
+    "versions": [
+      {
+        "id": "montblanc-cricket-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 48,
+          "haki": 39,
+          "intelligenz": 39,
+          "geschwindigkeit": 51,
+          "durabilitaet": 45
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/f/f9/Mont_Blanc_Cricket_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/368?cb=20251116160951"
+  },
+  {
+    "id": "montblanc-noland",
+    "name": "Montblanc Noland",
+    "crew": "Königreich Lvneel",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": false,
+    "cost": 41,
+    "versions": [
+      {
+        "id": "montblanc-noland-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 37,
+          "haki": 48,
+          "intelligenz": 48,
+          "geschwindigkeit": 37,
+          "durabilitaet": 45
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/27/Mont_Blanc_Noland_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20230806162218"
+  },
+  {
+    "id": "foxy",
+    "name": "Foxy",
+    "crew": "Foxy-Piraten",
+    "role": "Kapitän",
+    "tier": "C",
+    "devilFruit": "Noro Noro no Mi",
+    "alive": true,
+    "cost": 43,
+    "versions": [
+      {
+        "id": "foxy-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 39,
+          "haki": 35,
+          "intelligenz": 45,
+          "geschwindigkeit": 45,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/7/7d/Foxy_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20251102162706"
+  },
+  {
+    "id": "elizabello",
+    "name": "Elizabello II",
+    "crew": "Königreich Prodence",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 35,
+    "versions": [
+      {
+        "id": "elizabello-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 51,
+          "haki": 38,
+          "intelligenz": 35,
+          "geschwindigkeit": 43,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/a/ae/Elizabello_II_Anime_Infobox.png/revision/latest/scale-to-width-down/286?cb=20230926212430"
+  },
+  {
+    "id": "doberman",
+    "name": "Doberman",
+    "crew": "Marine",
+    "role": "Sonstige",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 39,
+    "versions": [
+      {
+        "id": "doberman-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 46,
+          "haki": 43,
+          "intelligenz": 48,
+          "geschwindigkeit": 42,
+          "durabilitaet": 40
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/e/e2/Doberman_Anime_Infobox.png/revision/latest/scale-to-width-down/308?cb=20221101021412"
+  },
+  {
+    "id": "t-bone",
+    "name": "T-Bone",
+    "crew": "Marine",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 39,
+    "versions": [
+      {
+        "id": "t-bone-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 49,
+          "haki": 41,
+          "intelligenz": 37,
+          "geschwindigkeit": 40,
+          "durabilitaet": 44
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/08/T_Bone_Anime_Infobox.png/revision/latest/scale-to-width-down/251?cb=20230427165456"
+  },
+  {
+    "id": "gin",
+    "name": "Gin",
+    "crew": "Krieg-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 29,
+    "versions": [
+      {
+        "id": "gin-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 48,
+          "haki": 42,
+          "intelligenz": 42,
+          "geschwindigkeit": 49,
+          "durabilitaet": 37
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/49/Gin_Anime_Infobox.png/revision/latest/scale-to-width-down/347?cb=20220920031419"
+  },
+  {
+    "id": "pearl",
+    "name": "Pearl",
+    "crew": "Krieg-Piraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 34,
+    "versions": [
+      {
+        "id": "pearl-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 45,
+          "haki": 42,
+          "intelligenz": 48,
+          "geschwindigkeit": 45,
+          "durabilitaet": 47
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/8f/Pearl_Anime_Infobox.png/revision/latest/scale-to-width-down/243?cb=20221003214553"
+  },
+  {
+    "id": "zunesha",
+    "name": "Zunesha",
+    "crew": "Mokomo-Dukedom",
+    "role": "Sonstige",
+    "tier": "S",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 109,
+    "versions": [
+      {
+        "id": "zunesha-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 91,
+          "haki": 86,
+          "intelligenz": 92,
+          "geschwindigkeit": 94,
+          "durabilitaet": 95
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/4e/Zunesha_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20190117233721"
+  },
+  {
+    "id": "brownbeard",
+    "name": "Brownbeard",
+    "crew": "Punk Hazard",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 44,
+    "versions": [
+      {
+        "id": "brownbeard-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 47,
+          "haki": 45,
+          "intelligenz": 48,
+          "geschwindigkeit": 38,
+          "durabilitaet": 47
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/4/4c/Chadros_Higelyges_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/400?cb=20130429132405"
+  },
+  {
+    "id": "fukaboshi",
+    "name": "Fukaboshi",
+    "crew": "Ryugu-Königreich",
+    "role": "Kämpfer",
+    "tier": "B",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 51,
+    "versions": [
+      {
+        "id": "fukaboshi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 52,
+          "haki": 63,
+          "intelligenz": 65,
+          "geschwindigkeit": 64,
+          "durabilitaet": 62
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/2/29/Fukaboshi_Anime_Infobox.png/revision/latest/scale-to-width-down/343?cb=20140107021229"
+  },
+  {
+    "id": "ryuboshi",
+    "name": "Ryuboshi",
+    "crew": "Ryugu-Königreich",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 34,
+    "versions": [
+      {
+        "id": "ryuboshi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 37,
+          "haki": 46,
+          "intelligenz": 50,
+          "geschwindigkeit": 51,
+          "durabilitaet": 42
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/d/d2/Ryuboshi_Anime_Infobox.png/revision/latest/scale-to-width-down/230?cb=20130128033938"
+  },
+  {
+    "id": "manboshi",
+    "name": "Manboshi",
+    "crew": "Ryugu-Königreich",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 39,
+    "versions": [
+      {
+        "id": "manboshi-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 48,
+          "haki": 41,
+          "intelligenz": 46,
+          "geschwindigkeit": 37,
+          "durabilitaet": 45
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/8/82/Manboshi_Anime_Infobox.png/revision/latest/scale-to-width-down/260?cb=20130430234840"
+  },
+  {
+    "id": "aladine",
+    "name": "Aladine",
+    "crew": "Sonnenpiraten",
+    "role": "Kämpfer",
+    "tier": "C",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 33,
+    "versions": [
+      {
+        "id": "aladine-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 48,
+          "haki": 46,
+          "intelligenz": 48,
+          "geschwindigkeit": 37,
+          "durabilitaet": 46
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/0/07/Aladine_Anime_Infobox.png/revision/latest/scale-to-width-down/371?cb=20170528042907"
+  },
+  {
+    "id": "dadan",
+    "name": "Curly Dadan",
+    "crew": "Dadan-Bande",
+    "role": "Kämpfer",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 17,
+    "versions": [
+      {
+        "id": "dadan-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 30,
+          "haki": 16,
+          "intelligenz": 31,
+          "geschwindigkeit": 21,
+          "durabilitaet": 32
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/b/b4/Curly_Dadan_Anime_Infobox.png/revision/latest/scale-to-width-down/400?cb=20160802231340"
+  },
+  {
+    "id": "makino",
+    "name": "Makino",
+    "crew": "Fuchsia-Dorf",
+    "role": "Sonstige",
+    "tier": "D",
+    "devilFruit": null,
+    "alive": true,
+    "cost": 19,
+    "versions": [
+      {
+        "id": "makino-standard",
+        "label": "Standard",
+        "stats": {
+          "staerke": 18,
+          "haki": 34,
+          "intelligenz": 17,
+          "geschwindigkeit": 26,
+          "durabilitaet": 25
+        }
+      }
+    ],
+    "imageUrl": "https://static.wikia.nocookie.net/onepiece/images/5/5a/Makino_Anime_Post_Timeskip_Infobox.png/revision/latest/scale-to-width-down/317?cb=20240914133612"
   }
 ]
