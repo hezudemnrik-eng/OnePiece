@@ -13,8 +13,8 @@ type Props = {
 export function RollPanel({ character, skipsLeft, onAccept, onSkip, readOnly = false }: Props) {
   if (!character) return null;
   return (
-    <div className="flex flex-col items-center gap-4 rounded-xl border border-amber-500/40 bg-amber-500/5 p-6">
-      <p className="text-sm text-black/60 dark:text-white/50">
+    <div className="flex flex-col items-center gap-4 rounded-2xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-6 shadow-sm">
+      <p className="text-xs uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400">
         {readOnly ? "Gerade gerollt" : "Dein gerollter Charakter"}
       </p>
       {character.imageUrl && (
@@ -23,7 +23,7 @@ export function RollPanel({ character, skipsLeft, onAccept, onSkip, readOnly = f
           src={character.imageUrl}
           alt={character.name}
           referrerPolicy="no-referrer"
-          className="h-40 w-auto rounded-lg border border-black/10 dark:border-white/10 object-cover object-top shadow"
+          className="h-44 w-auto rounded-xl border border-amber-500/30 object-cover object-top shadow-lg"
         />
       )}
       <div className="w-full max-w-xs">
@@ -33,14 +33,14 @@ export function RollPanel({ character, skipsLeft, onAccept, onSkip, readOnly = f
         <div className="flex gap-3">
           <button
             onClick={onAccept}
-            className="rounded-md bg-amber-600 text-white px-5 py-2 font-medium hover:bg-amber-700"
+            className="rounded-md bg-amber-600 text-white px-5 py-2 font-medium shadow transition hover:bg-amber-700 hover:shadow-md"
           >
             Nehmen
           </button>
           <button
             onClick={onSkip}
             disabled={skipsLeft <= 0}
-            className="rounded-md border border-black/15 dark:border-white/15 px-5 py-2 font-medium disabled:opacity-40"
+            className="rounded-md border border-black/15 dark:border-white/15 px-5 py-2 font-medium transition hover:border-amber-500/50 disabled:opacity-40"
           >
             Skip ({skipsLeft} übrig)
           </button>

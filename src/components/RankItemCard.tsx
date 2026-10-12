@@ -14,7 +14,7 @@ export function RankItemCard({ item, draggable = false, onDragStart }: Props) {
         e.dataTransfer.setData("text/rank-item-id", item.id);
         onDragStart?.(item.id);
       }}
-      className={`flex items-center gap-2 rounded-lg border border-black/10 dark:border-white/10 bg-white/70 dark:bg-white/5 px-3 py-2 text-sm shadow-sm transition hover:shadow-md ${
+      className={`flex items-center gap-2 rounded-xl border border-black/10 dark:border-white/10 bg-[var(--surface)]/70 px-3 py-2 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:border-amber-500/50 ${
         draggable ? "cursor-grab" : ""
       }`}
     >
