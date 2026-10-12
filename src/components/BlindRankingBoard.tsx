@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { BLIND_THEMES, buildRound, correctOrder, scoreGuess, type BlindEntry, type BlindScore } from "@/lib/blindRanking";
-import { playAccept, playSkip, vibrate } from "@/lib/sfx";
+import { playAccept, playSkip, playTick, vibrate } from "@/lib/sfx";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 
 type Phase = "setup" | "guessing" | "result";
@@ -35,8 +35,10 @@ export function BlindRankingBoard() {
   const [themeId, setThemeId] = useState(BLIND_THEMES[0].id);
   const [size, setSize] = useState(6);
   const [round, setRound] = useState<BlindEntry[]>([]);
-  const [shuffledForDisplay, setShuffledForDisplay] = useState<BlindEntry[]>([]);
-  const [guessOrder, setGuessOrder] = useState<string[]>([]);
+  const [presentOrder, setPresentOrder] = useState<BlindEntry[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  // assignments[rank] = slotId of the entry the player placed at that rank (rank 0 = stärkster)
+  const [assignments, setAssignments] = useState<(string | null)[]>([]);
   const [score, setScore] = useState<BlindScore | null>(null);
   const [history, setHistory] = useState<HistoryRecord[]>(() => loadHistory());
   const [animationsEnabled] = useAnimationsEnabled();
@@ -46,25 +48,15 @@ export function BlindRankingBoard() {
   function startRound(nextThemeId = themeId) {
     const r = buildRound(nextThemeId, size);
     setRound(r);
-    setShuffledForDisplay([...r].sort(() => Math.random() - 0.5));
-    setGuessOrder([]);
+    setPresentOrder([...r].sort(() => Math.random() - 0.5));
+    setCurrentIndex(0);
+    setAssignments(new Array(r.length).fill(null));
     setScore(null);
     setPhase("guessing");
   }
 
-  function toggleSlot(slotId: string) {
-    if (guessOrder.includes(slotId)) {
-      setGuessOrder(guessOrder.filter((id) => id !== slotId));
-      return;
-    }
-    if (guessOrder.length >= round.length) return;
-    const next = [...guessOrder, slotId];
-    setGuessOrder(next);
-    if (animationsEnabled) vibrate(15);
-  }
-
-  function reveal() {
-    if (guessOrder.length !== round.length) return;
+  function finish(finalAssignments: (string | null)[]) {
+    const guessOrder = finalAssignments as string[];
     const result = scoreGuess(round, guessOrder);
     setScore(result);
     if (animationsEnabled) {
@@ -79,6 +71,30 @@ export function BlindRankingBoard() {
     });
     setHistory(loadHistory());
     setPhase("result");
+  }
+
+  function assignRank(rank: number) {
+    if (assignments[rank] !== null) return;
+    const current = presentOrder[currentIndex];
+    if (!current) return;
+    const next = [...assignments];
+    next[rank] = current.slotId;
+    setAssignments(next);
+    if (animationsEnabled) {
+      playTick();
+      vibrate(15);
+    }
+    if (currentIndex + 1 >= presentOrder.length) {
+      finish(next);
+    } else {
+      setCurrentIndex(currentIndex + 1);
+    }
+  }
+
+  function restartSameRound() {
+    setCurrentIndex(0);
+    setAssignments(new Array(round.length).fill(null));
+    setScore(null);
   }
 
   if (phase === "setup") {
@@ -136,59 +152,70 @@ export function BlindRankingBoard() {
   }
 
   if (phase === "guessing") {
+    const current = presentOrder[currentIndex];
     return (
-      <div className="flex flex-col gap-5 max-w-2xl">
+      <div className="flex flex-col gap-5 max-w-lg">
         <div>
           <h2 className="text-lg font-semibold">{theme.label}</h2>
           <p className="text-sm text-black/60 dark:text-white/50">
-            Tippe die Charaktere in absteigender Reihenfolge an (1. Klick = stärkster). Noch keine Namen oder Werte sichtbar.
+            Charakter {currentIndex + 1} von {presentOrder.length} — wähle, auf welchem Rang er steht (Platz 1 = stärkster).
+            Erst danach siehst du den nächsten Charakter.
           </p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {shuffledForDisplay.map((entry) => {
-            const rank = guessOrder.indexOf(entry.slotId);
+        {current && (
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-6">
+            {current.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={current.imageUrl}
+                alt={current.name}
+                referrerPolicy="no-referrer"
+                className="h-32 w-auto rounded-lg border border-amber-500/40 object-cover object-top shadow-lg"
+              />
+            ) : (
+              <span className="flex h-32 w-24 items-center justify-center rounded-lg bg-amber-500/15 text-3xl font-bold text-amber-700 dark:text-amber-400">
+                {current.name.slice(0, 2).toUpperCase()}
+              </span>
+            )}
+            <p className="text-center text-lg font-semibold">{current.name}</p>
+          </div>
+        )}
+        <div className="flex flex-col gap-2">
+          {assignments.map((slotId, rank) => {
+            const occupant = slotId ? round.find((e) => e.slotId === slotId) : null;
             return (
               <button
-                key={entry.slotId}
-                onClick={() => toggleSlot(entry.slotId)}
-                className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border p-4 h-28 transition ${
-                  rank >= 0
-                    ? "border-amber-500 bg-amber-500/10"
-                    : "border-black/15 dark:border-white/15 hover:border-amber-500/50"
+                key={rank}
+                onClick={() => assignRank(rank)}
+                disabled={Boolean(occupant)}
+                className={`flex items-center gap-3 rounded-lg border p-3 text-sm text-left transition ${
+                  occupant
+                    ? "border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5"
+                    : "border-amber-500/40 hover:bg-amber-500/10"
                 }`}
               >
-                {rank >= 0 && (
-                  <span className="absolute -top-2 -left-2 flex h-7 w-7 items-center justify-center rounded-full bg-amber-600 text-white text-sm font-bold">
-                    {rank + 1}
-                  </span>
-                )}
-                <span className="text-3xl" aria-hidden>
-                  🏴‍☠️
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-600 text-white text-sm font-bold shrink-0">
+                  {rank + 1}
                 </span>
-                <span className="text-xs text-black/50 dark:text-white/40">Mysteriöser Charakter</span>
+                {occupant ? (
+                  <span className="font-medium">{occupant.name}</span>
+                ) : (
+                  <span className="text-black/50 dark:text-white/40">— frei: hier einordnen —</span>
+                )}
               </button>
             );
           })}
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={reveal}
-            disabled={guessOrder.length !== round.length}
-            className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700 disabled:opacity-40"
-          >
-            Aufdecken ({guessOrder.length}/{round.length})
-          </button>
-          <button onClick={() => setGuessOrder([])} className="text-sm text-black/50 dark:text-white/40 hover:underline">
-            Zurücksetzen
-          </button>
-        </div>
+        <button onClick={restartSameRound} className="self-start text-sm text-black/50 dark:text-white/40 hover:underline">
+          Zurücksetzen
+        </button>
       </div>
     );
   }
 
   if (phase === "result" && score) {
     const truth = correctOrder(round);
-    const guessed = guessOrder.map((id) => round.find((e) => e.slotId === id)!);
+    const guessed = assignments.map((id) => round.find((e) => e.slotId === id)!);
     return (
       <div className="flex flex-col gap-6 max-w-2xl">
         <h2 className="text-xl font-semibold">
