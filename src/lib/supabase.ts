@@ -1,4 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { DraftState } from "./draft";
+import type { BattleResult } from "./battle-sim";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -113,6 +115,113 @@ function randomShareCode(length = 6): string {
   let code = "";
   for (let i = 0; i < length; i++) code += chars[Math.floor(Math.random() * chars.length)];
   return code;
+}
+
+export type LiveDraftSession = {
+  id: string;
+  invite_code: string;
+  host_id: string;
+  max_players: number;
+  phase: "lobby" | "drafting" | "result";
+  state: DraftState;
+  battle: BattleResult | null;
+  updated_at: string;
+};
+
+/** Creates a live draft lobby and returns it, or null on failure (not configured / no session). */
+export async function createLiveDraft(
+  initialState: DraftState,
+  maxPlayers: number
+): Promise<LiveDraftSession | null> {
+  if (!supabase) return null;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return null;
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const inviteCode = randomShareCode();
+    const { data, error } = await supabase
+      .from("draft_sessions")
+      .insert({
+        invite_code: inviteCode,
+        host_id: userId,
+        max_players: maxPlayers,
+        phase: "lobby",
+        state: initialState,
+      })
+      .select()
+      .single();
+    if (!error && data) return data as LiveDraftSession;
+    if (error && error.code !== "23505") break; // not an invite-code collision — stop retrying
+  }
+  return null;
+}
+
+/** Looks up a live draft lobby/session by its invite code. */
+export async function fetchLiveDraftByCode(inviteCode: string): Promise<LiveDraftSession | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("draft_sessions")
+    .select()
+    .eq("invite_code", inviteCode.trim().toUpperCase())
+    .maybeSingle();
+  if (error || !data) return null;
+  return data as LiveDraftSession;
+}
+
+export async function fetchLiveDraftById(id: string): Promise<LiveDraftSession | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase.from("draft_sessions").select().eq("id", id).maybeSingle();
+  if (error || !data) return null;
+  return data as LiveDraftSession;
+}
+
+/**
+ * Writes a new state/phase/battle for a live draft, but only if nobody
+ * else's write landed since `expectedUpdatedAt` (optimistic concurrency —
+ * two people clicking "join" or "pick" at the same instant shouldn't
+ * silently clobber each other). Returns `conflict: true` when that
+ * happened; the caller re-fetches the row and retries against the new
+ * state rather than resending its now-stale write.
+ */
+export async function writeLiveDraft(
+  id: string,
+  expectedUpdatedAt: string,
+  patch: { state?: DraftState; phase?: LiveDraftSession["phase"]; battle?: BattleResult }
+): Promise<{ session?: LiveDraftSession; conflict?: boolean; error?: string }> {
+  if (!supabase) return { error: "not configured" };
+  const { data, error } = await supabase
+    .from("draft_sessions")
+    .update({ ...patch, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("updated_at", expectedUpdatedAt)
+    .select()
+    .maybeSingle();
+  if (error) return { error: error.message };
+  if (!data) return { conflict: true };
+  return { session: data as LiveDraftSession };
+}
+
+/**
+ * Subscribes to live changes on one draft session row. Returns an
+ * unsubscribe function. Requires the table to be added to Supabase's
+ * `supabase_realtime` publication (see migration 0003).
+ */
+export function subscribeLiveDraft(
+  id: string,
+  onChange: (session: LiveDraftSession) => void
+): () => void {
+  if (!supabase) return () => {};
+  const channel = supabase
+    .channel(`draft_session_${id}`)
+    .on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "draft_sessions", filter: `id=eq.${id}` },
+      (payload) => onChange(payload.new as LiveDraftSession)
+    )
+    .subscribe();
+  return () => {
+    supabase!.removeChannel(channel);
+  };
 }
 
 /**

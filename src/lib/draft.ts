@@ -8,6 +8,8 @@ export type DraftPlayer = {
   pickedCharacterIds: string[];
   /** Set when the draft is Team-vs-Team; undefined for free-for-all drafts. */
   team?: DraftTeam;
+  /** Supabase auth.uid() of whoever claimed this seat, for live drafts; undefined/null = open seat. */
+  userId?: string | null;
 };
 
 export type DraftState = {
@@ -20,6 +22,11 @@ export type DraftState = {
   finished: boolean;
   /** Names of people watching without drafting themselves. */
   spectators: string[];
+  /** ISO timestamp of when the current turn began — lets every client in a
+   * live draft agree on the pick-timer countdown instead of each running
+   * its own clock from whenever it happened to render. Unused in hotseat
+   * mode (each browser already has a single, authoritative local timer). */
+  turnStartedAt: string;
 };
 
 export function createDraft(
@@ -42,12 +49,30 @@ export function createDraft(
     direction: 1,
     finished: false,
     spectators: options.spectators ?? [],
+    turnStartedAt: new Date().toISOString(),
   };
 }
 
 /** All characters picked so far by every player on a given side, for Team-vs-Team drafts. */
 export function getTeamSidePicks(state: DraftState, team: DraftTeam): string[] {
   return state.players.filter((p) => p.team === team).flatMap((p) => p.pickedCharacterIds);
+}
+
+/** The first seat nobody has claimed yet, for a live draft's lobby. -1 if the lobby is full. */
+export function firstOpenSeat(state: DraftState): number {
+  return state.players.findIndex((p) => !p.userId);
+}
+
+/** Claims an open seat for a live draft. No-op (returns the same state) if the seat is already taken. */
+export function claimSeat(state: DraftState, seatIndex: number, userId: string, name: string): DraftState {
+  const seat = state.players[seatIndex];
+  if (!seat || seat.userId) return state;
+  const players = state.players.map((p, i) => (i === seatIndex ? { ...p, userId, name } : p));
+  return { ...state, players };
+}
+
+export function isLobbyFull(state: DraftState): boolean {
+  return state.players.every((p) => Boolean(p.userId));
 }
 
 export function currentPlayer(state: DraftState): DraftPlayer {
@@ -71,7 +96,14 @@ function advanceTurn(state: DraftState): DraftState {
     (p) => p.pickedCharacterIds.length >= state.teamSize
   );
 
-  return { ...state, currentPlayerIndex, round, direction, finished };
+  return {
+    ...state,
+    currentPlayerIndex,
+    round,
+    direction,
+    finished,
+    turnStartedAt: new Date().toISOString(),
+  };
 }
 
 export function pick(state: DraftState, characterId: string): DraftState {
