@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Geist, Geist_Mono, Pirata_One } from "next/font/google";
-import { AccountPanel } from "@/components/AccountPanel";
+import { AuthGate } from "@/components/AuthGate";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,6 +24,11 @@ export const metadata: Metadata = {
   description: "Privates Fan-Projekt: Draft-Spiele und Tierlisten rund um One Piece.",
 };
 
+// The whole app renders behind AuthGate's client-side auth check, so no
+// route here can produce a static instant-navigation shell — opt out of
+// that dev-only validation rather than chase an unreachable target.
+export const instant = false;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -32,14 +36,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${pirataOne.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-black/10 dark:border-white/10 bg-[var(--background)]/85 backdrop-blur px-4 py-3">
-          <Link href="/" className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl text-amber-700 dark:text-amber-400">
-            <span aria-hidden>🏴‍☠️</span>
-            One Piece Draft-App
-          </Link>
-          <AccountPanel />
-        </header>
-        {children}
+        <AuthGate>{children}</AuthGate>
       </body>
     </html>
   );

@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+// Rendering here depends on AuthGate's client-side auth check in the root
+// layout, so this route can't produce a static instant-navigation shell.
+export const instant = false;
+
 const links = [
   { href: "/draft", icon: "⚔️", title: "PvP-Draft gegen Freunde", desc: "Snake-Draft im Hotseat, danach Kampfsimulation." },
   { href: "/draft/live", icon: "🌐", title: "Live-Draft (mehrere Geräte)", desc: "Lobby mit Code teilen, jeder draftet von seinem Gerät." },

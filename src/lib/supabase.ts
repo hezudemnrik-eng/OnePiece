@@ -62,6 +62,8 @@ export type AuthUser = {
   id: string;
   username: string | null;
   isAnonymous: boolean;
+  avatarCharacterId: string | null;
+  isAdmin: boolean;
 };
 
 /** The signed-in user, if any (anonymous or a real username+password account). */
@@ -69,21 +71,52 @@ export async function getCurrentAuthUser(): Promise<AuthUser | null> {
   if (!supabase) return null;
   const { data } = await supabase.auth.getUser();
   if (!data.user) return null;
-  const { data: profile } = await supabase.from("profiles").select("username").eq("id", data.user.id).maybeSingle();
-  return { id: data.user.id, username: profile?.username ?? null, isAnonymous: data.user.is_anonymous ?? true };
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("username, avatar_character_id, is_admin")
+    .eq("id", data.user.id)
+    .maybeSingle();
+  return {
+    id: data.user.id,
+    username: profile?.username ?? null,
+    isAnonymous: data.user.is_anonymous ?? true,
+    avatarCharacterId: profile?.avatar_character_id ?? null,
+    isAdmin: profile?.is_admin ?? false,
+  };
 }
 
-/** Creates a real account. Signs the browser's current anonymous session out first if there was one. */
-export async function signUpWithUsername(username: string, password: string): Promise<{ error?: string }> {
+/** Checks a registration invite code against the shared setting in app_settings. */
+export async function checkInviteCode(code: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { data } = await supabase.from("app_settings").select("value").eq("key", "invite_code").maybeSingle();
+  if (!data) return true; // no code configured yet — don't block registration
+  return data.value.trim().toLowerCase() === code.trim().toLowerCase();
+}
+
+/**
+ * Creates a real account. Upgrades the browser's current anonymous session
+ * in place (via `updateUser`) rather than signing out and starting fresh —
+ * that keeps the same auth.uid(), so any tier lists already synced under
+ * the anonymous session carry over automatically instead of needing a
+ * separate migration step.
+ */
+export async function signUpWithUsername(
+  username: string,
+  password: string,
+  inviteCode: string,
+  avatarCharacterId: string | null
+): Promise<{ error?: string }> {
   if (!supabase) return { error: "Supabase ist nicht konfiguriert." };
   const trimmed = username.trim();
   if (trimmed.length < 3) return { error: "Nutzername muss mindestens 3 Zeichen haben." };
   if (password.length < 6) return { error: "Passwort muss mindestens 6 Zeichen haben." };
 
-  await supabase.auth.signOut();
-  sessionPromise = null;
+  const codeOk = await checkInviteCode(inviteCode);
+  if (!codeOk) return { error: "Einladungscode ist falsch." };
+
+  await ensureSupabaseSession(); // ensures an anonymous session (and its data) exists to upgrade
   const email = usernameToEmail(trimmed);
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.updateUser({ email, password });
   if (error) {
     if (error.message.toLowerCase().includes("already registered")) {
       return { error: "Dieser Nutzername ist schon vergeben." };
@@ -92,17 +125,22 @@ export async function signUpWithUsername(username: string, password: string): Pr
   }
   if (!data.user) return { error: "Registrierung fehlgeschlagen." };
 
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .upsert({ id: data.user.id, username: trimmed, nickname: trimmed }, { onConflict: "id" });
+  const { error: profileError } = await supabase.from("profiles").upsert(
+    {
+      id: data.user.id,
+      username: trimmed,
+      nickname: trimmed,
+      avatar_character_id: avatarCharacterId,
+      last_seen: new Date().toISOString(),
+    },
+    { onConflict: "id" }
+  );
   if (profileError) return { error: profileError.message };
   return {};
 }
 
 export async function signInWithUsername(username: string, password: string): Promise<{ error?: string }> {
   if (!supabase) return { error: "Supabase ist nicht konfiguriert." };
-  await supabase.auth.signOut();
-  sessionPromise = null;
   const email = usernameToEmail(username.trim());
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { error: "Nutzername oder Passwort ist falsch." };
@@ -113,6 +151,14 @@ export async function signOutUser(): Promise<void> {
   if (!supabase) return;
   await supabase.auth.signOut();
   sessionPromise = null;
+}
+
+/** Updates the heartbeat timestamp Übersicht/friend lists use to show who's online. */
+export async function pingOnline(): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("profiles").update({ last_seen: new Date().toISOString() }).eq("id", userId);
 }
 
 export type RemoteTierList = {
