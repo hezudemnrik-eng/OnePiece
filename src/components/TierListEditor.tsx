@@ -2,11 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { characters, type Tier } from "@/lib/characters";
-import { fetchMyTierLists, isSupabaseConfigured, saveTierListRemote } from "@/lib/supabase";
+import {
+  ensureProfile,
+  fetchMyTierLists,
+  fetchPublicListsByShareCode,
+  isSupabaseConfigured,
+  saveTierListRemote,
+} from "@/lib/supabase";
 import { CharacterCard } from "./CharacterCard";
 
 const TIERS: Tier[] = ["S", "A", "B", "C", "D"];
 const STORAGE_KEY = "op-tierlists";
+const NICKNAME_KEY = "op-nickname";
 
 type Assignments = Record<string, Tier>;
 type StoredLists = Record<string, Assignments>;
@@ -29,6 +36,15 @@ function saveLists(lists: StoredLists) {
   }
 }
 
+function loadNickname(): string {
+  if (typeof window === "undefined") return "Spieler";
+  try {
+    return window.localStorage.getItem(NICKNAME_KEY) || "Spieler";
+  } catch {
+    return "Spieler";
+  }
+}
+
 export function TierListEditor() {
   const [listName, setListName] = useState("Meine Tierliste");
   const [allLists, setAllLists] = useState<StoredLists>(() => loadLists());
@@ -41,6 +57,52 @@ export function TierListEditor() {
     isSupabaseConfigured() ? "loading" : "off"
   );
   const [syncErrorDetail, setSyncErrorDetail] = useState("");
+
+  const [nickname, setNickname] = useState(() => loadNickname());
+  const [myShareCode, setMyShareCode] = useState<string | null>(null);
+  const [friendLists, setFriendLists] = useState<Record<string, Assignments>>({});
+  const [friendCodeInput, setFriendCodeInput] = useState("");
+  const [friendLoadStatus, setFriendLoadStatus] = useState<"idle" | "loading" | "ok" | "not-found">("idle");
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(NICKNAME_KEY, nickname);
+    } catch {
+      // ignore
+    }
+  }, [nickname]);
+
+  // Creates/loads this browser's share code once Supabase is configured.
+  // Re-runs only when the nickname changes (not on every render), since
+  // ensureProfile() itself is idempotent for the code and only updates
+  // the nickname server-side.
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    let cancelled = false;
+    ensureProfile(nickname).then((profile) => {
+      if (!cancelled && profile) setMyShareCode(profile.share_code);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [nickname]);
+
+  async function loadFriendCode() {
+    const code = friendCodeInput.trim();
+    if (!code) return;
+    setFriendLoadStatus("loading");
+    const { ok, lists } = await fetchPublicListsByShareCode(code);
+    if (!ok || lists.length === 0) {
+      setFriendLoadStatus("not-found");
+      return;
+    }
+    setFriendLists((prev) => {
+      const next = { ...prev };
+      for (const l of lists) next[`${l.ownerNickname}: ${l.name}`] = l.assignments as Assignments;
+      return next;
+    });
+    setFriendLoadStatus("ok");
+  }
 
   // One-time async fetch of this browser's remote tier lists, merged over
   // the local cache (remote wins on name clashes since it's the source of
@@ -111,7 +173,7 @@ export function TierListEditor() {
     return characters.filter((c) => !assignments[c.id]);
   }
 
-  const compareAssignments = compareWith ? allLists[compareWith] : null;
+  const compareAssignments = compareWith ? friendLists[compareWith] ?? allLists[compareWith] : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -143,6 +205,11 @@ export function TierListEditor() {
                   {name}
                 </option>
               ))}
+            {Object.keys(friendLists).map((name) => (
+              <option key={name} value={name}>
+                {name} (Freund)
+              </option>
+            ))}
           </select>
         </label>
         {isSupabaseConfigured() ? (
@@ -177,6 +244,46 @@ export function TierListEditor() {
           )}
         </p>
       </div>
+
+      {isSupabaseConfigured() && (
+        <div className="flex flex-wrap items-end gap-3 rounded-lg border border-black/10 dark:border-white/10 p-3">
+          <label className="flex flex-col gap-1 text-sm">
+            Dein Name
+            <input
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value || "Spieler")}
+              className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
+            />
+          </label>
+          <div className="text-sm">
+            <p className="text-black/60 dark:text-white/50">Dein Freund-Code</p>
+            <p className="font-mono text-lg tracking-widest">{myShareCode ?? "…"}</p>
+          </div>
+          <label className="flex flex-col gap-1 text-sm">
+            Freund-Code eingeben
+            <div className="flex gap-2">
+              <input
+                value={friendCodeInput}
+                onChange={(e) => setFriendCodeInput(e.target.value)}
+                placeholder="z. B. AB3XQ9"
+                className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5 font-mono uppercase"
+              />
+              <button
+                onClick={loadFriendCode}
+                className="rounded-md bg-amber-600 text-white px-3 py-1.5 text-sm font-medium hover:bg-amber-700"
+              >
+                Laden
+              </button>
+            </div>
+          </label>
+          <p className="text-xs text-black/50 dark:text-white/40">
+            {friendLoadStatus === "loading" && "Suche…"}
+            {friendLoadStatus === "ok" && "Gefunden – jetzt oben bei „Vergleichen mit“ wählbar."}
+            {friendLoadStatus === "not-found" &&
+              "Kein Code gefunden oder dein Freund hat noch keine öffentliche Liste."}
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-3">
         {TIERS.map((tier) => (

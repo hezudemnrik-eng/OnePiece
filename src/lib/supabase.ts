@@ -85,3 +85,82 @@ export async function saveTierListRemote(
     );
   return error ? { error: error.message } : {};
 }
+
+export type Profile = { id: string; nickname: string; share_code: string };
+
+function randomShareCode(length = 6): string {
+  // No 0/O/1/I — avoids codes friends misread when typing them in by hand.
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < length; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+/**
+ * Ensures this browser's anonymous user has a profile with a stable,
+ * human-shareable code (so a friend can type it in rather than handling a
+ * raw auth.uid()). The code is generated once and kept; only the nickname
+ * is updated on later calls. Returns null if Supabase isn't configured,
+ * the session fails, or the table is missing (migration not applied).
+ */
+export async function ensureProfile(nickname: string): Promise<Profile | null> {
+  if (!supabase) return null;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return null;
+
+  const { data: existing } = await supabase
+    .from("profiles")
+    .select("id, nickname, share_code")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (existing?.share_code) {
+    if (existing.nickname !== nickname) {
+      await supabase.from("profiles").update({ nickname }).eq("id", userId);
+    }
+    return { id: userId, nickname, share_code: existing.share_code };
+  }
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const code = randomShareCode();
+    const { data, error } = await supabase
+      .from("profiles")
+      .upsert({ id: userId, nickname, share_code: code }, { onConflict: "id" })
+      .select("id, nickname, share_code")
+      .single();
+    if (!error && data?.share_code) return data as Profile;
+    if (error && error.code !== "23505") break; // not a share_code collision — stop retrying
+  }
+  return null;
+}
+
+export type FriendPublicList = {
+  ownerNickname: string;
+  name: string;
+  assignments: Record<string, string>;
+};
+
+/** Looks up a friend's public tier lists by their share code. */
+export async function fetchPublicListsByShareCode(
+  code: string
+): Promise<{ ok: boolean; lists: FriendPublicList[] }> {
+  if (!supabase) return { ok: false, lists: [] };
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, nickname")
+    .eq("share_code", code.trim().toUpperCase())
+    .maybeSingle();
+  if (profileError || !profile) return { ok: false, lists: [] };
+
+  const { data: lists, error } = await supabase
+    .from("tier_lists")
+    .select("name, assignments")
+    .eq("owner_id", profile.id)
+    .eq("is_public", true);
+  if (error || !lists) return { ok: false, lists: [] };
+
+  return {
+    ok: true,
+    lists: lists.map((l) => ({ ownerNickname: profile.nickname, name: l.name, assignments: l.assignments })),
+  };
+}
