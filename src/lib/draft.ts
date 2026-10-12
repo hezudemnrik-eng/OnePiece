@@ -10,7 +10,7 @@ export type DraftPlayer = {
   team?: DraftTeam;
   /** Supabase auth.uid() of whoever claimed this seat, for live drafts; undefined/null = open seat. */
   userId?: string | null;
-  /** How many more times this player may reroll their current offered character. */
+  /** How many more times this player may reroll their current offer this turn — resets to skipsPerTurn at the start of each of their turns (see advanceTurn), rather than being a fixed pool for the whole draft. */
   skipsLeft: number;
 };
 
@@ -31,16 +31,27 @@ export type DraftState = {
    * its own clock from whenever it happened to render. Unused in hotseat
    * mode (each browser already has a single, authoritative local timer). */
   turnStartedAt: string;
-  /** The character currently offered to the player on turn — accept it or
-   * reroll (skipRoll). Null once the draft has finished. */
-  rolledCharacterId: string | null;
-  /** How many rerolls each player starts a draft with. */
-  maxSkips: number;
+  /** The characters currently offered to the player on turn — pick one
+   * (pickCharacter) or reroll the whole offer (skipRoll). Empty once the
+   * draft has finished. Normally OFFER_COUNT long; shorter only if the
+   * available pool runs lower than that. Offering a small choice instead
+   * of a single take-it-or-leave-it roll is the main lever against the
+   * draft feeling like pure gambling — you always have some say. */
+  rolledCharacterIds: string[];
+  /** How many times the player on turn may reroll their current offer, refilled to this value at the start of each of their turns. */
+  skipsPerTurn: number;
 };
 
-function rollRandom(pool: string[], rng: () => number): string | null {
-  if (pool.length === 0) return null;
-  return pool[Math.floor(rng() * pool.length)];
+const OFFER_COUNT = 3;
+
+function rollMultiple(pool: string[], count: number, rng: () => number): string[] {
+  const copy = [...pool];
+  const picked: string[] = [];
+  while (picked.length < count && copy.length > 0) {
+    const i = Math.floor(rng() * copy.length);
+    picked.push(copy.splice(i, 1)[0]);
+  }
+  return picked;
 }
 
 export function createDraft(
@@ -51,11 +62,11 @@ export function createDraft(
     teams?: DraftTeam[];
     teamModeEnabled?: boolean;
     spectators?: string[];
-    maxSkips?: number;
+    skipsPerTurn?: number;
     rng?: () => number;
   } = {}
 ): DraftState {
-  const maxSkips = options.maxSkips ?? 3;
+  const skipsPerTurn = options.skipsPerTurn ?? 1;
   const rng = options.rng ?? Math.random;
   const availableCharacterIds = [...allCharacterIds];
   return {
@@ -64,7 +75,7 @@ export function createDraft(
       name,
       pickedCharacterIds: [],
       team: options.teams?.[i],
-      skipsLeft: maxSkips,
+      skipsLeft: skipsPerTurn,
     })),
     availableCharacterIds,
     teamSize,
@@ -75,8 +86,8 @@ export function createDraft(
     spectators: options.spectators ?? [],
     teamModeEnabled: options.teamModeEnabled,
     turnStartedAt: new Date().toISOString(),
-    rolledCharacterId: rollRandom(availableCharacterIds, rng),
-    maxSkips,
+    rolledCharacterIds: rollMultiple(availableCharacterIds, OFFER_COUNT, rng),
+    skipsPerTurn,
   };
 }
 
@@ -129,21 +140,26 @@ function advanceTurn(state: DraftState, rng: () => number): DraftState {
 
   const finished = state.players.every((p) => p.pickedCharacterIds.length >= state.teamSize);
 
+  // Refill the now-current player's skips for their fresh turn.
+  const players = finished
+    ? state.players
+    : state.players.map((p, i) => (i === currentPlayerIndex ? { ...p, skipsLeft: state.skipsPerTurn } : p));
+
   return {
     ...state,
+    players,
     currentPlayerIndex,
     round,
     direction,
     finished,
     turnStartedAt: new Date().toISOString(),
-    rolledCharacterId: finished ? null : rollRandom(state.availableCharacterIds, rng),
+    rolledCharacterIds: finished ? [] : rollMultiple(state.availableCharacterIds, OFFER_COUNT, rng),
   };
 }
 
-/** Accepts the currently offered (rolled) character for the player on turn. */
-export function acceptRoll(state: DraftState, rng: () => number = Math.random): DraftState {
-  if (state.finished || !state.rolledCharacterId) return state;
-  const characterId = state.rolledCharacterId;
+/** Picks one of the currently offered characters for the player on turn. No-op if characterId isn't actually one of the offered ones. */
+export function pickCharacter(state: DraftState, characterId: string, rng: () => number = Math.random): DraftState {
+  if (state.finished || !state.rolledCharacterIds.includes(characterId)) return state;
   const player = currentPlayer(state);
   if (player.pickedCharacterIds.length >= state.teamSize) return state;
 
@@ -155,22 +171,23 @@ export function acceptRoll(state: DraftState, rng: () => number = Math.random): 
   return advanceTurn({ ...state, players, availableCharacterIds }, rng);
 }
 
-/** Rerolls the offered character for the player on turn, spending one of their skips. No-op once skips run out. */
+/** Rerolls the whole offer for the player on turn, spending one of their skips. No-op once skips run out. */
 export function skipRoll(state: DraftState, rng: () => number = Math.random): DraftState {
-  if (state.finished || !state.rolledCharacterId) return state;
+  if (state.finished || state.rolledCharacterIds.length === 0) return state;
   const player = currentPlayer(state);
   if (player.skipsLeft <= 0) return state;
 
   const players = state.players.map((p) => (p.id === player.id ? { ...p, skipsLeft: p.skipsLeft - 1 } : p));
-  const otherChoices = state.availableCharacterIds.filter((id) => id !== state.rolledCharacterId);
-  const rolledCharacterId = rollRandom(otherChoices.length > 0 ? otherChoices : state.availableCharacterIds, rng);
+  const rolledCharacterIds = rollMultiple(state.availableCharacterIds, OFFER_COUNT, rng);
 
-  return { ...state, players, rolledCharacterId, turnStartedAt: new Date().toISOString() };
+  return { ...state, players, rolledCharacterIds, turnStartedAt: new Date().toISOString() };
 }
 
-/** Used when the pick timer runs out: the player gets whatever was currently offered. */
+/** Used when the pick timer runs out: the player gets a random one of whatever was currently offered. */
 export function autoPick(state: DraftState, rng: () => number = Math.random): DraftState {
-  return acceptRoll(state, rng);
+  if (state.finished || state.rolledCharacterIds.length === 0) return state;
+  const characterId = state.rolledCharacterIds[Math.floor(rng() * state.rolledCharacterIds.length)];
+  return pickCharacter(state, characterId, rng);
 }
 
 export function getTeam(state: DraftState, playerId: string, allCharacters: Character[]): Character[] {

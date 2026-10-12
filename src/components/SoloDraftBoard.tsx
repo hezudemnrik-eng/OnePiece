@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { characters, getDefaultVersion } from "@/lib/characters";
-import { acceptRoll, autoPick, createDraft, currentPlayer, getTeam, skipRoll, type DraftState } from "@/lib/draft";
+import { autoPick, createDraft, currentPlayer, getTeam, pickCharacter, skipRoll, type DraftState } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { generateAiTeam, generateImuBoss, type AiTeam, type Difficulty } from "@/lib/imu";
-import { recordMatchResult } from "@/lib/supabase";
+import { getCurrentAuthUser, recordMatchResult } from "@/lib/supabase";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RollPanel } from "./RollPanel";
@@ -54,6 +54,12 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
   const [battle, setBattle] = useState<BattleResult | null>(null);
   const [runs, setRuns] = useState<RunRecord[]>(() => loadRuns(storageKey));
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    getCurrentAuthUser().then((u) => {
+      if (u?.username) setPlayerName(u.username);
+    });
+  }, []);
 
   const isBossFight = opponentName === "Imu";
   // Against Imu, only draft from the strongest characters (B-tier or
@@ -114,11 +120,11 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, draft?.currentPlayerIndex, draft?.finished]);
 
-  function handleAccept() {
+  function handlePick(characterId: string) {
     if (!draft) return;
     playAccept();
     vibrate(30);
-    applyDraft(acceptRoll(draft));
+    applyDraft(pickCharacter(draft, characterId));
   }
 
   function handleSkip() {
@@ -184,9 +190,9 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
 
   if (phase === "drafting" && draft) {
     const player = currentPlayer(draft);
-    const rolled = draft.rolledCharacterId
-      ? characters.find((c) => c.id === draft.rolledCharacterId) ?? null
-      : null;
+    const offered = draft.rolledCharacterIds
+      .map((id) => characters.find((c) => c.id === id))
+      .filter((c): c is NonNullable<typeof c> => Boolean(c));
     return (
       <div>
         <div className="mb-4 flex items-center justify-between">
@@ -195,7 +201,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
           </p>
           <TimerBar secondsLeft={secondsLeft} totalSeconds={PICK_SECONDS} />
         </div>
-        <RollPanel character={rolled} skipsLeft={player.skipsLeft} onAccept={handleAccept} onSkip={handleSkip} />
+        <RollPanel offered={offered} skipsLeft={player.skipsLeft} onPick={handlePick} onSkip={handleSkip} />
       </div>
     );
   }

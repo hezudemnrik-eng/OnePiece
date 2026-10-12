@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { characters, getDefaultVersion, type Character } from "@/lib/characters";
 import {
-  acceptRoll,
   assignTeam,
   autoPick,
   claimSeat,
@@ -14,6 +13,7 @@ import {
   getTeam,
   getTeamSidePicks,
   isLobbyFull,
+  pickCharacter,
   skipRoll,
   type DraftTeam,
 } from "@/lib/draft";
@@ -24,6 +24,7 @@ import {
   ensureSupabaseSession,
   fetchLiveDraftByCode,
   fetchLiveDraftById,
+  getCurrentAuthUser,
   recordMatchResult,
   subscribeLiveDraft,
   writeLiveDraft,
@@ -103,6 +104,9 @@ export function LiveDraftBoard() {
         // and the user already clicked into create/join, don't stomp that.
         setView((v) => (v === "loading" ? "home" : v));
       }
+    });
+    getCurrentAuthUser().then((u) => {
+      if (!cancelled && u?.username) setNickname(u.username);
     });
     return () => {
       cancelled = true;
@@ -249,11 +253,11 @@ export function LiveDraftBoard() {
     }
   }
 
-  async function applyAccept() {
+  async function applyPick(characterId: string) {
     if (!session) return;
     playAccept();
     vibrate(30);
-    const next = acceptRoll(session.state);
+    const next = pickCharacter(session.state, characterId);
     const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
     if (result.session) setSession(result.session);
     else if (result.conflict) {
@@ -532,9 +536,9 @@ export function LiveDraftBoard() {
     const myTurn = !isSpectator && player.userId === myUserId;
     const elapsed = Math.floor((nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000);
     const secondsLeft = Math.max(0, PICK_SECONDS - elapsed);
-    const rolled = session.state.rolledCharacterId
-      ? characters.find((c) => c.id === session.state.rolledCharacterId) ?? null
-      : null;
+    const offered = session.state.rolledCharacterIds
+      .map((id) => characters.find((c) => c.id === id))
+      .filter((c): c is NonNullable<typeof c> => Boolean(c));
 
     return (
       <div className="grid gap-6 md:grid-cols-[1fr_280px]">
@@ -547,9 +551,9 @@ export function LiveDraftBoard() {
             <TimerBar secondsLeft={secondsLeft} totalSeconds={PICK_SECONDS} />
           </div>
           <RollPanel
-            character={rolled}
+            offered={offered}
             skipsLeft={player.skipsLeft}
-            onAccept={applyAccept}
+            onPick={applyPick}
             onSkip={applySkip}
             readOnly={!myTurn}
           />

@@ -3,18 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import { characters, getDefaultVersion, type Character } from "@/lib/characters";
 import {
-  acceptRoll,
   autoPick,
   createDraft,
   currentPlayer,
   getTeam,
   getTeamSidePicks,
+  pickCharacter,
   skipRoll,
   type DraftState,
   type DraftTeam,
 } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
+import { getCurrentAuthUser } from "@/lib/supabase";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RollPanel } from "./RollPanel";
 import { TimerBar } from "./TimerBar";
@@ -40,6 +41,14 @@ export function DraftBoard() {
   const [battle, setBattle] = useState<BattleResult | null>(null);
   const [winnerLabel, setWinnerLabel] = useState<string>("");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Hotseat mode is shared-device, but whoever's logged in on this device
+  // is presumably Player 1 — prefill their name instead of a placeholder.
+  useEffect(() => {
+    getCurrentAuthUser().then((u) => {
+      if (u?.username) setNames((prev) => [u.username as string, ...prev.slice(1)]);
+    });
+  }, []);
 
   function startDraft() {
     const ids = characters.map((c) => c.id);
@@ -117,11 +126,11 @@ export function DraftBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, draft?.currentPlayerIndex, draft?.finished]);
 
-  function handleAccept() {
+  function handlePick(characterId: string) {
     if (!draft) return;
     playAccept();
     vibrate(30);
-    applyDraft(acceptRoll(draft));
+    applyDraft(pickCharacter(draft, characterId));
   }
 
   function handleSkip() {
@@ -209,9 +218,7 @@ export function DraftBoard() {
 
   if (phase === "drafting" && draft) {
     const player = currentPlayer(draft);
-    const rolled = draft.rolledCharacterId
-      ? characters.find((c) => c.id === draft.rolledCharacterId) ?? null
-      : null;
+    const offered = charactersFromIds(draft.rolledCharacterIds);
     return (
       <div className="grid gap-6 md:grid-cols-[1fr_280px]">
         <div>
@@ -221,7 +228,7 @@ export function DraftBoard() {
             </p>
             <TimerBar secondsLeft={secondsLeft} totalSeconds={PICK_SECONDS} />
           </div>
-          <RollPanel character={rolled} skipsLeft={player.skipsLeft} onAccept={handleAccept} onSkip={handleSkip} />
+          <RollPanel offered={offered} skipsLeft={player.skipsLeft} onPick={handlePick} onSkip={handleSkip} />
         </div>
         <aside className="flex flex-col gap-4">
           {draft.players.map((p) => (
