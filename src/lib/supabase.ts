@@ -111,10 +111,19 @@ export async function checkInviteCode(code: string): Promise<boolean> {
 
 /**
  * Creates a real account. Upgrades the browser's current anonymous session
- * in place (via `updateUser`) rather than signing out and starting fresh —
- * that keeps the same auth.uid(), so any tier lists already synced under
- * the anonymous session carry over automatically instead of needing a
- * separate migration step.
+ * in place rather than signing out and starting fresh — that keeps the
+ * same auth.uid(), so any tier lists already synced under the anonymous
+ * session carry over automatically instead of needing a separate migration
+ * step.
+ *
+ * The actual email/password update happens server-side (/api/auth/register)
+ * via the Supabase admin API instead of a client-side `updateUser({email})`
+ * call — the latter triggers Supabase's "secure email change" confirmation
+ * email every time, which is both pointless (the synthetic address can't
+ * receive mail) and runs into the free tier's email rate limit after a
+ * handful of signups. After the server confirms the update, we sign in
+ * fresh with the new credentials so the browser's session reflects the
+ * real (non-anonymous) account.
  */
 export async function signUpWithUsername(
   username: string,
@@ -131,27 +140,21 @@ export async function signUpWithUsername(
   if (!codeOk) return { error: "Einladungscode ist falsch." };
 
   await ensureSupabaseSession(); // ensures an anonymous session (and its data) exists to upgrade
-  const email = usernameToEmail(trimmed);
-  const { data, error } = await supabase.auth.updateUser({ email, password });
-  if (error) {
-    if (error.message.toLowerCase().includes("already registered")) {
-      return { error: "Dieser Nutzername ist schon vergeben." };
-    }
-    return { error: error.message };
-  }
-  if (!data.user) return { error: "Registrierung fehlgeschlagen." };
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) return { error: "Sitzung konnte nicht erstellt werden." };
 
-  const { error: profileError } = await supabase.from("profiles").upsert(
-    {
-      id: data.user.id,
-      username: trimmed,
-      nickname: trimmed,
-      avatar_character_id: avatarCharacterId,
-      last_seen: new Date().toISOString(),
-    },
-    { onConflict: "id" }
-  );
-  if (profileError) return { error: profileError.message };
+  const email = usernameToEmail(trimmed);
+  const res = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ accessToken, username: trimmed, password, email, avatarCharacterId }),
+  });
+  const body: { error?: string } = await res.json().catch(() => ({ error: "Registrierung fehlgeschlagen." }));
+  if (!res.ok) return { error: body.error ?? "Registrierung fehlgeschlagen." };
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+  if (signInError) return { error: signInError.message };
   return {};
 }
 

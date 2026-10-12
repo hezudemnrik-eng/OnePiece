@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Pirata_One } from "next/font/google";
 import { AuthGate } from "@/components/AuthGate";
 import "./globals.css";
@@ -22,6 +22,13 @@ const pirataOne = Pirata_One({
 export const metadata: Metadata = {
   title: "One Piece Draft-App",
   description: "Privates Fan-Projekt: Draft-Spiele und Tierlisten rund um One Piece.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 // The whole app renders behind AuthGate's client-side auth check, so no
