@@ -73,13 +73,13 @@ export function AccountPanel({ onSignedOut }: Props) {
             className={`h-9 w-9 rounded-full object-cover object-top border-2 border-foreground ${frameClass}`}
           />
         )}
-        <span className="absolute -bottom-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold tabular-nums text-white">
+        <span className="absolute -bottom-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold tabular-nums text-poster-ink">
           {level}
         </span>
       </Link>
       <span>
         <span className={`font-semibold ${colorClass}`}>{user.username}</span>
-        {user.isAdmin && <span className="ml-1 text-xs text-accent">(Admin)</span>}
+        {user.isAdmin && <span className="ml-1 text-xs text-accent-ink">(Admin)</span>}
       </span>
       <span className="text-black/50 dark:text-white/40">{formatBerry(berries)}</span>
       <Link href="/profil" className="text-black/50 dark:text-white/40 hover:underline">

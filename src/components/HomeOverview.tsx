@@ -111,7 +111,7 @@ export function HomeOverview() {
                 {myLobby.phase === "lobby" ? "wartet auf Spieler" : "läuft gerade"}
               </span>
             </span>
-            <span className="text-accent text-xl" aria-hidden>
+            <span className="text-accent-ink text-xl" aria-hidden>
               →
             </span>
           </Card>
@@ -125,7 +125,7 @@ export function HomeOverview() {
               </span>
               Weiterspielen: {lastMode.title}
             </span>
-            <span className="text-accent text-xl" aria-hidden>
+            <span className="text-accent-ink text-xl" aria-hidden>
               →
             </span>
           </Card>
@@ -187,7 +187,7 @@ export function HomeOverview() {
                 <span
                   key={p.userId}
                   title={p.username}
-                  className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--background)] bg-accent/15 text-[9px] font-bold text-accent"
+                  className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--background)] bg-accent/15 text-[9px] font-bold text-accent-ink"
                 >
                   {p.username.slice(0, 2).toUpperCase()}
                 </span>

@@ -651,7 +651,7 @@ export function LiveDraftBoard() {
                       onClick={() => handleAssignTeam(i, p.team === team ? undefined : team)}
                       className={`rounded px-2 py-1 text-xs font-medium ${
                         p.team === team
-                          ? "bg-mode-draft text-white"
+                          ? "bg-mode-draft text-poster-ink"
                           : "border border-black/15 dark:border-white/15 text-black/60 dark:text-white/50"
                       }`}
                     >
@@ -806,7 +806,7 @@ export function LiveDraftBoard() {
         <h2 className="text-xl font-semibold">Draft beendet</h2>
         {newAchievements.length > 0 && (
           <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
-            <p className="mb-1 text-sm font-semibold text-accent">🏆 Neue Erfolge freigeschaltet!</p>
+            <p className="mb-1 text-sm font-semibold text-accent-ink">🏆 Neue Erfolge freigeschaltet!</p>
             <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
               {newAchievements.map((a) => (
                 <li key={a.id}>

@@ -24,7 +24,7 @@ export function BottomNav() {
       <Link
         href="/"
         className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
-          pathname === "/" ? "text-accent" : "text-black/50 dark:text-white/40"
+          pathname === "/" ? "text-accent-ink" : "text-black/50 dark:text-white/40"
         }`}
       >
         <span className="text-lg" aria-hidden>
@@ -39,7 +39,7 @@ export function BottomNav() {
             key={g.id}
             href={g.href}
             className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
-              active ? "text-accent" : "text-black/50 dark:text-white/40"
+              active ? "text-accent-ink" : "text-black/50 dark:text-white/40"
             }`}
           >
             <span className="text-lg" aria-hidden>

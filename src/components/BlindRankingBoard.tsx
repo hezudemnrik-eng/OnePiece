@@ -265,22 +265,22 @@ export function BlindRankingBoard() {
           </p>
         </div>
         {current && (
-          <Card variant="spotlight" accent="blind-ranking" className="flex flex-col items-center gap-3">
+          <div className="op-wanted op-parchment flex flex-col items-center gap-3 rounded-xl p-4">
             {current.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={current.imageUrl}
                 alt={current.name}
                 referrerPolicy="no-referrer"
-                className="h-32 w-auto rounded-lg border border-mode-blind-ranking/40 object-cover object-top shadow-lg"
+                className="h-32 w-auto rounded-lg border-2 border-poster-ink object-cover object-top"
               />
             ) : (
-              <span className="flex h-32 w-24 items-center justify-center rounded-lg bg-mode-blind-ranking/15 text-3xl font-bold text-mode-blind-ranking">
+              <span className="flex h-32 w-24 items-center justify-center rounded-lg border-2 border-poster-ink bg-mode-blind-ranking/15 text-3xl font-bold">
                 {current.name.slice(0, 2).toUpperCase()}
               </span>
             )}
-            <p className="text-center text-lg font-semibold">{current.name}</p>
-          </Card>
+            <p className="font-[family-name:var(--font-display)] text-center text-lg">{current.name}</p>
+          </div>
         )}
         <div className="flex flex-col gap-2">
           {assignments.map((slotId, rank) => {

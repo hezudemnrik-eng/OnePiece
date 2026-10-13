@@ -9,6 +9,12 @@
      overrides below): only the page chrome around them goes dark, not the
      brand colors themselves. */
   --accent: #f4c542;
+  /* Separate "readable" variant for plain accent-colored TEXT (nav active
+     state, achievement-banner headings, …) — the vivid fill color above is
+     far too light to read against the light page background, even though
+     it's exactly right as a button/badge fill. Same value as --accent in
+     dark mode, where the fill color already reads perfectly as text too. */
+  --accent-ink: #b45309;
   /* Success now rides the brand gold instead of a separate green (Q23) —
      aliased rather than hardcoded so it always tracks --accent. */
   --success: var(--accent);
@@ -49,6 +55,7 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
   --color-success: var(--success);
   --color-danger: var(--danger);
   --color-navy: var(--navy);
@@ -91,6 +98,9 @@
        warning/error text (as opposed to white-on-red button fills, where
        the original tone is fine). */
     --danger: #ef4444;
+    /* The vivid fill color already reads perfectly as text here, unlike in
+       light mode (see --accent-ink above). */
+    --accent-ink: var(--accent);
     --mode-imu: #dc2626;
     --mode-quiz: #60a5fa;
     --mode-tierlisten: #a78bfa;
@@ -108,6 +118,7 @@
   --foreground: #ede6d6;
   --surface: #121f33;
   --danger: #ef4444;
+  --accent-ink: var(--accent);
   --mode-imu: #dc2626;
   --mode-quiz: #60a5fa;
   --mode-tierlisten: #a78bfa;

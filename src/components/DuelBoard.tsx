@@ -206,13 +206,13 @@ export function DuelBoard() {
         <div className="flex gap-2 rounded-lg border border-black/10 dark:border-white/10 p-1 text-sm w-fit">
           <button
             onClick={() => setMode("1v1")}
-            className={`rounded-md px-3 py-1.5 font-medium ${mode === "1v1" ? "bg-mode-duell text-white" : "text-black/60 dark:text-white/50"}`}
+            className={`rounded-md px-3 py-1.5 font-medium ${mode === "1v1" ? "bg-mode-duell text-poster-ink" : "text-black/60 dark:text-white/50"}`}
           >
             1 gegen 1
           </button>
           <button
             onClick={() => setMode("team")}
-            className={`rounded-md px-3 py-1.5 font-medium ${mode === "team" ? "bg-mode-duell text-white" : "text-black/60 dark:text-white/50"}`}
+            className={`rounded-md px-3 py-1.5 font-medium ${mode === "team" ? "bg-mode-duell text-poster-ink" : "text-black/60 dark:text-white/50"}`}
           >
             Team-Duell (3 vs. 3)
           </button>
@@ -304,7 +304,7 @@ export function DuelBoard() {
           <h2 className="text-xl font-semibold">{winner.name} gewinnt das Duell!</h2>
           {newAchievements.length > 0 && (
             <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
-              <p className="mb-1 text-sm font-semibold text-accent">🏆 Neue Erfolge freigeschaltet!</p>
+              <p className="mb-1 text-sm font-semibold text-accent-ink">🏆 Neue Erfolge freigeschaltet!</p>
               <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
                 {newAchievements.map((a) => (
                   <li key={a.id}>

@@ -271,7 +271,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
         )}
         {newAchievements.length > 0 && (
           <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
-            <p className="mb-1 text-sm font-semibold text-accent">🏆 Neue Erfolge freigeschaltet!</p>
+            <p className="mb-1 text-sm font-semibold text-accent-ink">🏆 Neue Erfolge freigeschaltet!</p>
             <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
               {newAchievements.map((a) => (
                 <li key={a.id}>

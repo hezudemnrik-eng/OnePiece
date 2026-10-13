@@ -32,7 +32,7 @@ function Avatar({ userId, username, avatarCharacterId, online }: { userId: strin
           className="h-8 w-8 rounded-full object-cover object-top"
         />
       ) : (
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent">
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent-ink">
           {username.slice(0, 2).toUpperCase()}
         </span>
       )}

@@ -27,7 +27,7 @@ type AccentClasses = {
 
 export const MODE_ACCENT_CLASSES: Record<ModeAccent, AccentClasses> = {
   accent: {
-    text: "text-accent",
+    text: "text-accent-ink",
     border: "border-accent",
     borderSoft: "border-accent/40",
     bgSoft: "bg-accent/10",

@@ -255,7 +255,7 @@ export function ProfileBoard() {
         <div>
           <p className={`font-[family-name:var(--font-display)] text-xl ${activeColorClass}`}>{user.username}</p>
           {activeTitle && <p className={`text-sm ${activeTitle.className}`}>{activeTitle.label}</p>}
-          <p className="font-[family-name:var(--font-display)] text-lg text-accent">
+          <p className="font-[family-name:var(--font-display)] text-lg text-accent-ink">
             {progress.rankTitle} · Level {progress.level}
           </p>
           <p className="text-sm opacity-70">{formatBerry(berries)}</p>
@@ -305,7 +305,7 @@ export function ProfileBoard() {
           <button
             onClick={copyShareCode}
             disabled={!shareCode}
-            className="text-xs text-black/50 dark:text-white/40 hover:text-accent hover:underline disabled:opacity-40"
+            className="text-xs text-black/50 dark:text-white/40 hover:text-accent-ink hover:underline disabled:opacity-40"
           >
             {codeCopied ? "Kopiert!" : "Kopieren"}
           </button>
@@ -334,7 +334,7 @@ export function ProfileBoard() {
               <p className="text-xs text-black/50 dark:text-white/40">Niederlagen</p>
             </Card>
             <Card variant="plain" className="py-4">
-              <p className="text-2xl font-bold text-accent">
+              <p className="text-2xl font-bold text-accent-ink">
                 {Math.round((myStats.wins / Math.max(1, myStats.wins + myStats.losses)) * 100)}%
               </p>
               <p className="text-xs text-black/50 dark:text-white/40">Winrate</p>
@@ -354,7 +354,7 @@ export function ProfileBoard() {
                 <button
                   key={f}
                   onClick={() => setMatchFilter(f)}
-                  className={`rounded-full px-2.5 py-1 text-xs ${matchFilter === f ? "bg-accent text-white" : "border border-black/10 dark:border-white/10 text-black/50 dark:text-white/40"}`}
+                  className={`rounded-full px-2.5 py-1 text-xs ${matchFilter === f ? "bg-accent text-poster-ink" : "border border-black/10 dark:border-white/10 text-black/50 dark:text-white/40"}`}
                 >
                   {f === "alle" ? "Alle" : MODE_LABELS[f]}
                 </button>

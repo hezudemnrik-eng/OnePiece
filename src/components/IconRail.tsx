@@ -26,7 +26,7 @@ export function IconRail() {
       <button
         onClick={() => setExpanded((v) => !v)}
         aria-label={expanded ? "Navigation einklappen" : "Navigation ausklappen"}
-        className="mb-4 self-center text-lg leading-none text-black/50 dark:text-white/40 hover:text-accent"
+        className="mb-4 self-center text-lg leading-none text-black/50 dark:text-white/40 hover:text-accent-ink"
       >
         {expanded ? "«" : "»"}
       </button>
@@ -39,7 +39,7 @@ export function IconRail() {
               href={item.href}
               title={item.title}
               className={`flex items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium ${
-                active ? "bg-accent/10 text-accent" : "text-black/60 dark:text-white/50 hover:bg-black/5 dark:hover:bg-white/5"
+                active ? "bg-accent/10 text-accent-ink" : "text-black/60 dark:text-white/50 hover:bg-black/5 dark:hover:bg-white/5"
               }`}
             >
               <span className="text-xl shrink-0" aria-hidden>
