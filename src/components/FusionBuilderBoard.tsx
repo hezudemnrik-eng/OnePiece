@@ -9,7 +9,10 @@ import {
   type FusionCategoryId,
   type FusionOption,
 } from "@/lib/fusionTraits";
+import { checkFusionAchievements, type FusionAchievement } from "@/lib/fusionAchievements";
+import { fusionXpForBounty, XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
+import { incrementXp, recordFusionCompletion, unlockAchievement } from "@/lib/supabase";
 
 type Phase = "setup" | "rolling" | "done";
 
@@ -29,10 +32,13 @@ function FusionTile({
   categoryLabel,
   option,
   onClick,
+  justLocked,
 }: {
   categoryLabel: string;
   option: FusionOption;
   onClick?: () => void;
+  /** Plays a short pop-in animation — used for a tile that was just locked in. */
+  justLocked?: boolean;
 }) {
   return (
     <button
@@ -43,7 +49,7 @@ function FusionTile({
         onClick
           ? "border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/15 active:bg-amber-500/20"
           : "border-amber-500/30 bg-amber-500/5"
-      }`}
+      } ${justLocked ? "op-pop-in" : ""}`}
     >
       {option.sourceImageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -115,6 +121,7 @@ export function FusionBuilderBoard() {
     {} as Record<FusionCategoryId, FusionOption>
   );
   const [picks, setPicks] = useState<FusionOption[]>([]);
+  const [newAchievements, setNewAchievements] = useState<FusionAchievement[]>([]);
 
   const remainingCategories = FUSION_CATEGORIES.filter(
     (c) => !picks.some((p) => p.categoryId === c.id)
@@ -123,7 +130,21 @@ export function FusionBuilderBoard() {
   function start() {
     setPhase("rolling");
     setPicks([]);
+    setNewAchievements([]);
     setCandidates(rollCandidates(FUSION_CATEGORIES.map((c) => c.id)));
+  }
+
+  async function finalizeFusion(finalPicks: FusionOption[]) {
+    const bounty = computeBounty(finalPicks);
+    recordFusionCompletion(fusionXpForBounty(bounty));
+    const earned = checkFusionAchievements(finalPicks, bounty);
+    if (earned.length === 0) return;
+    const results = await Promise.all(earned.map(async (a) => ({ a, isNew: await unlockAchievement(a.id) })));
+    const fresh = results.filter((r) => r.isNew).map((r) => r.a);
+    if (fresh.length > 0) {
+      incrementXp(fresh.length * XP_ACHIEVEMENT_BONUS);
+      setNewAchievements(fresh);
+    }
   }
 
   function choose(categoryId: FusionCategoryId) {
@@ -136,6 +157,8 @@ export function FusionBuilderBoard() {
 
     if (nextPicks.length === FUSION_CATEGORIES.length) {
       setPhase("done");
+      setNewAchievements([]);
+      finalizeFusion(nextPicks);
       return;
     }
 
@@ -192,6 +215,7 @@ export function FusionBuilderBoard() {
                   key={p.categoryId}
                   categoryLabel={FUSION_CATEGORIES.find((c) => c.id === p.categoryId)?.label ?? ""}
                   option={p}
+                  justLocked
                 />
               ))}
             </div>
@@ -211,11 +235,23 @@ export function FusionBuilderBoard() {
         <p className="text-xs uppercase tracking-widest text-black/50 dark:text-white/40 mb-1">Kopfgeld</p>
         <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">{formatBerry(bounty)}</p>
       </div>
+      {newAchievements.length > 0 && (
+        <div className="op-pop-in rounded-xl border border-amber-400 bg-amber-400/10 p-3">
+          <p className="mb-1 text-sm font-semibold text-amber-700 dark:text-amber-400">🏆 Neue Erfolge freigeschaltet!</p>
+          <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
+            {newAchievements.map((a) => (
+              <li key={a.id}>
+                <span className="font-medium">{a.label}</span> — {a.description}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         {FUSION_CATEGORIES.map((category) => {
           const pick = picks.find((p) => p.categoryId === category.id);
           if (!pick) return null;
-          return <FusionTile key={category.id} categoryLabel={category.label} option={pick} />;
+          return <FusionTile key={category.id} categoryLabel={category.label} option={pick} justLocked />;
         })}
       </div>
       <button onClick={start} className="self-start rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700">

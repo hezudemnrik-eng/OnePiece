@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { BLIND_THEMES, buildRound, correctOrder, scoreGuess, type BlindEntry, type BlindScore } from "@/lib/blindRanking";
+import { XP_BLIND_RANKING_COMPLETE } from "@/lib/levels";
 import { playAccept, playSkip, playTick, vibrate } from "@/lib/sfx";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
+import { recordBlindRankingCompletion } from "@/lib/supabase";
 
 type Phase = "setup" | "guessing" | "result";
 
@@ -71,6 +73,7 @@ export function BlindRankingBoard() {
     });
     setHistory(loadHistory());
     setPhase("result");
+    recordBlindRankingCompletion(XP_BLIND_RANKING_COMPLETE);
   }
 
   function assignRank(rank: number) {
