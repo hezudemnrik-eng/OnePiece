@@ -3,9 +3,17 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { characters } from "@/lib/characters";
-import { fetchMyLevelInfo, getCurrentAuthUser, isSupabaseConfigured, signOutUser, type AuthUser } from "@/lib/supabase";
+import {
+  fetchMyLevelInfo,
+  fetchShopItems,
+  getCurrentAuthUser,
+  isSupabaseConfigured,
+  signOutUser,
+  type AuthUser,
+} from "@/lib/supabase";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 import { COSMETIC_FRAMES } from "@/lib/levels";
+import { formatBerry } from "@/lib/fusionTraits";
 
 type Props = {
   /** Called after a successful logout so the parent (AuthGate) can re-check auth state. */
@@ -15,13 +23,21 @@ type Props = {
 export function AccountPanel({ onSignedOut }: Props) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [frameClass, setFrameClass] = useState("");
+  const [colorClass, setColorClass] = useState("");
+  const [berries, setBerries] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [animationsEnabled, setAnimationsEnabled] = useAnimationsEnabled();
 
   useEffect(() => {
-    Promise.all([getCurrentAuthUser(), fetchMyLevelInfo()]).then(([u, levelInfo]) => {
+    Promise.all([getCurrentAuthUser(), fetchMyLevelInfo(), fetchShopItems()]).then(([u, levelInfo, items]) => {
       setUser(u);
-      setFrameClass(COSMETIC_FRAMES.find((f) => f.id === levelInfo?.equippedFrame)?.className ?? "");
+      setFrameClass(
+        COSMETIC_FRAMES.find((f) => f.id === levelInfo?.equippedFrame)?.className ??
+          items.find((i) => i.category === "frame" && i.id === levelInfo?.equippedFrame)?.className ??
+          ""
+      );
+      setColorClass(items.find((i) => i.category === "color" && i.id === levelInfo?.equippedColor)?.className ?? "");
+      setBerries(levelInfo?.berries ?? 0);
       setLoaded(true);
     });
   }, []);
@@ -55,9 +71,10 @@ export function AccountPanel({ onSignedOut }: Props) {
         />
       )}
       <span>
-        <span className="font-semibold">{user.username}</span>
+        <span className={`font-semibold ${colorClass}`}>{user.username}</span>
         {user.isAdmin && <span className="ml-1 text-xs text-amber-600">(Admin)</span>}
       </span>
+      <span className="text-black/50 dark:text-white/40">{formatBerry(berries)}</span>
       <Link href="/profil" className="text-black/50 dark:text-white/40 hover:underline">
         Profil
       </Link>

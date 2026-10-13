@@ -778,29 +778,39 @@ export async function fetchMyAchievements(): Promise<Set<string>> {
   return new Set((data ?? []).map((r) => r.achievement_id as string));
 }
 
-/** Inserts the achievement if not already unlocked; returns true when it was newly unlocked. */
+/**
+ * Unlocks the achievement (and its Berry bonus) via migration 0012's
+ * unlock_achievement RPC, which does the insert and the Berry award
+ * atomically. Returns true when it was newly unlocked.
+ */
 export async function unlockAchievement(achievementId: string): Promise<boolean> {
   if (!supabase) return false;
   const userId = await ensureSupabaseSession();
   if (!userId) return false;
-  const { error } = await supabase
-    .from("achievements")
-    .insert({ user_id: userId, achievement_id: achievementId });
-  // A unique-violation (code 23505) means it was already unlocked — not an error for our purposes.
-  return !error;
+  const { data } = await supabase.rpc("unlock_achievement", { p_achievement_id: achievementId });
+  return Boolean(data);
 }
 
 // --- Level/rank profile info ---
 
-export type MyLevelInfo = { xp: number; equippedFrame: string | null };
+export type MyLevelInfo = { xp: number; equippedFrame: string | null; berries: number; equippedColor: string | null };
 
 export async function fetchMyLevelInfo(): Promise<MyLevelInfo | null> {
   if (!supabase) return null;
   const userId = await ensureSupabaseSession();
   if (!userId) return null;
-  const { data } = await supabase.from("profiles").select("xp, equipped_frame").eq("id", userId).maybeSingle();
+  const { data } = await supabase
+    .from("profiles")
+    .select("xp, equipped_frame, berries, equipped_color")
+    .eq("id", userId)
+    .maybeSingle();
   if (!data) return null;
-  return { xp: (data.xp as number) ?? 0, equippedFrame: (data.equipped_frame as string | null) ?? null };
+  return {
+    xp: (data.xp as number) ?? 0,
+    equippedFrame: (data.equipped_frame as string | null) ?? null,
+    berries: (data.berries as number) ?? 0,
+    equippedColor: (data.equipped_color as string | null) ?? null,
+  };
 }
 
 export async function setEquippedFrame(frameId: string | null): Promise<void> {
@@ -808,4 +818,68 @@ export async function setEquippedFrame(frameId: string | null): Promise<void> {
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await supabase.from("profiles").update({ equipped_frame: frameId }).eq("id", userId);
+}
+
+export async function setEquippedColor(colorId: string | null): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("profiles").update({ equipped_color: colorId }).eq("id", userId);
+}
+
+// --- Berry shop (migration 0012) ---
+// A general, extensible cosmetics shop: `category` is open-ended ("frame",
+// "color", and later backgrounds/sound-packs etc.) so new categories need
+// only a new DB row, not a schema change.
+
+export type ShopItem = {
+  id: string;
+  category: string;
+  label: string;
+  price: number;
+  minLevel: number;
+  className: string;
+};
+
+export async function fetchShopItems(): Promise<ShopItem[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("shop_items")
+    .select("id, category, label, price, min_level, class_name")
+    .order("price", { ascending: true });
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    category: r.category as string,
+    label: r.label as string,
+    price: r.price as number,
+    minLevel: r.min_level as number,
+    className: r.class_name as string,
+  }));
+}
+
+/** The signed-in user's owned (purchased) shop item ids. */
+export async function fetchMyShopPurchases(): Promise<Set<string>> {
+  if (!supabase) return new Set();
+  const userId = await ensureSupabaseSession();
+  if (!userId) return new Set();
+  const { data } = await supabase.from("shop_purchases").select("item_id").eq("user_id", userId);
+  return new Set((data ?? []).map((r) => r.item_id as string));
+}
+
+/** Buys a shop item (level + Berry checks happen server-side). Returns false if locked, unaffordable, or not configured. */
+export async function purchaseShopItem(itemId: string): Promise<boolean> {
+  if (!supabase) return false;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return false;
+  const { data } = await supabase.rpc("purchase_shop_item", { p_item_id: itemId });
+  return Boolean(data);
+}
+
+/** Equips an owned shop item into its category's profile slot. Returns false if not owned. */
+export async function equipShopItem(itemId: string): Promise<boolean> {
+  if (!supabase) return false;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return false;
+  const { data } = await supabase.rpc("equip_shop_item", { p_item_id: itemId });
+  return Boolean(data);
 }

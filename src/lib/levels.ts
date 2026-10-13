@@ -70,6 +70,11 @@ export const DAILY_XP_CAP = 400;
 // migration 0011) — flat-XP modes with no real win/loss or skill signal.
 export const FARMABLE_MODES = ["crew", "blind-ranking"] as const;
 
+// Kept in sync with berry_per_level()/achievement_berry_bonus() in
+// migration 0012 — the actual Berry awards happen server-side.
+export const BERRY_PER_LEVEL = 50;
+export const ACHIEVEMENT_BERRY_BONUS = 100;
+
 // Flat/scaled XP awards per completed action across the app.
 export const XP_MATCH_WIN = 25;
 export const XP_MATCH_LOSS = 10;
