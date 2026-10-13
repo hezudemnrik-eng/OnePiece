@@ -83,13 +83,13 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       >
         <IconRail />
         <div className="md:pl-16">
-          <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b-2 border-foreground bg-[var(--background)]/95 backdrop-blur px-3 py-3 sm:px-4">
+          <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b-2 border-foreground bg-[var(--background)]/95 backdrop-blur px-3 py-2 sm:px-4">
             <Link href="/" className="flex min-w-0 shrink-0 items-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/logo.webp"
                 alt="One Piece Draft"
-                className="h-9 w-auto shrink-0 object-contain sm:h-10"
+                className="h-12 w-auto shrink-0 object-contain sm:h-14"
               />
             </Link>
             <div className="flex min-w-0 items-center gap-3">

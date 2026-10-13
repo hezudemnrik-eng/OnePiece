@@ -53,7 +53,7 @@
   /* Tint over the signed-in app shell's map-background.jpg (Boss's ChatGPT
      artwork) so body text/cards on top stay legible — lighter in light
      mode (the map itself is dark/navy), much darker in dark mode. */
-  --op-map-overlay: rgba(250, 246, 236, 0.9);
+  --op-map-overlay: rgba(250, 246, 236, 0.72);
 }
 
 @theme inline {
@@ -117,7 +117,7 @@
     --mode-shop: #4ade80;
     --rarity-silver: #d1d5db;
     --rarity-legendary: #e879f9;
-    --op-map-overlay: rgba(6, 10, 18, 0.78);
+    --op-map-overlay: rgba(6, 10, 18, 0.6);
   }
 }
 
@@ -137,7 +137,7 @@
   --mode-shop: #4ade80;
   --rarity-silver: #d1d5db;
   --rarity-legendary: #e879f9;
-  --op-map-overlay: rgba(6, 10, 18, 0.78);
+  --op-map-overlay: rgba(6, 10, 18, 0.6);
 }
 
 body {
