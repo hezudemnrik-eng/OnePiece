@@ -166,7 +166,7 @@ export function BlindRankingBoard() {
           </p>
         </div>
         {current && (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-6">
+          <div className="op-parchment flex flex-col items-center gap-3 rounded-xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-6">
             {current.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img

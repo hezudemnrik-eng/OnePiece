@@ -117,7 +117,7 @@ export function ProfileBoard() {
 
   return (
     <div className="flex flex-col gap-8 max-w-2xl">
-      <div className="flex items-center gap-4">
+      <div className="op-card op-parchment op-framed flex items-center gap-4 p-5">
         {avatar?.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
