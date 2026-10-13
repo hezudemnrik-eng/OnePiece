@@ -49,7 +49,7 @@
         "label": "Aktuell (Wano)",
         "stats": {
           "staerke": 88,
-          "haki": 85,
+          "haki": 90,
           "intelligenz": 55,
           "geschwindigkeit": 75,
           "durabilitaet": 80
@@ -144,11 +144,11 @@
         "id": "chopper-monster",
         "label": "Monster Point",
         "stats": {
-          "staerke": 60,
+          "staerke": 65,
           "haki": 15,
           "intelligenz": 45,
           "geschwindigkeit": 45,
-          "durabilitaet": 65
+          "durabilitaet": 72
         }
       }
     ],
@@ -168,7 +168,7 @@
         "id": "robin-current",
         "label": "Aktuell",
         "stats": {
-          "staerke": 55,
+          "staerke": 62,
           "haki": 40,
           "intelligenz": 80,
           "geschwindigkeit": 45,
