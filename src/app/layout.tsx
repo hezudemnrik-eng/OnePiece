@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Baloo_2, Geist, Geist_Mono, Pirata_One } from "next/font/google";
+import { Anton, Geist, Geist_Mono, Pirata_One } from "next/font/google";
 import Script from "next/script";
 import { AuthGate } from "@/components/AuthGate";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme";
@@ -15,11 +15,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Playful, rounded display face for headings and mode titles — the main
-// --font-display (see globals.css's @theme inline block).
-const baloo2 = Baloo_2({
-  variable: "--font-baloo",
-  weight: ["600", "700", "800"],
+// Bold condensed poster/stencil face for headings, character names and
+// mode titles — matches the wanted-poster reference mockups (Phase 12),
+// replacing the earlier rounded/cute Baloo 2. Main --font-display (see
+// globals.css's @theme inline block).
+const anton = Anton({
+  variable: "--font-anton",
+  weight: "400",
   subsets: ["latin"],
 });
 
@@ -52,7 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="de"
-      className={`${geistSans.variable} ${geistMono.variable} ${baloo2.variable} ${pirataOne.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${anton.variable} ${pirataOne.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {/* Applies a saved manual light/dark override before first paint, so

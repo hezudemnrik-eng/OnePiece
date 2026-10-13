@@ -1,11 +1,12 @@
 import type { Character } from "@/lib/characters";
+import { Badge } from "./ui/Badge";
 
-const TIER_COLORS: Record<Character["tier"], string> = {
-  S: "bg-amber-500 text-amber-950",
-  A: "bg-rose-500 text-rose-950",
-  B: "bg-sky-500 text-sky-950",
-  C: "bg-emerald-500 text-emerald-950",
-  D: "bg-zinc-400 text-zinc-950",
+const TIER_RARITY: Record<Character["tier"], "legendary" | "gold" | "silver" | "bronze"> = {
+  S: "legendary",
+  A: "gold",
+  B: "silver",
+  C: "bronze",
+  D: "bronze",
 };
 
 type Props = {
@@ -31,9 +32,9 @@ export function CharacterCard({
         onDragStart?.(character.id);
       }}
       onClick={() => onClick?.(character.id)}
-      className={`op-card flex items-center gap-2 px-3 py-2 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:border-amber-500/50 ${
+      className={`flex items-center gap-2 px-1 py-1 text-sm transition ${
         onClick ? "cursor-pointer" : draggable ? "cursor-grab" : ""
-      } ${selected ? "ring-2 ring-amber-500" : ""}`}
+      } ${selected ? "ring-2 ring-poster-ink rounded-lg" : ""}`}
     >
       <div className="relative shrink-0">
         {character.imageUrl ? (
@@ -43,26 +44,20 @@ export function CharacterCard({
             alt={character.name}
             loading="lazy"
             referrerPolicy="no-referrer"
-            className="h-10 w-10 rounded-full object-cover object-top border border-black/10 dark:border-white/10"
+            className="h-10 w-10 rounded-full object-cover object-top border-2 border-poster-ink"
           />
         ) : (
-          <span
-            className={`inline-flex h-10 w-10 items-center justify-center rounded-full text-xs font-bold ${TIER_COLORS[character.tier]}`}
-          >
-            {character.tier}
-          </span>
+          <Badge rarity={TIER_RARITY[character.tier]}>{character.tier}</Badge>
         )}
         {character.imageUrl && (
-          <span
-            className={`absolute -bottom-1 -right-1 inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ring-2 ring-white dark:ring-neutral-900 ${TIER_COLORS[character.tier]}`}
-          >
+          <Badge rarity={TIER_RARITY[character.tier]} size="sm" className="absolute -bottom-1 -right-1">
             {character.tier}
-          </span>
+          </Badge>
         )}
       </div>
       <div className="min-w-0">
-        <p className="truncate font-medium">{character.name}</p>
-        <p className="truncate text-xs text-black/60 dark:text-white/50">
+        <p className="truncate font-[family-name:var(--font-display)] text-base">{character.name}</p>
+        <p className="truncate text-xs opacity-70">
           {character.crew} · {character.role}
         </p>
       </div>

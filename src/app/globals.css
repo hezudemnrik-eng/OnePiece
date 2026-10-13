@@ -3,12 +3,22 @@
 :root {
   --background: #faf6ec;
   --foreground: #1a2332;
-  --surface: #ffffff;
-  --accent: #d97706;
+  --surface: #fff8e6;
+  /* One-Piece wanted-poster palette (Phase 12, from reference mockups) —
+     the same hex values are used in light AND dark mode (see the dark
+     overrides below): only the page chrome around them goes dark, not the
+     brand colors themselves. */
+  --accent: #f4c542;
   /* Success now rides the brand gold instead of a separate green (Q23) —
      aliased rather than hardcoded so it always tracks --accent. */
   --success: var(--accent);
-  --danger: #e11d48;
+  --danger: #b22222;
+  --navy: #0d3b66;
+  /* Always-paper surface for "wanted poster" character cards — stays
+     parchment-cream regardless of light/dark theme, since the poster is an
+     in-universe object, not reactive UI chrome (see .op-wanted below). */
+  --poster-paper: #f6e5c3;
+  --poster-ink: #1a1a1a;
   /* Unified corner radius for every card-like surface app-wide. */
   --radius-card: 1rem;
 
@@ -41,6 +51,9 @@
   --color-accent: var(--accent);
   --color-success: var(--success);
   --color-danger: var(--danger);
+  --color-navy: var(--navy);
+  --color-poster-paper: var(--poster-paper);
+  --color-poster-ink: var(--poster-ink);
   --color-mode-draft: var(--mode-draft);
   --color-mode-duell: var(--mode-duell);
   --color-mode-zufallsgegner: var(--mode-zufallsgegner);
@@ -56,10 +69,10 @@
   --color-rarity-legendary: var(--rarity-legendary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  /* Playful rounded display face for headings/mode titles (Q11/Q17) —
-     Pirata One (blackletter) is kept as --font-mystery for rare dramatic
-     flavor (e.g. the Imu intro) instead of being the everyday display font. */
-  --font-display: var(--font-baloo);
+  /* Bold condensed wanted-poster/stencil display face (Phase 12) — Pirata
+     One (blackletter) stays --font-mystery for rare dramatic flavor (e.g.
+     the Imu intro) rather than being the everyday display font. */
+  --font-display: var(--font-anton);
   --font-mystery: var(--font-pirata);
 }
 
@@ -70,8 +83,14 @@
     --background: #0c1626;
     --foreground: #ede6d6;
     --surface: #121f33;
-    --accent: #f0b429;
-    --danger: #fb7185;
+    /* --accent stays the same hex as light mode (Phase 12 palette reference
+       uses identical yellow in both panels) — it actually reads very well
+       as text on this dark navy background. --danger needs its own
+       brighter dark-mode shade though: the reference's deep firebrick red
+       has poor contrast against a near-black background when used as plain
+       warning/error text (as opposed to white-on-red button fills, where
+       the original tone is fine). */
+    --danger: #ef4444;
     --mode-imu: #dc2626;
     --mode-quiz: #60a5fa;
     --mode-tierlisten: #a78bfa;
@@ -88,8 +107,7 @@
   --background: #0c1626;
   --foreground: #ede6d6;
   --surface: #121f33;
-  --accent: #f0b429;
-  --danger: #fb7185;
+  --danger: #ef4444;
   --mode-imu: #dc2626;
   --mode-quiz: #60a5fa;
   --mode-tierlisten: #a78bfa;
@@ -179,6 +197,18 @@ body {
 .op-ink-btn:active:not(:disabled) {
   box-shadow: 1px 1px 0 0 var(--foreground);
   transform: translate(3px, 3px);
+}
+
+/* "Wanted poster" treatment for hero character reveals (Draft offer cards,
+   Duell fighter cards) — Phase 12. Always parchment-paper + ink-black,
+   regardless of light/dark theme: the poster is an in-universe object, not
+   reactive UI chrome, matching the reference mockups (same card look in
+   both theme panels, only the page behind it goes dark). */
+.op-wanted {
+  background-color: var(--poster-paper);
+  color: var(--poster-ink);
+  border: 3px solid var(--poster-ink);
+  box-shadow: 5px 5px 0 0 var(--poster-ink);
 }
 
 /* Comic-lettering stroke for display-font headings — a thin outline in

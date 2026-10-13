@@ -8,6 +8,8 @@ export type RankableItem = {
   name: string;
   subtitle?: string;
   imageUrl?: string | null;
+  /** Only set for character-based categories — arcs/islands/custom entries have no canon tier. */
+  tier?: Character["tier"];
 };
 
 export type BuiltInCategory = {
@@ -17,7 +19,7 @@ export type BuiltInCategory = {
 };
 
 function toItems(pool: Character[]): RankableItem[] {
-  return pool.map((c) => ({ id: c.id, name: c.name, subtitle: `${c.crew} · ${c.role}`, imageUrl: c.imageUrl }));
+  return pool.map((c) => ({ id: c.id, name: c.name, subtitle: `${c.crew} · ${c.role}`, imageUrl: c.imageUrl, tier: c.tier }));
 }
 
 /** Shorthand for a character-filtered built-in category — most of the 20 templates (Q94) are one of these. */

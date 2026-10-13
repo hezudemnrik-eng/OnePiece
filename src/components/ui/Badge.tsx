@@ -1,9 +1,11 @@
 import type { HTMLAttributes } from "react";
 
 type Rarity = "bronze" | "silver" | "gold" | "legendary";
+type Size = "sm" | "md";
 
 type Props = HTMLAttributes<HTMLSpanElement> & {
   rarity?: Rarity;
+  size?: Size;
 };
 
 const RARITY_CLASSES: Record<Rarity, string> = {
@@ -13,16 +15,25 @@ const RARITY_CLASSES: Record<Rarity, string> = {
   legendary: "op-legendary-glow bg-rarity-legendary text-white",
 };
 
+// Two fixed sizes rather than a className override — conflicting Tailwind
+// size utilities (e.g. a caller passing "h-5 w-5" after our own "h-7 w-7")
+// don't reliably override each other via class string order.
+const SIZE_CLASSES: Record<Size, string> = {
+  sm: "h-5 w-5 text-[10px] border",
+  md: "h-7 w-7 text-xs border-2",
+};
+
 /**
- * Small rounded pill — tier badges on CharacterCard/RankItemCard, rarity
- * chips, and the "Neu"-badge on freshly added characters (Q90) all use this
- * instead of hand-rolling their own `rounded-full ... text-[10px]` string.
+ * Wax-seal/medallion-style tier badge (Phase 12, from the wanted-poster
+ * reference mockups) — a small circular coin with a bold ink ring and a
+ * lighter inner ring, replacing the earlier flat rounded pill. Sized for a
+ * single tier letter; for longer labels pass a wider className override.
  */
-export function Badge({ rarity, className = "", children, ...rest }: Props) {
+export function Badge({ rarity, size = "md", className = "", children, ...rest }: Props) {
   const rarityClass = rarity ? RARITY_CLASSES[rarity] : "bg-black/10 dark:bg-white/10";
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full border-2 border-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${rarityClass} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full border-foreground font-bold uppercase shadow-[0_0_0_2px_var(--poster-paper)] ${SIZE_CLASSES[size]} ${rarityClass} ${className}`}
       {...rest}
     >
       {children}

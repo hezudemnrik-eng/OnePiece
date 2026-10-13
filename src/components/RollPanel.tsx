@@ -86,7 +86,7 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
           return (
             <div
               key={i}
-              className="op-parchment op-ink flex flex-col items-center gap-3 rounded-2xl bg-mode-draft/10 p-4"
+              className="op-parchment op-wanted flex flex-col items-center gap-3 rounded-2xl p-4"
             >
               {char.imageUrl && (
                 <div
@@ -98,8 +98,8 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
                     src={char.imageUrl}
                     alt={spinning ? "" : char.name}
                     referrerPolicy="no-referrer"
-                    className={`h-32 w-auto rounded-xl border object-cover object-top shadow-lg transition-opacity ${spinning ? "opacity-70 blur-[1px]" : "opacity-100"}`}
-                    style={{ borderColor: fruitColor ?? "var(--mode-draft)" }}
+                    className={`h-32 w-auto rounded-xl border-2 object-cover object-top shadow-lg transition-opacity ${spinning ? "opacity-70 blur-[1px]" : "opacity-100"}`}
+                    style={{ borderColor: fruitColor ?? "var(--poster-ink)" }}
                   />
                 </div>
               )}

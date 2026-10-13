@@ -316,29 +316,31 @@ export function DuelBoard() {
           )}
           <div className="grid grid-cols-2 gap-4">
             {[fighterA, fighterB].map((f, i) => (
-              <Card
+              <div
                 key={f.id}
-                variant={f.id === winner.id ? "spotlight" : "framed"}
-                accent="duell"
-                className="flex flex-col items-center gap-2 p-4"
+                className={`op-wanted op-parchment relative flex flex-col items-center gap-2 rounded-xl p-4 ${
+                  f.id === winner.id ? "op-s-tier-glow" : ""
+                }`}
               >
+                <Badge rarity={TIER_RARITY[f.tier]} className="absolute -top-2 -right-2">
+                  {f.tier}
+                </Badge>
                 {f.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={f.imageUrl}
                     alt={f.name}
                     referrerPolicy="no-referrer"
-                    className="h-28 w-auto rounded-lg object-cover object-top shadow"
+                    className="h-28 w-auto rounded-lg border-2 border-poster-ink object-cover object-top"
                   />
                 ) : (
-                  <span className="flex h-28 w-20 items-center justify-center rounded-lg bg-mode-duell/15 text-2xl font-bold text-mode-duell">
+                  <span className="flex h-28 w-20 items-center justify-center rounded-lg border-2 border-poster-ink bg-mode-duell/15 text-2xl font-bold">
                     {f.name.slice(0, 2).toUpperCase()}
                   </span>
                 )}
-                <p className="text-sm font-medium text-center">{f.name}</p>
-                <Badge rarity={TIER_RARITY[f.tier]}>{f.tier}</Badge>
-                <span className="text-xs text-black/50 dark:text-white/40">{i === 0 ? "Charakter A" : "Charakter B"}</span>
-              </Card>
+                <p className="font-[family-name:var(--font-display)] text-base text-center">{f.name}</p>
+                <span className="text-xs opacity-70">{i === 0 ? "Charakter A" : "Charakter B"}</span>
+              </div>
             ))}
           </div>
           <Card variant="framed" accent="duell" className="p-4">

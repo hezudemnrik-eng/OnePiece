@@ -9,7 +9,10 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: "op-ink-btn bg-accent text-white hover:brightness-95 disabled:hover:brightness-100",
+  // Dark ink text, not white — the brand accent is a light straw-hat
+  // yellow (Phase 12), so white-on-yellow would be unreadable; matches the
+  // reference mockup's black lettering on its gold button.
+  primary: "op-ink-btn bg-accent text-poster-ink hover:brightness-95 disabled:hover:brightness-100",
   secondary: "op-ink-btn bg-transparent hover:bg-black/5 dark:hover:bg-white/5",
   danger: "op-ink-btn bg-danger text-white hover:brightness-95 disabled:hover:brightness-100",
   // Deliberately left plain (no ink border) — minor/de-emphasized actions
