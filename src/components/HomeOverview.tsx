@@ -7,7 +7,6 @@ import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
 import { getLevelProgress } from "@/lib/levels";
 import { getLastPlayedHref } from "@/lib/lastPlayed";
 import { getTodaysChallenge, type DailyChallenge } from "@/lib/dailyChallenge";
-import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
@@ -97,19 +96,22 @@ export function HomeOverview() {
       {isSupabaseConfigured() && !loaded && <LoadingSpinner />}
 
       {isSupabaseConfigured() && loaded && progress && (
-        <Card variant="plain" className="px-4 py-3">
+        <div
+          className="op-card bg-cover bg-center px-4 py-3"
+          style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')" }}
+        >
           <div className="flex items-center justify-between gap-2 mb-1.5 text-sm">
-            <span className="flex min-w-0 items-center gap-1.5 truncate whitespace-nowrap font-semibold">
+            <span className="flex min-w-0 items-center gap-1.5 truncate whitespace-nowrap font-semibold text-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/images/ship-wheel.webp" alt="" aria-hidden className="h-4 w-4 shrink-0 object-contain" />
               Level {progress.level} · {progress.rankTitle}
             </span>
-            <span className="shrink-0 whitespace-nowrap tabular-nums text-black/50 dark:text-white/40 font-[family-name:var(--font-mono)]">
+            <span className="shrink-0 whitespace-nowrap tabular-nums text-white/70 font-[family-name:var(--font-mono)]">
               {progress.xp - progress.levelStartXp}/{progress.levelEndXp - progress.levelStartXp} XP
             </span>
           </div>
           <ProgressBar progress={progress.progress} size="md" />
-        </Card>
+        </div>
       )}
 
       {myLobby ? (
@@ -185,15 +187,18 @@ export function HomeOverview() {
 
       {challenge && (
         <Link href={challenge.href}>
-          <Card variant="parchment" accent={challenge.accent} className="flex items-center gap-3 px-4 py-3">
+          <div
+            className="op-card flex items-center gap-3 bg-cover bg-center px-4 py-3"
+            style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')" }}
+          >
             <span className="shrink-0 text-lg" aria-hidden>
               {challenge.icon}
             </span>
-            <span className="min-w-0 truncate whitespace-nowrap text-sm">
+            <span className="min-w-0 truncate whitespace-nowrap text-sm text-white">
               <span className="font-semibold">Heute: </span>
               {challenge.text}
             </span>
-          </Card>
+          </div>
         </Link>
       )}
 
