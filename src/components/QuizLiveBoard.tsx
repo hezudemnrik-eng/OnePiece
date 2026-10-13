@@ -27,6 +27,7 @@ import {
 import { playAccept, playSkip, playWin, vibrate } from "@/lib/sfx";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 import { LoadingSpinner } from "./LoadingSpinner";
+import { AnswerOption } from "./ui/AnswerOption";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { Input } from "./ui/Input";
@@ -312,23 +313,11 @@ export function QuizLiveBoard() {
               const isSelected = selected === i;
               const isCorrect = i === q.correct;
               const showState = isMyTurn && selected !== null;
+              const state = showState && isCorrect ? "correct" : showState && isSelected ? "incorrect" : isMyTurn ? "idle" : "muted";
               return (
-                <button
-                  key={i}
-                  onClick={() => choose(i)}
-                  disabled={!isMyTurn || selected !== null}
-                  className={`rounded-md border px-4 py-2.5 text-sm text-left transition ${
-                    showState && isCorrect
-                      ? "border-success bg-success/15 font-semibold"
-                      : showState && isSelected && !isCorrect
-                        ? "border-danger bg-danger/15"
-                        : isMyTurn
-                          ? "border-black/15 dark:border-white/15 hover:border-mode-quiz/50"
-                          : "border-black/10 dark:border-white/10 opacity-50 cursor-default"
-                  }`}
-                >
+                <AnswerOption key={i} state={state} onClick={() => choose(i)} disabled={!isMyTurn || selected !== null}>
                   {opt}
-                </button>
+                </AnswerOption>
               );
             })}
           </div>

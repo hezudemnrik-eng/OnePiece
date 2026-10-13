@@ -15,6 +15,7 @@ import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
 import { incrementXp, recordQuizResult, unlockAchievement } from "@/lib/supabase";
 import { playAccept, playSkip, playWin, vibrate } from "@/lib/sfx";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
+import { AnswerOption } from "./ui/AnswerOption";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { Select } from "./ui/Select";
@@ -176,21 +177,11 @@ export function QuizSoloBoard() {
               const isSelected = selected === i;
               const isCorrect = i === q.correct;
               const showState = selected !== null;
+              const state = showState && isCorrect ? "correct" : showState && isSelected ? "incorrect" : "idle";
               return (
-                <button
-                  key={i}
-                  onClick={() => choose(i)}
-                  disabled={selected !== null}
-                  className={`rounded-md border px-4 py-2.5 text-sm text-left transition ${
-                    showState && isCorrect
-                      ? "border-success bg-success/15 font-semibold"
-                      : showState && isSelected && !isCorrect
-                        ? "border-danger bg-danger/15"
-                        : "border-black/15 dark:border-white/15 hover:border-mode-quiz/50"
-                  }`}
-                >
+                <AnswerOption key={i} state={state} onClick={() => choose(i)} disabled={selected !== null}>
                   {opt}
-                </button>
+                </AnswerOption>
               );
             })}
           </div>
