@@ -77,7 +77,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (user && user.username && !user.isAnonymous) {
     return (
-      <>
+      <div
+        className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
+        style={{ backgroundImage: "linear-gradient(var(--op-map-overlay), var(--op-map-overlay)), url('/images/map-background.jpg')" }}
+      >
         <IconRail />
         <div className="md:pl-16">
           <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b-2 border-foreground bg-[var(--background)]/95 backdrop-blur px-3 py-3 sm:px-4">
@@ -97,7 +100,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
           <div className="pb-16 md:pb-0">{children}</div>
         </div>
         <BottomNav />
-      </>
+      </div>
     );
   }
 
