@@ -29,10 +29,13 @@ function FusionTile({
   categoryLabel,
   option,
   onClick,
+  justLocked,
 }: {
   categoryLabel: string;
   option: FusionOption;
   onClick?: () => void;
+  /** Plays a short pop-in animation — used for a tile that was just locked in. */
+  justLocked?: boolean;
 }) {
   return (
     <button
@@ -43,7 +46,7 @@ function FusionTile({
         onClick
           ? "border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/15 active:bg-amber-500/20"
           : "border-amber-500/30 bg-amber-500/5"
-      }`}
+      } ${justLocked ? "op-pop-in" : ""}`}
     >
       {option.sourceImageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -192,6 +195,7 @@ export function FusionBuilderBoard() {
                   key={p.categoryId}
                   categoryLabel={FUSION_CATEGORIES.find((c) => c.id === p.categoryId)?.label ?? ""}
                   option={p}
+                  justLocked
                 />
               ))}
             </div>
@@ -215,7 +219,7 @@ export function FusionBuilderBoard() {
         {FUSION_CATEGORIES.map((category) => {
           const pick = picks.find((p) => p.categoryId === category.id);
           if (!pick) return null;
-          return <FusionTile key={category.id} categoryLabel={category.label} option={pick} />;
+          return <FusionTile key={category.id} categoryLabel={category.label} option={pick} justLocked />;
         })}
       </div>
       <button onClick={start} className="self-start rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700">
