@@ -27,6 +27,11 @@ import { Input } from "./ui/Input";
 import { Select } from "./ui/Select";
 
 const TIERS: Tier[] = ["S", "A", "B", "C", "D"];
+// Hard pagination instead of a scrollbar for the unassigned pool (Q96/the
+// "kein Scrollen" core requirement) — categories can hold ~300 items
+// (e.g. "Charaktere"), which rendered as one flat wrapped list blew the
+// page height out to 20×+ the viewport.
+const UNASSIGNED_PAGE_SIZE = 24;
 const STORAGE_KEY = "op-tierlists";
 const NICKNAME_KEY = "op-nickname";
 const DEFAULT_LIST_NAME = "Meine Tierliste";
@@ -99,6 +104,7 @@ export function TierListEditor() {
   const [friendLoadStatus, setFriendLoadStatus] = useState<"idle" | "loading" | "ok" | "not-found">("idle");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [newAchievements, setNewAchievements] = useState<TierListAchievement[]>([]);
+  const [unassignedPage, setUnassignedPage] = useState(0);
 
   const items: RankableItem[] = builtInCategory(category)?.items ?? customCategories.find((c) => c.id === category)?.items ?? [];
   const categoryLabel =
@@ -247,6 +253,7 @@ export function TierListEditor() {
     setCompareWith("");
     setSelectedItemId(null);
     setNewAchievements([]);
+    setUnassignedPage(0);
   }
 
   function handleCreateCustomCategory() {
@@ -317,6 +324,7 @@ export function TierListEditor() {
               const name = e.target.value || DEFAULT_LIST_NAME;
               setListName(name);
               setAssignments(allLists[storageKey(category, name)] ?? {});
+              setUnassignedPage(0);
             }}
           />
         </label>
@@ -497,23 +505,57 @@ export function TierListEditor() {
         ))}
       </div>
 
-      <div>
-        <h3 className="mb-2 text-sm font-medium text-black/60 dark:text-white/50">
-          Noch nicht eingestuft – tippe einen Eintrag an und dann eine Tier-Reihe (oder zieh ihn per Drag & Drop)
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {unassigned().map((item) => (
-            <RankItemCard
-              key={item.id}
-              item={item}
-              draggable
-              onDragStart={() => {}}
-              onClick={handleItemTap}
-              selected={selectedItemId === item.id}
-            />
-          ))}
-        </div>
-      </div>
+      {(() => {
+        const pool = unassigned();
+        const totalPages = Math.max(1, Math.ceil(pool.length / UNASSIGNED_PAGE_SIZE));
+        const page = Math.min(unassignedPage, totalPages - 1);
+        const pageItems = pool.slice(page * UNASSIGNED_PAGE_SIZE, (page + 1) * UNASSIGNED_PAGE_SIZE);
+        return (
+          <div>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-medium text-black/60 dark:text-white/50">
+                Noch nicht eingestuft ({pool.length}) – tippe einen Eintrag an und dann eine Tier-Reihe (oder zieh ihn
+                per Drag & Drop)
+              </h3>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setUnassignedPage((p) => Math.max(0, p - 1))}
+                    disabled={page === 0}
+                  >
+                    ← Zurück
+                  </Button>
+                  <span className="text-black/50 dark:text-white/40">
+                    Seite {page + 1}/{totalPages}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setUnassignedPage((p) => Math.min(totalPages - 1, p + 1))}
+                    disabled={page >= totalPages - 1}
+                  >
+                    Weiter →
+                  </Button>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {pageItems.map((item) => (
+                <RankItemCard
+                  key={item.id}
+                  item={item}
+                  draggable
+                  onDragStart={() => {}}
+                  onClick={handleItemTap}
+                  selected={selectedItemId === item.id}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
