@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { MODES, type ModeGroupId } from "@/lib/modes";
 import { Card } from "@/components/ui/Card";
+import { setLastPlayedHref } from "@/lib/lastPlayed";
 
 type Props = {
   group: ModeGroupId;
@@ -12,7 +15,7 @@ function ModeGrid({ modes }: { modes: typeof MODES }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {modes.map((m) => (
-        <Link key={m.href} href={m.href} className="group">
+        <Link key={m.href} href={m.href} className="group" onClick={() => setLastPlayedHref(m.href)}>
           <Card
             variant="spotlight"
             accent={m.accent}
