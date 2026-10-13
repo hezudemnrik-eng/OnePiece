@@ -529,25 +529,122 @@ export async function fetchMyRecentMatches(limit = 5): Promise<RecentMatch[]> {
   }));
 }
 
-export type OnlineProfile = {
-  userId: string;
+export type FriendRequest = {
+  friendshipId: string;
+  requesterId: string;
   username: string;
   avatarCharacterId: string | null;
 };
 
-/** Everyone else in the friend group active in the last 2 minutes (based on the AuthGate heartbeat). */
-export async function fetchOnlineFriends(): Promise<OnlineProfile[]> {
+export type Friend = {
+  friendshipId: string;
+  userId: string;
+  username: string;
+  avatarCharacterId: string | null;
+  online: boolean;
+};
+
+/**
+ * Sends a friend request to whoever owns this share_code (migration 0002 —
+ * same code already used to look up a friend's public tier lists). Replaces
+ * the old "everyone recently online counts as a friend" stand-in with a
+ * real opt-in graph (migration 0013).
+ */
+export async function sendFriendRequestByShareCode(code: string): Promise<{ ok: boolean; error?: string }> {
+  if (!supabase) return { ok: false, error: "Nicht verbunden." };
+  const myUserId = await ensureSupabaseSession();
+  if (!myUserId) return { ok: false, error: "Nicht angemeldet." };
+
+  const { data: target } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("share_code", code.trim().toUpperCase())
+    .maybeSingle();
+  if (!target) return { ok: false, error: "Kein Nutzer mit diesem Code gefunden." };
+  if (target.id === myUserId) return { ok: false, error: "Das ist dein eigener Code." };
+
+  const { error } = await supabase.from("friendships").insert({ requester_id: myUserId, addressee_id: target.id });
+  if (error) {
+    if (error.code === "23505") return { ok: false, error: "Ihr seid schon verbunden oder die Anfrage läuft bereits." };
+    return { ok: false, error: "Anfrage konnte nicht gesendet werden." };
+  }
+  return { ok: true };
+}
+
+/** Pending requests addressed to me, newest first. */
+export async function fetchIncomingFriendRequests(): Promise<FriendRequest[]> {
   if (!supabase) return [];
   const myUserId = await ensureSupabaseSession();
+  if (!myUserId) return [];
+  const { data: rows } = await supabase
+    .from("friendships")
+    .select("id, requester_id")
+    .eq("addressee_id", myUserId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  if (!rows || rows.length === 0) return [];
+
+  const requesterIds = rows.map((r) => r.requester_id);
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, username, avatar_character_id")
+    .in("id", requesterIds);
+
+  return rows.map((r) => {
+    const p = profiles?.find((p) => p.id === r.requester_id);
+    return {
+      friendshipId: r.id,
+      requesterId: r.requester_id,
+      username: p?.username ?? "?",
+      avatarCharacterId: p?.avatar_character_id ?? null,
+    };
+  });
+}
+
+export async function respondToFriendRequest(friendshipId: string, accept: boolean): Promise<void> {
+  if (!supabase) return;
+  await supabase
+    .from("friendships")
+    .update({ status: accept ? "accepted" : "declined", updated_at: new Date().toISOString() })
+    .eq("id", friendshipId);
+}
+
+/** Also used to cancel a request you sent, or unfriend an accepted one. */
+export async function removeFriendship(friendshipId: string): Promise<void> {
+  if (!supabase) return;
+  await supabase.from("friendships").delete().eq("id", friendshipId);
+}
+
+/** Accepted friends, each flagged online based on the AuthGate heartbeat (same 2-minute window as before). */
+export async function fetchFriends(): Promise<Friend[]> {
+  if (!supabase) return [];
+  const myUserId = await ensureSupabaseSession();
+  if (!myUserId) return [];
+  const { data: rows } = await supabase
+    .from("friendships")
+    .select("id, requester_id, addressee_id")
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${myUserId},addressee_id.eq.${myUserId}`);
+  if (!rows || rows.length === 0) return [];
+
+  const friendIds = rows.map((r) => (r.requester_id === myUserId ? r.addressee_id : r.requester_id));
   const twoMinAgo = new Date(Date.now() - 2 * 60_000).toISOString();
-  const { data } = await supabase
+  const { data: profiles } = await supabase
     .from("profiles")
     .select("id, username, avatar_character_id, last_seen")
-    .not("username", "is", null)
-    .gte("last_seen", twoMinAgo);
-  return (data ?? [])
-    .filter((p) => p.id !== myUserId)
-    .map((p) => ({ userId: p.id, username: p.username as string, avatarCharacterId: p.avatar_character_id }));
+    .in("id", friendIds);
+
+  return rows.map((r) => {
+    const friendId = r.requester_id === myUserId ? r.addressee_id : r.requester_id;
+    const p = profiles?.find((p) => p.id === friendId);
+    return {
+      friendshipId: r.id,
+      userId: friendId,
+      username: p?.username ?? "?",
+      avatarCharacterId: p?.avatar_character_id ?? null,
+      online: !!p?.last_seen && p.last_seen >= twoMinAgo,
+    };
+  });
 }
 
 export type OpenLiveDraft = {
@@ -818,6 +915,14 @@ export async function setEquippedFrame(frameId: string | null): Promise<void> {
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await supabase.from("profiles").update({ equipped_frame: frameId }).eq("id", userId);
+}
+
+/** Lets a user change their avatar after signup (previously only ever set once, at registration). */
+export async function setAvatarCharacterId(characterId: string): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("profiles").update({ avatar_character_id: characterId }).eq("id", userId);
 }
 
 export async function setEquippedColor(colorId: string | null): Promise<void> {

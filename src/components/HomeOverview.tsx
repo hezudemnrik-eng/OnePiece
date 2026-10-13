@@ -11,13 +11,13 @@ import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
+  fetchFriends,
   fetchMyLevelInfo,
-  fetchOnlineFriends,
   fetchRelevantLiveDrafts,
   getCurrentAuthUser,
   isSupabaseConfigured,
+  type Friend,
   type MyLevelInfo,
-  type OnlineProfile,
   type OpenLiveDraft,
 } from "@/lib/supabase";
 
@@ -42,7 +42,7 @@ function greeting(hour: number): string {
 export function HomeOverview() {
   const [username, setUsername] = useState<string | null>(null);
   const [levelInfo, setLevelInfo] = useState<MyLevelInfo | null>(null);
-  const [online, setOnline] = useState<OnlineProfile[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [myLobby, setMyLobby] = useState<OpenLiveDraft | null>(null);
   const [lastHref, setLastHref] = useState<string | null>(null);
   // new Date() is a "dynamic" API under Next's Cache Components prerendering
@@ -64,11 +64,11 @@ export function HomeOverview() {
       setChallenge(getTodaysChallenge(now));
     });
     if (!isSupabaseConfigured()) return;
-    Promise.all([getCurrentAuthUser(), fetchMyLevelInfo(), fetchOnlineFriends(), fetchRelevantLiveDrafts()]).then(
-      ([user, level, friends, drafts]) => {
+    Promise.all([getCurrentAuthUser(), fetchMyLevelInfo(), fetchFriends(), fetchRelevantLiveDrafts()]).then(
+      ([user, level, friendList, drafts]) => {
         setUsername(user?.username ?? null);
         setLevelInfo(level);
-        setOnline(friends);
+        setFriends(friendList);
         setMyLobby(drafts.find((d) => d.isMine) ?? null);
         setLoaded(true);
       }
@@ -77,6 +77,7 @@ export function HomeOverview() {
 
   const progress = levelInfo ? getLevelProgress(levelInfo.xp) : null;
   const lastMode = lastHref ? MODES.find((m) => m.href === lastHref) : undefined;
+  const onlineFriends = friends.filter((f) => f.online);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 flex flex-col gap-4">
@@ -167,10 +168,10 @@ export function HomeOverview() {
         </Link>
       )}
 
-      {isSupabaseConfigured() && loaded && online.length > 0 && (
+      {isSupabaseConfigured() && loaded && onlineFriends.length > 0 && (
         <div className="flex items-center gap-2 text-sm text-black/60 dark:text-white/50">
           <div className="flex -space-x-2">
-            {online.slice(0, 5).map((p) => {
+            {onlineFriends.slice(0, 5).map((p) => {
               const avatar = avatarFor(p.avatarCharacterId);
               return avatar?.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -193,7 +194,7 @@ export function HomeOverview() {
               );
             })}
           </div>
-          <span>{online.length} online</span>
+          <span>{onlineFriends.length} online</span>
         </div>
       )}
     </main>

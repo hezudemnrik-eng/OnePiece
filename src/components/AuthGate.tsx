@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { characters } from "@/lib/characters";
+import { AVATAR_CHOICES } from "@/lib/avatarChoices";
 import { AccountPanel } from "./AccountPanel";
 import { BottomNav } from "./BottomNav";
 import { IconRail } from "./IconRail";
@@ -16,21 +16,6 @@ import {
   signUpWithUsername,
   type AuthUser,
 } from "@/lib/supabase";
-
-const AVATAR_CHOICES = [
-  "luffy",
-  "zoro",
-  "nami",
-  "usopp",
-  "sanji",
-  "chopper",
-  "robin",
-  "franky",
-  "brook",
-  "jinbe",
-  "shanks",
-  "ace",
-].map((id) => characters.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => Boolean(c));
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
