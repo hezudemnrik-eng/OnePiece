@@ -55,11 +55,11 @@ export function AccountPanel({ onSignedOut }: Props) {
   const avatar = user.avatarCharacterId ? characters.find((c) => c.id === user.avatarCharacterId) : null;
 
   return (
-    <div className="flex items-center gap-2 text-sm">
+    <div className="flex min-w-0 items-center gap-1.5 text-sm sm:gap-2">
       <button
         onClick={() => setAnimationsEnabled(!animationsEnabled)}
         title={animationsEnabled ? "Animationen & Sound ausschalten" : "Animationen & Sound einschalten"}
-        className="text-base"
+        className="hidden shrink-0 text-base sm:inline"
       >
         {animationsEnabled ? "✨" : "🔇"}
       </button>
@@ -77,16 +77,26 @@ export function AccountPanel({ onSignedOut }: Props) {
           {level}
         </span>
       </Link>
-      <span>
+      {/* Username/Admin-Badge nur ab sm — auf dem Handy drängte das sonst
+          Berry-Anzeige und Abmelden-Button aus dem sichtbaren Header (Q143). */}
+      <span className="hidden min-w-0 truncate whitespace-nowrap sm:inline">
         <span className={`font-semibold ${colorClass}`}>{user.username}</span>
         {user.isAdmin && <span className="ml-1 text-xs text-accent-ink">(Admin)</span>}
       </span>
-      <span className="text-black/50 dark:text-white/40">{formatBerry(berries)}</span>
-      <Link href="/profil" className="text-black/50 dark:text-white/40 hover:underline">
+      <span className="shrink-0 whitespace-nowrap text-black/50 dark:text-white/40">{formatBerry(berries)}</span>
+      <Link href="/profil" className="hidden shrink-0 text-black/50 dark:text-white/40 hover:underline sm:inline">
         Profil
       </Link>
-      <button onClick={handleLogout} className="text-black/50 dark:text-white/40 hover:underline">
-        Abmelden
+      <button
+        onClick={handleLogout}
+        title="Abmelden"
+        aria-label="Abmelden"
+        className="shrink-0 text-black/50 dark:text-white/40 hover:underline"
+      >
+        <span className="sm:hidden" aria-hidden>
+          🚪
+        </span>
+        <span className="hidden sm:inline">Abmelden</span>
       </button>
     </div>
   );

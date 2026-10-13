@@ -91,7 +91,8 @@ export function HomeOverview() {
       {isSupabaseConfigured() && loaded && progress && (
         <Card variant="plain" className="px-4 py-3">
           <div className="flex items-center justify-between gap-2 mb-1.5 text-sm">
-            <span className="truncate whitespace-nowrap font-semibold">
+            <span className="flex min-w-0 items-center gap-1.5 truncate whitespace-nowrap font-semibold">
+              <span aria-hidden>☸️</span>
               Level {progress.level} · {progress.rankTitle}
             </span>
             <span className="shrink-0 whitespace-nowrap tabular-nums text-black/50 dark:text-white/40 font-[family-name:var(--font-mono)]">

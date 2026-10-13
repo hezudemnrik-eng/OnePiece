@@ -80,15 +80,19 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       <>
         <IconRail />
         <div className="md:pl-16">
-          <header className="sticky top-0 z-20 flex items-center justify-between border-b-2 border-foreground bg-[var(--background)]/95 backdrop-blur px-4 py-3">
+          <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b-2 border-foreground bg-[var(--background)]/95 backdrop-blur px-3 py-3 sm:px-4">
             <Link
               href="/"
-              className="op-ink-text flex items-center gap-2 font-[family-name:var(--font-display)] text-xl text-accent"
+              className="op-ink-text flex min-w-0 shrink-0 items-center gap-2 font-[family-name:var(--font-display)] text-xl text-accent"
             >
               <span aria-hidden>🏴‍☠️</span>
-              One Piece Draft-App
+              {/* Full title only where the header actually has room for it (Q143) —
+                  on narrow phones it used to wrap word-by-word down the whole
+                  header once AccountPanel's content pushed it below its
+                  content-driven minimum width. */}
+              <span className="hidden sm:inline whitespace-nowrap">One Piece Draft-App</span>
             </Link>
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <ThemeToggle />
               <AccountPanel onSignedOut={refreshUser} />
             </div>

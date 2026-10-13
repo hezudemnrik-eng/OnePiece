@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MODES, MODE_GROUPS } from "@/lib/modes";
+import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
 
 function isGroupActive(pathname: string, groupHref: string, groupId: string): boolean {
   if (pathname === groupHref) return true;
@@ -10,8 +10,9 @@ function isGroupActive(pathname: string, groupHref: string, groupId: string): bo
 }
 
 /**
- * Fixed bottom bar for mobile (Q51) — Home + the 3 mode categories (Q52).
- * Profil is reached via the avatar in the header instead of a 5th slot (Q59).
+ * Fixed bottom bar for mobile (Q51) — Home + the 3 mode categories (Q52) +
+ * Shop as its own 5th slot (requested alongside the Shop redesign — Profil
+ * still stays header-avatar-only, Q59).
  */
 export function BottomNav() {
   const pathname = usePathname();
@@ -49,6 +50,17 @@ export function BottomNav() {
           </Link>
         );
       })}
+      <Link
+        href={SHOP_TILE.href}
+        className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
+          pathname.startsWith(SHOP_TILE.href) ? "text-accent-ink" : "text-black/50 dark:text-white/40"
+        }`}
+      >
+        <span className="text-lg" aria-hidden>
+          {SHOP_TILE.icon}
+        </span>
+        {SHOP_TILE.title}
+      </Link>
     </nav>
   );
 }
