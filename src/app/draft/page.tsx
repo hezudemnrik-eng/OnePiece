@@ -1,14 +1,14 @@
 import { DraftBoard } from "@/components/DraftBoard";
+import { PageShell } from "@/components/ui/PageShell";
 
 export default function DraftPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl mb-1 text-amber-700 dark:text-amber-400">PvP-Draft gegen Freunde</h1>
-      <p className="text-sm text-black/60 dark:text-white/50 mb-6">
-        Hotseat-Modus auf einem Gerät für den Start. Live-Draft über mehrere
-        Geräte braucht noch die Supabase-Anbindung (siehe .env.example).
-      </p>
+    <PageShell
+      title="PvP-Draft gegen Freunde"
+      subtitle="Hotseat-Modus auf einem Gerät für den Start. Live-Draft über mehrere Geräte braucht noch die Supabase-Anbindung (siehe .env.example)."
+      accent="draft"
+    >
       <DraftBoard />
-    </main>
+    </PageShell>
   );
 }

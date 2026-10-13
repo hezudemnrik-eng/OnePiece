@@ -12,15 +12,22 @@ import {
   confirmRoles,
   createDraft,
   currentPlayer,
+  DRAFT_EMOTES,
   firstOpenSeat,
   getTeam,
   isLobbyFull,
   pickCharacter,
+  resolveTeamRoleConflicts,
+  sendEmote,
   skipRoll,
+  touchPresence,
+  type DraftEmote,
   type DraftTeam,
 } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { getRoleAdjustedVersions } from "@/lib/crewRoles";
+import { checkDraftAchievements, type DraftAchievement } from "@/lib/draftAchievements";
+import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
@@ -29,8 +36,10 @@ import {
   fetchLiveDraftByCode,
   fetchLiveDraftById,
   getCurrentAuthUser,
+  incrementXp,
   recordMatchResult,
   subscribeLiveDraft,
+  unlockAchievement,
   writeLiveDraft,
   type LiveDraftSession,
 } from "@/lib/supabase";
@@ -39,10 +48,16 @@ import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
 import { RollPanel } from "./RollPanel";
 import { TimerBar } from "./TimerBar";
 import { VictoryBanner } from "./VictoryBanner";
+import { Button } from "./ui/Button";
+import { Card } from "./ui/Card";
+import { Input } from "./ui/Input";
+import { Select } from "./ui/Select";
 
 const PICK_SECONDS = 30;
 const ROLES_SECONDS = 45;
 const NICKNAME_KEY = "op-nickname";
+const PRESENCE_INTERVAL_MS = 7000;
+const STALE_MS = 15000;
 
 type View = "loading" | "home" | "create-form" | "join-form" | "lobby" | "drafting" | "roles" | "result";
 
@@ -77,11 +92,15 @@ export function LiveDraftBoard() {
   const [codeInput, setCodeInput] = useState("");
   const [joinAsSpectator, setJoinAsSpectator] = useState(false);
 
+  const [newAchievements, setNewAchievements] = useState<DraftAchievement[]>([]);
+
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoPickFiredRef = useRef(false);
   const autoConfirmRolesFiredRef = useRef(false);
   const matchRecordedRef = useRef(false);
+  const achievementsCheckedRef = useRef(false);
+  const lastHeartbeatRef = useRef(0);
 
   function detachPolling() {
     if (pollIntervalRef.current) {
@@ -285,6 +304,29 @@ export function LiveDraftBoard() {
     }
   }
 
+  // Presence heartbeat (Q109): each client periodically touches its own
+  // player's lastSeenAt so the others can tell a closed tab apart from a
+  // teammate who's just thinking. Throttled against the existing 1s
+  // nowTick rather than a second independent interval, matching how the
+  // auto-pick/auto-confirm checks below already work off the same clock.
+  useEffect(() => {
+    if (!session || !myUserId || isSpectator) return;
+    if (effectiveView !== "drafting" && effectiveView !== "roles") return;
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    if (!me) return;
+    if (nowTick - lastHeartbeatRef.current < PRESENCE_INTERVAL_MS) return;
+    lastHeartbeatRef.current = nowTick;
+    const next = touchPresence(session.state, me.id);
+    writeLiveDraft(session.id, session.updated_at, { state: next }).then((result) => {
+      if (result.session) setSession(result.session);
+    });
+  }, [nowTick, effectiveView, session, myUserId, isSpectator]);
+
+  function isPlayerStale(lastSeenAt: string | undefined): boolean {
+    if (!lastSeenAt) return false;
+    return nowTick - new Date(lastSeenAt).getTime() > STALE_MS;
+  }
+
   // Only the current player's own browser fires the timeout auto-pick, so
   // two tabs never race to both auto-pick the same turn.
   useEffect(() => {
@@ -320,19 +362,22 @@ export function LiveDraftBoard() {
     if (session.host_id !== myUserId) return;
 
     const isTeamMode = session.state.players.some((p) => p.team);
+    // Teammates assigned roles independently of each other — resolve any
+    // clash over the same crew position by lottery before battling (Q104).
+    const state = isTeamMode ? resolveTeamRoleConflicts(session.state) : session.state;
     let result: BattleResult;
     if (isTeamMode) {
-      const sideA = session.state.players.filter((p) => p.team === "A");
-      const sideB = session.state.players.filter((p) => p.team === "B");
-      const sideAVersions = sideA.flatMap((p) => getRoleAdjustedVersions(getTeam(session.state, p.id, characters), p.roleAssignments));
-      const sideANames = sideA.flatMap((p) => getTeam(session.state, p.id, characters).map((c) => c.name));
-      const sideBVersions = sideB.flatMap((p) => getRoleAdjustedVersions(getTeam(session.state, p.id, characters), p.roleAssignments));
-      const sideBNames = sideB.flatMap((p) => getTeam(session.state, p.id, characters).map((c) => c.name));
+      const sideA = state.players.filter((p) => p.team === "A");
+      const sideB = state.players.filter((p) => p.team === "B");
+      const sideAVersions = sideA.flatMap((p) => getRoleAdjustedVersions(getTeam(state, p.id, characters), p.roleAssignments));
+      const sideANames = sideA.flatMap((p) => getTeam(state, p.id, characters).map((c) => c.name));
+      const sideBVersions = sideB.flatMap((p) => getRoleAdjustedVersions(getTeam(state, p.id, characters), p.roleAssignments));
+      const sideBNames = sideB.flatMap((p) => getTeam(state, p.id, characters).map((c) => c.name));
       result = simulateBattle(sideAVersions, sideANames, sideBVersions, sideBNames);
     } else {
-      const [p1, p2] = session.state.players;
-      const rosterA = getTeam(session.state, p1.id, characters);
-      const rosterB = getTeam(session.state, p2.id, characters);
+      const [p1, p2] = state.players;
+      const rosterA = getTeam(state, p1.id, characters);
+      const rosterB = getTeam(state, p2.id, characters);
       result = simulateBattle(
         getRoleAdjustedVersions(rosterA, p1.roleAssignments),
         rosterA.map((c) => c.name),
@@ -340,11 +385,38 @@ export function LiveDraftBoard() {
         rosterB.map((c) => c.name)
       );
     }
-    writeLiveDraft(session.id, session.updated_at, { phase: "result", battle: result }).then((r) => {
+    writeLiveDraft(session.id, session.updated_at, { state, phase: "result", battle: result }).then((r) => {
       if (r.session) setSession(r.session);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.state.players, session?.phase, myUserId]);
+
+  // Every participant's own browser checks its own draft achievements once —
+  // mirrors the match-result recording effect just below.
+  useEffect(() => {
+    if (!session || session.phase !== "result" || !session.battle || !myUserId || isSpectator) return;
+    if (achievementsCheckedRef.current) return;
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    if (!me) return;
+    achievementsCheckedRef.current = true;
+    const battle = session.battle;
+    const won = me.team ? me.team === battle.winnerTeam : session.state.players.indexOf(me) === (battle.winnerTeam === "A" ? 0 : 1);
+    const roster = getTeam(session.state, me.id, characters);
+    const opponentRoster = session.state.players
+      .filter((p) => (me.team ? p.team !== me.team : p.id !== me.id))
+      .flatMap((p) => getTeam(session.state, p.id, characters));
+    const rerolls = session.state.rerollsUsed?.[me.id] ?? 0;
+    const earned = checkDraftAchievements(roster, opponentRoster, won, rerolls, me.roleAssignments);
+    if (earned.length === 0) return;
+    Promise.all(earned.map(async (a) => ({ a, isNew: await unlockAchievement(a.id) }))).then((results) => {
+      const fresh = results.filter((r) => r.isNew).map((r) => r.a);
+      if (fresh.length > 0) {
+        incrementXp(fresh.length * XP_ACHIEVEMENT_BONUS);
+        setNewAchievements(fresh);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.state.finished, session?.phase, myUserId]);
 
   async function handleAssignRole(characterId: string, role: Role) {
     if (!session || !myUserId) return;
@@ -401,13 +473,60 @@ export function LiveDraftBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.state.finished, session?.phase, myUserId]);
 
+  async function handleSendEmote(emote: DraftEmote) {
+    if (!session || !myUserId) return;
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    if (!me) return;
+    const next = sendEmote(session.state, me.id, emote);
+    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
+    if (result.session) setSession(result.session);
+  }
+
   function backToHome() {
     unsubscribeRef.current?.();
     unsubscribeRef.current = null;
     detachPolling();
     setSession(null);
     setErrorMsg("");
+    setNewAchievements([]);
+    achievementsCheckedRef.current = false;
+    matchRecordedRef.current = false;
     setView("home");
+  }
+
+  function chatLabel(playerId: string): string {
+    return session?.state.players.find((p) => p.id === playerId)?.name ?? "?";
+  }
+
+  // Chat is intentionally limited to a fixed set of preset reactions (Q108)
+  // — no free text, so no moderation surface needed for a feature this small.
+  function renderChatBar() {
+    if (!session || isSpectator) return null;
+    const recent = session.state.chatLog?.slice(-6) ?? [];
+    return (
+      <div className="flex flex-col gap-2 rounded-lg border border-dashed border-black/15 dark:border-white/15 p-3">
+        <div className="flex flex-wrap gap-1.5">
+          {DRAFT_EMOTES.map((emote) => (
+            <button
+              key={emote}
+              onClick={() => handleSendEmote(emote)}
+              className="rounded-full border border-black/15 dark:border-white/15 px-2 py-1 text-base transition hover:border-mode-draft/50"
+            >
+              {emote}
+            </button>
+          ))}
+        </div>
+        {recent.length > 0 && (
+          <ul className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-black/50 dark:text-white/40">
+            {recent.map((m, i) => (
+              <li key={i}>
+                {chatLabel(m.playerId)}: {m.emote}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
   }
 
   if (effectiveView === "loading") {
@@ -416,56 +535,39 @@ export function LiveDraftBoard() {
 
   if (effectiveView === "home") {
     return (
-      <div className="flex flex-col gap-4 max-w-md">
+      <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Dein Name
-          <input
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value || "Spieler")}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
-          />
+          <Input value={nickname} onChange={(e) => setNickname(e.target.value || "Spieler")} />
         </label>
         <div className="flex gap-3">
-          <button
-            onClick={() => setView("create-form")}
-            className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
-          >
-            Lobby erstellen
-          </button>
-          <button
-            onClick={() => setView("join-form")}
-            className="rounded-md border border-black/15 dark:border-white/15 px-4 py-2 font-medium"
-          >
+          <Button onClick={() => setView("create-form")}>Lobby erstellen</Button>
+          <Button variant="secondary" onClick={() => setView("join-form")}>
             Mit Code beitreten
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     );
   }
 
   if (effectiveView === "create-form") {
     return (
-      <div className="flex flex-col gap-4 max-w-md">
+      <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Anzahl Spieler (2 oder 4)
-          <select
-            value={playerCount}
-            onChange={(e) => setPlayerCount(Number(e.target.value))}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
-          >
+          <Select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))}>
             <option value={2}>2</option>
             <option value={4}>4</option>
-          </select>
+          </Select>
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Teamgröße
-          <input
+          <Input
             type="number"
             min={1}
             max={10}
             value={teamSize}
             onChange={(e) => setTeamSize(Math.min(10, Math.max(1, Number(e.target.value) || 1)))}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
           />
         </label>
         {playerCount === 4 && (
@@ -474,51 +576,41 @@ export function LiveDraftBoard() {
             Team-vs-Team (2 gegen 2)
           </label>
         )}
-        {errorMsg && <p className="text-sm text-amber-600">{errorMsg}</p>}
+        {errorMsg && <p className="text-sm text-danger">{errorMsg}</p>}
         <div className="flex gap-3">
-          <button
-            onClick={handleCreate}
-            className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
-          >
-            Lobby erstellen
-          </button>
-          <button onClick={() => setView("home")} className="text-sm text-black/50 dark:text-white/40">
+          <Button onClick={handleCreate}>Lobby erstellen</Button>
+          <Button variant="ghost" onClick={() => setView("home")} className="text-black/50 dark:text-white/40">
             Zurück
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     );
   }
 
   if (effectiveView === "join-form") {
     return (
-      <div className="flex flex-col gap-4 max-w-md">
+      <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Einladungscode
-          <input
+          <Input
             value={codeInput}
             onChange={(e) => setCodeInput(e.target.value)}
             placeholder="z. B. AB3XQ9"
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5 font-mono uppercase"
+            className="font-mono uppercase"
           />
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={joinAsSpectator} onChange={(e) => setJoinAsSpectator(e.target.checked)} />
           Nur zuschauen (nicht selbst draften)
         </label>
-        {errorMsg && <p className="text-sm text-amber-600">{errorMsg}</p>}
+        {errorMsg && <p className="text-sm text-danger">{errorMsg}</p>}
         <div className="flex gap-3">
-          <button
-            onClick={() => handleJoin()}
-            className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
-          >
-            Beitreten
-          </button>
-          <button onClick={() => setView("home")} className="text-sm text-black/50 dark:text-white/40">
+          <Button onClick={() => handleJoin()}>Beitreten</Button>
+          <Button variant="ghost" onClick={() => setView("home")} className="text-black/50 dark:text-white/40">
             Zurück
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
     );
   }
 
@@ -530,7 +622,7 @@ export function LiveDraftBoard() {
     const teamsAssigned = !teamModeEnabled || claimedPlayers.every((p) => p.team);
     const canStart = full && teamsAssigned;
     return (
-      <div className="flex flex-col gap-4 max-w-md">
+      <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
         <div>
           <p className="text-sm text-black/60 dark:text-white/50">Einladungscode</p>
           <p className="font-mono text-2xl tracking-widest">{session.invite_code}</p>
@@ -549,7 +641,7 @@ export function LiveDraftBoard() {
               <span>
                 Sitz {i + 1}: {p.userId ? p.name : <em className="text-black/40 dark:text-white/30">offen</em>}
                 {p.team && ` · Team ${p.team}`}
-                {p.userId === myUserId && <span className="ml-2 text-amber-600 text-xs">Du</span>}
+                {p.userId === myUserId && <span className="ml-2 text-mode-draft text-xs">Du</span>}
               </span>
               {teamModeEnabled && isHost && p.userId && (
                 <div className="flex gap-1 shrink-0">
@@ -559,7 +651,7 @@ export function LiveDraftBoard() {
                       onClick={() => handleAssignTeam(i, p.team === team ? undefined : team)}
                       className={`rounded px-2 py-1 text-xs font-medium ${
                         p.team === team
-                          ? "bg-amber-600 text-white"
+                          ? "bg-mode-draft text-poster-ink"
                           : "border border-black/15 dark:border-white/15 text-black/60 dark:text-white/50"
                       }`}
                     >
@@ -573,19 +665,15 @@ export function LiveDraftBoard() {
         </ul>
         {isSpectator && <p className="text-sm text-black/50 dark:text-white/40">Du schaust nur zu.</p>}
         {isHost && (
-          <button
-            onClick={startDraft}
-            disabled={!canStart}
-            className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700 disabled:opacity-40"
-          >
+          <Button onClick={startDraft} disabled={!canStart}>
             {!full ? "Warte auf weitere Spieler…" : !teamsAssigned ? "Teile erst alle Teams zu…" : "Draft starten"}
-          </button>
+          </Button>
         )}
         {!isHost && !full && <p className="text-sm text-black/50 dark:text-white/40">Warte auf weitere Spieler…</p>}
-        <button onClick={backToHome} className="self-start text-sm text-black/50 dark:text-white/40">
+        <Button variant="ghost" onClick={backToHome} className="self-start text-black/50 dark:text-white/40">
           Verlassen
-        </button>
-      </div>
+        </Button>
+      </Card>
     );
   }
 
@@ -598,16 +686,23 @@ export function LiveDraftBoard() {
       .map((id) => characters.find((c) => c.id === id))
       .filter((c): c is NonNullable<typeof c> => Boolean(c));
 
+    const disconnected = !isSpectator && player.userId && player.userId !== myUserId && isPlayerStale(player.lastSeenAt);
+
     return (
       <div className="grid gap-6 md:grid-cols-[1fr_280px]">
         <div>
           <div className="mb-4 flex items-center justify-between">
             <p key={player.id} className="op-turn-pulse text-sm">
               Am Zug: <span className="font-semibold">{player.name}</span>
-              {myTurn && <span className="text-amber-600"> (du!)</span>} · Runde {session.state.round}
+              {myTurn && <span className="text-mode-draft"> (du!)</span>} · Runde {session.state.round}
             </p>
             <TimerBar secondsLeft={secondsLeft} totalSeconds={PICK_SECONDS} />
           </div>
+          {disconnected && (
+            <p className="mb-3 text-sm text-danger">
+              ⚠️ {player.name} scheint die Verbindung verloren zu haben — der Entwurf pausiert, bis die Person zurück ist.
+            </p>
+          )}
           <RollPanel
             offered={offered}
             skipsLeft={player.skipsLeft}
@@ -615,16 +710,16 @@ export function LiveDraftBoard() {
             onSkip={applySkip}
             readOnly={!myTurn}
           />
-          {!myTurn && !isSpectator && (
+          {!myTurn && !isSpectator && !disconnected && (
             <p className="mt-3 text-sm text-black/50 dark:text-white/40">Warte, bis {player.name} gezogen hat…</p>
           )}
         </div>
         <aside className="flex flex-col gap-4">
           {session.state.players.map((p) => (
-            <div key={p.id} className="rounded-lg border border-black/10 dark:border-white/10 p-3">
+            <Card key={p.id} variant="framed" accent="draft" className="p-3">
               <p className="mb-2 text-sm font-semibold">
                 {p.name}
-                {p.team && <span className="text-amber-600"> · Team {p.team}</span>} ({p.pickedCharacterIds.length}/
+                {p.team && <span className="text-mode-draft"> · Team {p.team}</span>} ({p.pickedCharacterIds.length}/
                 {session.state.teamSize})
               </p>
               <ul className="space-y-1 text-sm text-black/70 dark:text-white/60">
@@ -634,8 +729,9 @@ export function LiveDraftBoard() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </Card>
           ))}
+          {renderChatBar()}
         </aside>
       </div>
     );
@@ -647,6 +743,9 @@ export function LiveDraftBoard() {
     const elapsed = Math.floor((nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000);
     const secondsLeft = Math.max(0, ROLES_SECONDS - elapsed);
     const readyCount = session.state.players.filter((p) => p.rolesReady).length;
+    const stalePlayers = session.state.players.filter(
+      (p) => p.userId && p.userId !== myUserId && !p.rolesReady && isPlayerStale(p.lastSeenAt)
+    );
 
     return (
       <div className="flex flex-col gap-4">
@@ -656,6 +755,12 @@ export function LiveDraftBoard() {
           </p>
           <TimerBar secondsLeft={secondsLeft} totalSeconds={ROLES_SECONDS} />
         </div>
+        {stalePlayers.length > 0 && (
+          <p className="text-sm text-danger">
+            ⚠️ {stalePlayers.map((p) => p.name).join(", ")} scheint die Verbindung verloren zu haben — es pausiert, bis die
+            Person zurück ist.
+          </p>
+        )}
         {isSpectator || !me ? (
           <p className="text-sm text-black/50 dark:text-white/40">Warte, bis alle Spieler ihre Rollen zugeteilt haben…</p>
         ) : me.rolesReady ? (
@@ -669,6 +774,7 @@ export function LiveDraftBoard() {
             confirmLabel="Bereit"
           />
         )}
+        {renderChatBar()}
       </div>
     );
   }
@@ -698,32 +804,41 @@ export function LiveDraftBoard() {
       <div className="flex flex-col gap-6">
         {session.battle && <VictoryBanner won={myWon} label={myWon === null ? `${winnerLabel} gewinnt!` : undefined} />}
         <h2 className="text-xl font-semibold">Draft beendet</h2>
+        {newAchievements.length > 0 && (
+          <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
+            <p className="mb-1 text-sm font-semibold text-accent-ink">🏆 Neue Erfolge freigeschaltet!</p>
+            <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
+              {newAchievements.map((a) => (
+                <li key={a.id}>
+                  <span className="font-medium">{a.label}</span> — {a.description}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
           {session.state.players.map((p) => (
-            <div key={p.id} className="rounded-lg border border-black/10 dark:border-white/10 p-3">
+            <Card key={p.id} variant="framed" accent="draft" className="p-3">
               <p className="mb-2 font-semibold">{p.name}</p>
               <ul className="space-y-1 text-sm">
                 {p.pickedCharacterIds.map((id) => (
                   <li key={id}>{characters.find((c) => c.id === id)?.name}</li>
                 ))}
               </ul>
-            </div>
+            </Card>
           ))}
         </div>
         {session.battle ? (
-          <div className="rounded-lg border border-amber-500/40 p-4">
+          <Card variant="framed" accent="draft" className="p-4">
             <p className="mb-2 font-semibold">Kampfsimulation: {winnerLabel} gewinnt!</p>
             <AnimatedBattleLog battle={session.battle} />
-          </div>
+          </Card>
         ) : (
           <p className="text-sm text-black/50 dark:text-white/40">Kampfsimulation wird berechnet…</p>
         )}
-        <button
-          onClick={backToHome}
-          className="self-start rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
-        >
+        <Button onClick={backToHome} className="self-start">
           Zur Startseite
-        </button>
+        </Button>
       </div>
     );
   }

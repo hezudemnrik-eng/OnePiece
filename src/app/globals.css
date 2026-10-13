@@ -3,18 +3,84 @@
 :root {
   --background: #faf6ec;
   --foreground: #1a2332;
-  --surface: #ffffff;
-  --accent: #d97706;
+  --surface: #fff8e6;
+  /* One-Piece wanted-poster palette (Phase 12, from reference mockups) —
+     the same hex values are used in light AND dark mode (see the dark
+     overrides below): only the page chrome around them goes dark, not the
+     brand colors themselves. */
+  --accent: #f4c542;
+  /* Separate "readable" variant for plain accent-colored TEXT (nav active
+     state, achievement-banner headings, …) — the vivid fill color above is
+     far too light to read against the light page background, even though
+     it's exactly right as a button/badge fill. Same value as --accent in
+     dark mode, where the fill color already reads perfectly as text too. */
+  --accent-ink: #b45309;
+  /* Success now rides the brand gold instead of a separate green (Q23) —
+     aliased rather than hardcoded so it always tracks --accent. */
+  --success: var(--accent);
+  --danger: #b22222;
+  --navy: #0d3b66;
+  /* Always-paper surface for "wanted poster" character cards — stays
+     parchment-cream regardless of light/dark theme, since the poster is an
+     in-universe object, not reactive UI chrome (see .op-wanted below). */
+  --poster-paper: #f6e5c3;
+  --poster-ink: #1a1a1a;
   /* Unified corner radius for every card-like surface app-wide. */
   --radius-card: 1rem;
+
+  /* Per-mode accent tints (Q29) — purely decorative accents (icons, active
+     nav item, card highlight borders), never a full replacement for the
+     brand gold used on primary actions/XP/currency. */
+  --mode-draft: var(--accent);
+  --mode-duell: var(--accent);
+  --mode-zufallsgegner: var(--accent);
+  --mode-imu: #7f1d1d;
+  --mode-quiz: #2563eb;
+  --mode-tierlisten: #7c3aed;
+  --mode-blind-ranking: #4f46e5;
+  --mode-crew: #0d9488;
+  --mode-fusion: #c026d3;
+
+  /* Rarity tiers for character/cosmetic highlighting (Q27). Gold reuses the
+     brand accent; legendary additionally gets the .op-legendary-glow
+     animation below. */
+  --rarity-bronze: #92400e;
+  --rarity-silver: #9ca3af;
+  --rarity-gold: var(--accent);
+  --rarity-legendary: #c026d3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-navy: var(--navy);
+  --color-poster-paper: var(--poster-paper);
+  --color-poster-ink: var(--poster-ink);
+  --color-mode-draft: var(--mode-draft);
+  --color-mode-duell: var(--mode-duell);
+  --color-mode-zufallsgegner: var(--mode-zufallsgegner);
+  --color-mode-imu: var(--mode-imu);
+  --color-mode-quiz: var(--mode-quiz);
+  --color-mode-tierlisten: var(--mode-tierlisten);
+  --color-mode-blind-ranking: var(--mode-blind-ranking);
+  --color-mode-crew: var(--mode-crew);
+  --color-mode-fusion: var(--mode-fusion);
+  --color-rarity-bronze: var(--rarity-bronze);
+  --color-rarity-silver: var(--rarity-silver);
+  --color-rarity-gold: var(--rarity-gold);
+  --color-rarity-legendary: var(--rarity-legendary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-pirata);
+  /* Bold condensed wanted-poster/stencil display face (Phase 12) — Pirata
+     One (blackletter) stays --font-mystery for rare dramatic flavor (e.g.
+     the Imu intro) rather than being the everyday display font. */
+  --font-display: var(--font-anton);
+  --font-mystery: var(--font-pirata);
 }
 
 /* System dark mode applies unless the user picked "light" explicitly via
@@ -24,7 +90,25 @@
     --background: #0c1626;
     --foreground: #ede6d6;
     --surface: #121f33;
-    --accent: #f0b429;
+    /* --accent stays the same hex as light mode (Phase 12 palette reference
+       uses identical yellow in both panels) — it actually reads very well
+       as text on this dark navy background. --danger needs its own
+       brighter dark-mode shade though: the reference's deep firebrick red
+       has poor contrast against a near-black background when used as plain
+       warning/error text (as opposed to white-on-red button fills, where
+       the original tone is fine). */
+    --danger: #ef4444;
+    /* The vivid fill color already reads perfectly as text here, unlike in
+       light mode (see --accent-ink above). */
+    --accent-ink: var(--accent);
+    --mode-imu: #dc2626;
+    --mode-quiz: #60a5fa;
+    --mode-tierlisten: #a78bfa;
+    --mode-blind-ranking: #818cf8;
+    --mode-crew: #2dd4bf;
+    --mode-fusion: #e879f9;
+    --rarity-silver: #d1d5db;
+    --rarity-legendary: #e879f9;
   }
 }
 
@@ -33,7 +117,16 @@
   --background: #0c1626;
   --foreground: #ede6d6;
   --surface: #121f33;
-  --accent: #f0b429;
+  --danger: #ef4444;
+  --accent-ink: var(--accent);
+  --mode-imu: #dc2626;
+  --mode-quiz: #60a5fa;
+  --mode-tierlisten: #a78bfa;
+  --mode-blind-ranking: #818cf8;
+  --mode-crew: #2dd4bf;
+  --mode-fusion: #e879f9;
+  --rarity-silver: #d1d5db;
+  --rarity-legendary: #e879f9;
 }
 
 body {
@@ -60,22 +153,98 @@ body {
 }
 
 /* Base card: the one corner-radius + surface treatment every card-like
-   block in the app should share. */
+   block in the app should share. Deutliche Tusche-Optik (Phase 11): ein
+   durchgängiger Tinten-Rand + harter Versatz-Schatten statt des früheren
+   1px-Rahmens ohne Schatten — "--foreground" dient als Tinte, die sich
+   automatisch an Light/Dark anpasst (dunkle Tinte auf hellem, helle Kontur
+   auf dunklem Grund) statt einen festen Schwarzwert zu erzwingen. */
 .op-card {
   border-radius: var(--radius-card);
-  background-color: color-mix(in srgb, var(--surface) 60%, transparent);
-  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  background-color: color-mix(in srgb, var(--surface) 88%, transparent);
+  border: 2px solid var(--foreground);
+  box-shadow: 3px 3px 0 0 var(--foreground);
 }
 
 /* Decorative wood/rope frame: a thick amber "plank" border plus a dashed
    inner "rope" ring. Opt-in on top of .op-card for spots that should feel
-   extra treasure-map-y (profile, fusion board) rather than everywhere. */
+   extra treasure-map-y (profile, fusion board) rather than everywhere. The
+   outer hard ink shadow is folded in here too (combined box-shadow value),
+   since this class's declarations would otherwise fully override .op-card's
+   own shadow rather than add to it. */
 .op-framed {
   border-width: 3px;
   border-color: color-mix(in srgb, #92400e 70%, var(--foreground) 10%);
   box-shadow:
     inset 0 0 0 4px var(--background),
-    inset 0 0 0 6px color-mix(in srgb, #92400e 55%, transparent);
+    inset 0 0 0 6px color-mix(in srgb, #92400e 55%, transparent),
+    5px 5px 0 0 var(--foreground);
+}
+
+/* --- Phase 11: deutliche Tusche-Optik (Comic-Stil-Pass) ---
+   Ein paar wiederverwendbare Bausteine für dicke Tinten-Outlines + harte
+   Versatz-Schatten statt weicher Blur-Schatten, zusätzlich zu dem oben
+   bereits verstärkten .op-card. */
+
+/* Bolder tier, for the one or two "hero" panels per screen (Card
+   variant="spotlight", featured results) rather than dense repeated chips. */
+.op-ink {
+  border-width: 3px;
+  border-color: var(--foreground);
+  box-shadow: 5px 5px 0 0 var(--foreground);
+}
+
+/* Button-specific: same bold outline/shadow, plus a "pressed" state that
+   flattens the shadow and nudges the button toward it — a classic
+   comic/game-UI press affordance instead of a soft brightness-only hover. */
+.op-ink-btn {
+  border-width: 3px;
+  border-color: var(--foreground);
+  box-shadow: 4px 4px 0 0 var(--foreground);
+  transition:
+    box-shadow 0.1s ease-out,
+    transform 0.1s ease-out,
+    filter 0.15s ease-out;
+}
+.op-ink-btn:active:not(:disabled) {
+  box-shadow: 1px 1px 0 0 var(--foreground);
+  transform: translate(3px, 3px);
+}
+
+/* "Wanted poster" treatment for hero character reveals (Draft offer cards,
+   Duell fighter cards) — Phase 12. Always parchment-paper + ink-black,
+   regardless of light/dark theme: the poster is an in-universe object, not
+   reactive UI chrome, matching the reference mockups (same card look in
+   both theme panels, only the page behind it goes dark). */
+.op-wanted {
+  background-color: var(--poster-paper);
+  color: var(--poster-ink);
+  border: 3px solid var(--poster-ink);
+  box-shadow: 5px 5px 0 0 var(--poster-ink);
+}
+
+/* Form fields (Input/Select/textarea) default to a dark-mode-reactive fill
+   meant for a dark page background — wrong inside a .op-wanted card, which
+   is always light paper regardless of theme. Higher specificity than the
+   Tailwind utility classes, so it reliably wins without a className-order
+   gamble. */
+.op-wanted input,
+.op-wanted select,
+.op-wanted textarea {
+  background-color: #fff;
+  color: var(--poster-ink);
+}
+
+/* Comic-lettering stroke for display-font headings — a thin outline in
+   every direction instead of a soft blurred drop-shadow. Fixed semi-opaque
+   black regardless of theme (reads as a dark contour on both the cream
+   light background and the navy dark one, rather than needing a separate
+   override per theme). */
+.op-ink-text {
+  text-shadow:
+    -1.5px -1.5px 0 rgba(0, 0, 0, 0.7),
+    1.5px -1.5px 0 rgba(0, 0, 0, 0.7),
+    -1.5px 1.5px 0 rgba(0, 0, 0, 0.7),
+    1.5px 1.5px 0 rgba(0, 0, 0, 0.7);
 }
 
 /* --- Draft animations --- */
@@ -108,6 +277,25 @@ body {
 }
 .op-s-tier-glow {
   animation: op-s-tier-glow 1.6s ease-in-out infinite;
+}
+
+/* Richer two-tone glow (gold + magenta) reserved for legendary-rarity
+   items — a step up from the single-color S-tier glow above. */
+@keyframes op-legendary-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(240, 180, 41, 0.5),
+      0 0 0 0 rgba(192, 38, 211, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 28px 8px rgba(240, 180, 41, 0.55),
+      0 0 44px 14px rgba(192, 38, 211, 0.3);
+  }
+}
+.op-legendary-glow {
+  animation: op-legendary-glow 1.8s ease-in-out infinite;
 }
 
 @keyframes op-slide-in {
@@ -192,6 +380,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .op-pop-in,
   .op-s-tier-glow,
+  .op-legendary-glow,
   .op-slide-in,
   .op-turn-pulse,
   .op-banner-in,

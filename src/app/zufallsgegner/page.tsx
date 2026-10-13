@@ -1,19 +1,14 @@
 import { SoloDraftBoard } from "@/components/SoloDraftBoard";
+import { PageShell } from "@/components/ui/PageShell";
 
 export default function ZufallsgegnerPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="font-[family-name:var(--font-display)] text-3xl mb-1 text-amber-700 dark:text-amber-400">Gegen Zufallsgegner</h1>
-      <p className="text-sm text-black/60 dark:text-white/50 mb-6">
-        Ranked-Modus gegen eine leichtere KI – gute Übung zwischen den
-        Partien gegen Freunde.
-      </p>
-      <SoloDraftBoard
-        opponentName="Zufallsgegner"
-        difficulty="mittel"
-        topShare={0.3}
-        storageKey="op-zufallsgegner-runs"
-      />
-    </main>
+    <PageShell
+      title="Gegen Zufallsgegner"
+      subtitle="Ranked-Modus gegen eine leichtere KI – gute Übung zwischen den Partien gegen Freunde."
+      accent="zufallsgegner"
+    >
+      <SoloDraftBoard opponentName="Zufallsgegner" difficulty="mittel" topShare={0.3} storageKey="op-zufallsgegner-runs" />
+    </PageShell>
   );
 }

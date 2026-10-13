@@ -33,10 +33,21 @@ export function VictoryBanner({ won, label }: Props) {
   const text = label ?? (won === true ? "SIEG!" : won === false ? "NIEDERLAGE" : "KAMPF BEENDET");
   const color = won === true ? "text-emerald-400" : won === false ? "text-rose-400" : "text-amber-300";
 
+  // Comic-lettering stroke (4-direction outline) plus a bold offset shadow
+  // for depth, instead of the earlier soft blurred drop-shadow (Phase 11).
+  const inkTextShadow = [
+    "-2px -2px 0 #000",
+    "2px -2px 0 #000",
+    "-2px 2px 0 #000",
+    "2px 2px 0 #000",
+    "7px 7px 0 rgba(0,0,0,0.85)",
+  ].join(", ");
+
   return (
     <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <p
-        className={`op-banner-in font-[family-name:var(--font-display)] text-6xl sm:text-7xl ${color} drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]`}
+        className={`op-banner-in font-[family-name:var(--font-display)] text-6xl sm:text-7xl ${color}`}
+        style={{ textShadow: inkTextShadow }}
       >
         {text}
       </p>

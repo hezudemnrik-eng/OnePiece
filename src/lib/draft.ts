@@ -16,7 +16,16 @@ export type DraftPlayer = {
   roleAssignments?: Record<string, Role>;
   /** Whether this player has confirmed their role assignments (or chosen to skip them) and is ready for battle. */
   rolesReady?: boolean;
+  /** ISO timestamp of this player's last heartbeat in a live draft — lets other clients tell a quiet turn apart from a genuinely closed tab (see touchPresence). Unused in hotseat/solo modes. */
+  lastSeenAt?: string;
 };
+
+/** Chat is intentionally limited to a fixed set of preset reactions (Q108) rather than free text — no moderation surface needed for a feature this small. */
+export const DRAFT_EMOTES = ["👍", "😅", "😱", "🔥", "😤", "🎉"] as const;
+export type DraftEmote = (typeof DRAFT_EMOTES)[number];
+export type ChatMessage = { playerId: string; emote: DraftEmote; at: string };
+
+const MAX_CHAT_LOG = 12;
 
 export type DraftState = {
   players: DraftPlayer[];
@@ -44,6 +53,10 @@ export type DraftState = {
   rolledCharacterIds: string[];
   /** How many times the player on turn may reroll their current offer, refilled to this value at the start of each of their turns. */
   skipsPerTurn: number;
+  /** Total rerolls each player has spent across the whole draft (playerId -> count) — skipsLeft alone can't answer this since it resets every turn. Used for the "no rerolls" achievement. */
+  rerollsUsed?: Record<string, number>;
+  /** Preset emote reactions sent during the draft (Q108), newest last, capped at MAX_CHAT_LOG. */
+  chatLog?: ChatMessage[];
 };
 
 const OFFER_COUNT = 3;
@@ -183,8 +196,9 @@ export function skipRoll(state: DraftState, rng: () => number = Math.random): Dr
 
   const players = state.players.map((p) => (p.id === player.id ? { ...p, skipsLeft: p.skipsLeft - 1 } : p));
   const rolledCharacterIds = rollMultiple(state.availableCharacterIds, OFFER_COUNT, rng);
+  const rerollsUsed = { ...state.rerollsUsed, [player.id]: (state.rerollsUsed?.[player.id] ?? 0) + 1 };
 
-  return { ...state, players, rolledCharacterIds, turnStartedAt: new Date().toISOString() };
+  return { ...state, players, rolledCharacterIds, rerollsUsed, turnStartedAt: new Date().toISOString() };
 }
 
 /** Used when the pick timer runs out: the player gets a random one of whatever was currently offered. */
@@ -234,4 +248,54 @@ export function confirmRoles(state: DraftState, playerId: string): DraftState {
 /** True once every seated (claimed) player has confirmed their roles — the live draft's battle computation waits for this before running. */
 export function allRolesConfirmed(state: DraftState): boolean {
   return state.players.filter((p) => p.userId || p.pickedCharacterIds.length > 0).every((p) => p.rolesReady);
+}
+
+/** Heartbeat for a live draft (Q109): each client periodically touches its own player's lastSeenAt so the others can tell a disconnected tab apart from a teammate who's just thinking — see LiveDraftBoard's presence effect and staleness check. */
+export function touchPresence(state: DraftState, playerId: string): DraftState {
+  const players = state.players.map((p) => (p.id === playerId ? { ...p, lastSeenAt: new Date().toISOString() } : p));
+  return { ...state, players };
+}
+
+/** Appends a preset emote reaction to the shared chat log (Q108). No-op for an unknown player. */
+export function sendEmote(state: DraftState, playerId: string, emote: DraftEmote): DraftState {
+  if (!state.players.some((p) => p.id === playerId)) return state;
+  const chatLog = [...(state.chatLog ?? []), { playerId, emote, at: new Date().toISOString() }].slice(-MAX_CHAT_LOG);
+  return { ...state, chatLog };
+}
+
+/**
+ * Resolves crew-position conflicts between teammates in Team-vs-Team mode
+ * (Q104), by lottery. assignRole only guards uniqueness within one player's
+ * own roster, so two different players on the same team can each
+ * independently end up assigning the same specific role (e.g. both pick
+ * "Kapitän") — this scans every team for such clashes and, for each one,
+ * randomly keeps a single claim while the rest fall back to "Sonstige".
+ * No-op for free-for-all drafts (no teams at all). Call once, after every
+ * player has confirmed their roles and before the battle is computed.
+ */
+export function resolveTeamRoleConflicts(state: DraftState, rng: () => number = Math.random): DraftState {
+  const teams = new Set(state.players.map((p) => p.team).filter((t): t is DraftTeam => Boolean(t)));
+  if (teams.size === 0) return state;
+
+  const players = state.players.map((p) => ({ ...p, roleAssignments: { ...p.roleAssignments } }));
+  for (const team of teams) {
+    const teammates = players.filter((p) => p.team === team);
+    const claims = new Map<Role, { player: (typeof players)[number]; characterId: string }[]>();
+    for (const player of teammates) {
+      for (const [characterId, role] of Object.entries(player.roleAssignments)) {
+        if (role === "Sonstige") continue;
+        const list = claims.get(role) ?? [];
+        list.push({ player, characterId });
+        claims.set(role, list);
+      }
+    }
+    for (const claimants of claims.values()) {
+      if (claimants.length <= 1) continue;
+      const winnerIndex = Math.floor(rng() * claimants.length);
+      claimants.forEach((claim, i) => {
+        if (i !== winnerIndex) claim.player.roleAssignments[claim.characterId] = "Sonstige";
+      });
+    }
+  }
+  return { ...state, players };
 }

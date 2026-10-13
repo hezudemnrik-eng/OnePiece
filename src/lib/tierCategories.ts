@@ -1,4 +1,5 @@
-import { characters, getCrews } from "./characters";
+import { characters, getCrews, type Character } from "./characters";
+import { classifyFruit } from "./fruitType";
 import { arcs } from "./arcs";
 import { islands } from "./islands";
 
@@ -7,6 +8,8 @@ export type RankableItem = {
   name: string;
   subtitle?: string;
   imageUrl?: string | null;
+  /** Only set for character-based categories — arcs/islands/custom entries have no canon tier. */
+  tier?: Character["tier"];
 };
 
 export type BuiltInCategory = {
@@ -15,11 +18,20 @@ export type BuiltInCategory = {
   items: RankableItem[];
 };
 
+function toItems(pool: Character[]): RankableItem[] {
+  return pool.map((c) => ({ id: c.id, name: c.name, subtitle: `${c.crew} · ${c.role}`, imageUrl: c.imageUrl, tier: c.tier }));
+}
+
+/** Shorthand for a character-filtered built-in category — most of the 20 templates (Q94) are one of these. */
+function charCategory(id: string, label: string, filter: (c: Character) => boolean): BuiltInCategory {
+  return { id, label, items: toItems(characters.filter(filter)) };
+}
+
 export const BUILT_IN_CATEGORIES: BuiltInCategory[] = [
   {
     id: "characters",
     label: "Charaktere",
-    items: characters.map((c) => ({ id: c.id, name: c.name, subtitle: `${c.crew} · ${c.role}`, imageUrl: c.imageUrl })),
+    items: toItems(characters),
   },
   {
     id: "arcs",
@@ -36,6 +48,22 @@ export const BUILT_IN_CATEGORIES: BuiltInCategory[] = [
     label: "Crews",
     items: getCrews().map((crew) => ({ id: crew, name: crew })),
   },
+  charCategory("strohhuete", "Strohhutbande", (c) => c.crew === "Strohhutbande"),
+  charCategory("marine", "Marine", (c) => c.crew === "Marine"),
+  charCategory("weissbart", "Weißbart-Piraten", (c) => c.crew === "Weißbart-Piraten"),
+  charCategory("rotbart", "Rotbart-Piraten", (c) => c.crew === "Rotbart-Piraten"),
+  charCategory("weltregierung", "Weltregierung", (c) => c.crew === "Weltregierung"),
+  charCategory("revolutionsarmee", "Revolutionsarmee", (c) => c.crew === "Revolutionsarmee"),
+  charCategory("logia_nutzer", "Logia-Nutzer", (c) => classifyFruit(c.devilFruit) === "logia"),
+  charCategory("zoan_nutzer", "Zoan-Nutzer", (c) => classifyFruit(c.devilFruit) === "zoan"),
+  charCategory("paramecia_nutzer", "Paramecia-Nutzer", (c) => classifyFruit(c.devilFruit) === "paramecia"),
+  charCategory("s_tier", "Elite-Liga (nur S-Tier)", (c) => c.tier === "S"),
+  charCategory("lebende", "Noch Lebende", (c) => c.alive),
+  charCategory("verstorbene", "Verstorbene", (c) => !c.alive),
+  charCategory("kapitaene", "Kapitäne", (c) => c.role === "Kapitän"),
+  charCategory("kaempfer", "Kämpfer", (c) => c.role === "Kämpfer"),
+  charCategory("aerzte", "Ärzte", (c) => c.role === "Arzt"),
+  charCategory("koeche", "Köche", (c) => c.role === "Koch"),
 ];
 
 export function builtInCategory(id: string): BuiltInCategory | undefined {

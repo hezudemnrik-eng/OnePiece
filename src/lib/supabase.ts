@@ -529,25 +529,122 @@ export async function fetchMyRecentMatches(limit = 5): Promise<RecentMatch[]> {
   }));
 }
 
-export type OnlineProfile = {
-  userId: string;
+export type FriendRequest = {
+  friendshipId: string;
+  requesterId: string;
   username: string;
   avatarCharacterId: string | null;
 };
 
-/** Everyone else in the friend group active in the last 2 minutes (based on the AuthGate heartbeat). */
-export async function fetchOnlineFriends(): Promise<OnlineProfile[]> {
+export type Friend = {
+  friendshipId: string;
+  userId: string;
+  username: string;
+  avatarCharacterId: string | null;
+  online: boolean;
+};
+
+/**
+ * Sends a friend request to whoever owns this share_code (migration 0002 —
+ * same code already used to look up a friend's public tier lists). Replaces
+ * the old "everyone recently online counts as a friend" stand-in with a
+ * real opt-in graph (migration 0013).
+ */
+export async function sendFriendRequestByShareCode(code: string): Promise<{ ok: boolean; error?: string }> {
+  if (!supabase) return { ok: false, error: "Nicht verbunden." };
+  const myUserId = await ensureSupabaseSession();
+  if (!myUserId) return { ok: false, error: "Nicht angemeldet." };
+
+  const { data: target } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("share_code", code.trim().toUpperCase())
+    .maybeSingle();
+  if (!target) return { ok: false, error: "Kein Nutzer mit diesem Code gefunden." };
+  if (target.id === myUserId) return { ok: false, error: "Das ist dein eigener Code." };
+
+  const { error } = await supabase.from("friendships").insert({ requester_id: myUserId, addressee_id: target.id });
+  if (error) {
+    if (error.code === "23505") return { ok: false, error: "Ihr seid schon verbunden oder die Anfrage läuft bereits." };
+    return { ok: false, error: "Anfrage konnte nicht gesendet werden." };
+  }
+  return { ok: true };
+}
+
+/** Pending requests addressed to me, newest first. */
+export async function fetchIncomingFriendRequests(): Promise<FriendRequest[]> {
   if (!supabase) return [];
   const myUserId = await ensureSupabaseSession();
+  if (!myUserId) return [];
+  const { data: rows } = await supabase
+    .from("friendships")
+    .select("id, requester_id")
+    .eq("addressee_id", myUserId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false });
+  if (!rows || rows.length === 0) return [];
+
+  const requesterIds = rows.map((r) => r.requester_id);
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, username, avatar_character_id")
+    .in("id", requesterIds);
+
+  return rows.map((r) => {
+    const p = profiles?.find((p) => p.id === r.requester_id);
+    return {
+      friendshipId: r.id,
+      requesterId: r.requester_id,
+      username: p?.username ?? "?",
+      avatarCharacterId: p?.avatar_character_id ?? null,
+    };
+  });
+}
+
+export async function respondToFriendRequest(friendshipId: string, accept: boolean): Promise<void> {
+  if (!supabase) return;
+  await supabase
+    .from("friendships")
+    .update({ status: accept ? "accepted" : "declined", updated_at: new Date().toISOString() })
+    .eq("id", friendshipId);
+}
+
+/** Also used to cancel a request you sent, or unfriend an accepted one. */
+export async function removeFriendship(friendshipId: string): Promise<void> {
+  if (!supabase) return;
+  await supabase.from("friendships").delete().eq("id", friendshipId);
+}
+
+/** Accepted friends, each flagged online based on the AuthGate heartbeat (same 2-minute window as before). */
+export async function fetchFriends(): Promise<Friend[]> {
+  if (!supabase) return [];
+  const myUserId = await ensureSupabaseSession();
+  if (!myUserId) return [];
+  const { data: rows } = await supabase
+    .from("friendships")
+    .select("id, requester_id, addressee_id")
+    .eq("status", "accepted")
+    .or(`requester_id.eq.${myUserId},addressee_id.eq.${myUserId}`);
+  if (!rows || rows.length === 0) return [];
+
+  const friendIds = rows.map((r) => (r.requester_id === myUserId ? r.addressee_id : r.requester_id));
   const twoMinAgo = new Date(Date.now() - 2 * 60_000).toISOString();
-  const { data } = await supabase
+  const { data: profiles } = await supabase
     .from("profiles")
     .select("id, username, avatar_character_id, last_seen")
-    .not("username", "is", null)
-    .gte("last_seen", twoMinAgo);
-  return (data ?? [])
-    .filter((p) => p.id !== myUserId)
-    .map((p) => ({ userId: p.id, username: p.username as string, avatarCharacterId: p.avatar_character_id }));
+    .in("id", friendIds);
+
+  return rows.map((r) => {
+    const friendId = r.requester_id === myUserId ? r.addressee_id : r.requester_id;
+    const p = profiles?.find((p) => p.id === friendId);
+    return {
+      friendshipId: r.id,
+      userId: friendId,
+      username: p?.username ?? "?",
+      avatarCharacterId: p?.avatar_character_id ?? null,
+      online: !!p?.last_seen && p.last_seen >= twoMinAgo,
+    };
+  });
 }
 
 export type OpenLiveDraft = {
@@ -660,6 +757,35 @@ export async function fetchQuizLeaderboard(): Promise<QuizLeaderboardEntry[]> {
     .sort((a, b) => b.totalScore / Math.max(1, b.totalQuestions) - a.totalScore / Math.max(1, a.totalQuestions));
 }
 
+export type GlobalLeaderboardEntry = {
+  userId: string;
+  username: string;
+  avatarCharacterId: string | null;
+  xp: number;
+};
+
+/**
+ * Account-wide XP ranking across every signed-up user (Q180) — distinct from
+ * fetchLeaderboard()/fetchQuizLeaderboard(), which only rank match/quiz
+ * results. `profiles` is already readable by everyone (migration 0001), and
+ * only the already-public username/xp/avatar fields are selected here.
+ */
+export async function fetchGlobalLeaderboard(limit = 50): Promise<GlobalLeaderboardEntry[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, username, avatar_character_id, xp")
+    .not("username", "is", null)
+    .order("xp", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((p) => ({
+    userId: p.id,
+    username: p.username as string,
+    avatarCharacterId: p.avatar_character_id,
+    xp: (p.xp as number) ?? 0,
+  }));
+}
+
 export type QuizSession = {
   id: string;
   invite_code: string;
@@ -668,6 +794,8 @@ export type QuizSession = {
   difficulty: string;
   questions: unknown[];
   created_at: string;
+  /** Index of the question that's currently "live" for everyone — the round-robin turn pointer (Q123, migration 0015). */
+  current_index: number;
 };
 
 /** Creates a multiplayer quiz lobby with a fixed, shared question set. */
@@ -721,18 +849,6 @@ export async function joinQuizSession(sessionId: string, username: string): Prom
     .upsert({ session_id: sessionId, user_id: userId, username }, { onConflict: "session_id,user_id" });
 }
 
-export async function submitQuizScore(sessionId: string, score: number): Promise<void> {
-  if (!supabase) return;
-  const userId = await ensureSupabaseSession();
-  if (!userId) return;
-  await supabase
-    .from("quiz_participants")
-    .update({ score, finished_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-    .eq("session_id", sessionId)
-    .eq("user_id", userId);
-  await awardModeXp("quiz", XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
-}
-
 export async function fetchQuizParticipants(sessionId: string): Promise<QuizParticipant[]> {
   if (!supabase) return [];
   const { data } = await supabase
@@ -741,6 +857,71 @@ export async function fetchQuizParticipants(sessionId: string): Promise<QuizPart
     .eq("session_id", sessionId)
     .order("score", { ascending: false, nullsFirst: false });
   return (data as QuizParticipant[]) ?? [];
+}
+
+/** Turn order for the round-robin live quiz (Q123) — join order, earliest first. */
+export async function fetchQuizTurnOrder(sessionId: string): Promise<{ userId: string; username: string }[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("quiz_participants")
+    .select("user_id, username, joined_at")
+    .eq("session_id", sessionId)
+    .order("joined_at", { ascending: true });
+  return (data ?? []).map((p) => ({ userId: p.user_id as string, username: p.username as string }));
+}
+
+/** Refetches just the session row — used to poll the shared current_index turn pointer. */
+export async function fetchQuizSession(sessionId: string): Promise<QuizSession | null> {
+  if (!supabase) return null;
+  const { data } = await supabase.from("quiz_sessions").select().eq("id", sessionId).maybeSingle();
+  return (data as QuizSession) ?? null;
+}
+
+/** Atomically advances the shared turn pointer by one — fails harmlessly (returns false) if another client already advanced it first. */
+export async function advanceQuizTurn(sessionId: string, expectedIndex: number): Promise<boolean> {
+  if (!supabase) return false;
+  const { data } = await supabase.rpc("advance_quiz_turn", { p_session_id: sessionId, p_expected_index: expectedIndex });
+  return data === true;
+}
+
+/** Called by whoever's turn it is, right after answering — adds one point to their own running score if they got it right. */
+export async function awardQuizTurnPoint(sessionId: string, correct: boolean): Promise<void> {
+  if (!supabase || !correct) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  const { data } = await supabase
+    .from("quiz_participants")
+    .select("score")
+    .eq("session_id", sessionId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  const nextScore = (data?.score ?? 0) + 1;
+  await supabase
+    .from("quiz_participants")
+    .update({ score: nextScore, updated_at: new Date().toISOString() })
+    .eq("session_id", sessionId)
+    .eq("user_id", userId);
+}
+
+/** Called once by each client when it detects the shared quiz has ended — awards XP for this participant's own final score. */
+export async function finalizeQuizParticipant(sessionId: string): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  const { data } = await supabase
+    .from("quiz_participants")
+    .select("score, finished_at")
+    .eq("session_id", sessionId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!data || data.finished_at) return; // already finalized
+  const score = data.score ?? 0;
+  await supabase
+    .from("quiz_participants")
+    .update({ finished_at: new Date().toISOString() })
+    .eq("session_id", sessionId)
+    .eq("user_id", userId);
+  await awardModeXp("quiz", XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
 }
 
 // --- Account-wide XP for modes that otherwise only keep local history ---
@@ -793,7 +974,14 @@ export async function unlockAchievement(achievementId: string): Promise<boolean>
 
 // --- Level/rank profile info ---
 
-export type MyLevelInfo = { xp: number; equippedFrame: string | null; berries: number; equippedColor: string | null };
+export type MyLevelInfo = {
+  xp: number;
+  equippedFrame: string | null;
+  berries: number;
+  equippedColor: string | null;
+  equippedTitle: string | null;
+  equippedArena: string | null;
+};
 
 export async function fetchMyLevelInfo(): Promise<MyLevelInfo | null> {
   if (!supabase) return null;
@@ -801,7 +989,7 @@ export async function fetchMyLevelInfo(): Promise<MyLevelInfo | null> {
   if (!userId) return null;
   const { data } = await supabase
     .from("profiles")
-    .select("xp, equipped_frame, berries, equipped_color")
+    .select("xp, equipped_frame, berries, equipped_color, equipped_title, equipped_arena")
     .eq("id", userId)
     .maybeSingle();
   if (!data) return null;
@@ -809,6 +997,8 @@ export async function fetchMyLevelInfo(): Promise<MyLevelInfo | null> {
     xp: (data.xp as number) ?? 0,
     equippedFrame: (data.equipped_frame as string | null) ?? null,
     berries: (data.berries as number) ?? 0,
+    equippedTitle: (data.equipped_title as string | null) ?? null,
+    equippedArena: (data.equipped_arena as string | null) ?? null,
     equippedColor: (data.equipped_color as string | null) ?? null,
   };
 }
@@ -820,11 +1010,33 @@ export async function setEquippedFrame(frameId: string | null): Promise<void> {
   await supabase.from("profiles").update({ equipped_frame: frameId }).eq("id", userId);
 }
 
+/** Lets a user change their avatar after signup (previously only ever set once, at registration). */
+export async function setAvatarCharacterId(characterId: string): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("profiles").update({ avatar_character_id: characterId }).eq("id", userId);
+}
+
 export async function setEquippedColor(colorId: string | null): Promise<void> {
   if (!supabase) return;
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await supabase.from("profiles").update({ equipped_color: colorId }).eq("id", userId);
+}
+
+export async function setEquippedTitle(titleId: string | null): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("profiles").update({ equipped_title: titleId }).eq("id", userId);
+}
+
+export async function setEquippedArena(arenaId: string | null): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("profiles").update({ equipped_arena: arenaId }).eq("id", userId);
 }
 
 // --- Berry shop (migration 0012) ---

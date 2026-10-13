@@ -1,18 +1,33 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { characters, type Role } from "@/lib/characters";
+import { characters, type Character, type Role } from "@/lib/characters";
 import { assignRole, autoPick, createDraft, currentPlayer, getTeam, pickCharacter, skipRoll, type DraftState } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { generateAiTeam, generateImuBoss, type AiTeam, type Difficulty } from "@/lib/imu";
-import { getCurrentAuthUser, recordMatchResult } from "@/lib/supabase";
+import { checkDraftAchievements, type DraftAchievement } from "@/lib/draftAchievements";
+import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
+import { getCurrentAuthUser, incrementXp, recordMatchResult, unlockAchievement } from "@/lib/supabase";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
 import { RollPanel } from "./RollPanel";
 import { TimerBar } from "./TimerBar";
 import { VictoryBanner } from "./VictoryBanner";
+import { Badge } from "./ui/Badge";
+import { Button } from "./ui/Button";
+import { Card } from "./ui/Card";
+import { Input } from "./ui/Input";
+import type { ModeAccent } from "./ui/modeAccents";
+
+const TIER_RARITY: Record<Character["tier"], "legendary" | "gold" | "silver" | "bronze"> = {
+  S: "legendary",
+  A: "gold",
+  B: "silver",
+  C: "bronze",
+  D: "bronze",
+};
 
 const PICK_SECONDS = 30;
 
@@ -55,7 +70,10 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
   const [opponentTeam, setOpponentTeam] = useState<AiTeam | null>(null);
   const [battle, setBattle] = useState<BattleResult | null>(null);
   const [runs, setRuns] = useState<RunRecord[]>(() => loadRuns(storageKey));
+  const [newAchievements, setNewAchievements] = useState<DraftAchievement[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const accent: ModeAccent = opponentName === "Imu" ? "imu" : "zufallsgegner";
 
   useEffect(() => {
     getCurrentAuthUser().then((u) => {
@@ -77,6 +95,19 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     setPhase("drafting");
   }
 
+  async function finalizeDraft(roster: Character[], opponentRoster: Character[], won: boolean, roleAssignments: DraftState["players"][number]["roleAssignments"]) {
+    if (!draft) return;
+    const rerolls = draft.rerollsUsed?.[draft.players[0].id] ?? 0;
+    const earned = checkDraftAchievements(roster, opponentRoster, won, rerolls, roleAssignments);
+    if (earned.length === 0) return;
+    const results = await Promise.all(earned.map(async (a) => ({ a, isNew: await unlockAchievement(a.id) })));
+    const fresh = results.filter((r) => r.isNew).map((r) => r.a);
+    if (fresh.length > 0) {
+      incrementXp(fresh.length * XP_ACHIEVEMENT_BONUS);
+      setNewAchievements(fresh);
+    }
+  }
+
   function startBattle() {
     if (!draft) return;
     const ai = isBossFight ? generateImuBoss(difficulty) : generateAiTeam({ teamSize, difficulty, topShare, flatBonus });
@@ -87,15 +118,18 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     const playerNames = roster.map((c) => c.name);
     const result = simulateBattle(playerVersions, playerNames, ai.versions, ai.names);
     setBattle(result);
+    const won = result.winnerTeam === "A";
     const run: RunRecord = {
       date: new Date().toLocaleString("de-DE"),
-      result: result.winnerTeam === "A" ? "win" : "loss",
+      result: won ? "win" : "loss",
       rounds: result.rounds.at(-1)?.round ?? 0,
     };
     saveRun(storageKey, run);
     setRuns(loadRuns(storageKey));
+    setNewAchievements([]);
     setPhase("result");
     recordMatchResult(opponentName === "Imu" ? "imu" : "zufallsgegner", opponentName, run.result);
+    finalizeDraft(roster, ai.characters, won, player.roleAssignments);
   }
 
   function handleAssignRole(characterId: string, role: Role) {
@@ -146,38 +180,31 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     setDraft(null);
     setBattle(null);
     setOpponentTeam(null);
+    setNewAchievements([]);
     setPhase("setup");
   }
 
   if (phase === "setup") {
     const wins = runs.filter((r) => r.result === "win").length;
     return (
-      <div className="flex flex-col gap-4 max-w-md">
+      <Card variant="spotlight" accent={accent} className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Dein Name
-          <input
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
-          />
+          <Input value={playerName} onChange={(e) => setPlayerName(e.target.value)} />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Teamgröße
-          <input
+          <Input
             type="number"
             min={1}
             max={10}
             value={teamSize}
             onChange={(e) => setTeamSize(Math.min(10, Math.max(1, Number(e.target.value) || 1)))}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
           />
         </label>
-        <button
-          onClick={startDraft}
-          className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
-        >
+        <Button onClick={startDraft} className="self-start">
           Draft gegen {opponentName} starten
-        </button>
+        </Button>
         {runs.length > 0 && (
           <div className="rounded-lg border border-black/10 dark:border-white/10 p-3 text-sm">
             <p className="mb-2 font-medium">
@@ -192,7 +219,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
             </ul>
           </div>
         )}
-      </div>
+      </Card>
     );
   }
 
@@ -238,30 +265,45 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
           {playerWon ? `Gewonnen gegen ${opponentName}!` : `${opponentName} hat gewonnen.`}
         </h2>
         {playerWon && isBossFight && (
-          <p className="-mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1 text-sm font-medium text-amber-700 dark:text-amber-400">
+          <p className="-mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-mode-imu/15 px-3 py-1 text-sm font-medium text-mode-imu">
             🏆 Imu-Bezwinger
           </p>
         )}
+        {newAchievements.length > 0 && (
+          <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
+            <p className="mb-1 text-sm font-semibold text-accent-ink">🏆 Neue Erfolge freigeschaltet!</p>
+            <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
+              {newAchievements.map((a) => (
+                <li key={a.id}>
+                  <span className="font-medium">{a.label}</span> — {a.description}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-black/10 dark:border-white/10 p-3">
+          <Card variant="framed" accent={accent} className="p-3">
             <p className="mb-2 font-semibold">{draft.players[0].name}</p>
             <ul className="space-y-1 text-sm">
               {draft.players[0].pickedCharacterIds.map((id) => (
                 <li key={id}>{characters.find((c) => c.id === id)?.name}</li>
               ))}
             </ul>
-          </div>
-          <div
-            className={`rounded-lg border p-3 ${isBossFight ? "op-s-tier-glow border-amber-500/50 bg-gradient-to-b from-amber-500/10 to-transparent" : "border-black/10 dark:border-white/10"}`}
-          >
-            <p className="mb-2 font-semibold">{opponentName}</p>
+          </Card>
+          <div className={`op-wanted op-parchment relative rounded-lg p-3 ${isBossFight ? "op-s-tier-glow" : ""}`}>
+            {isBossFight && imuChar && (
+              <Badge rarity={TIER_RARITY[imuChar.tier]} className="absolute -top-2 -right-2">
+                {imuChar.tier}
+              </Badge>
+            )}
+            <p className="mb-2 font-[family-name:var(--font-display)]">{opponentName}</p>
             {imuChar?.imageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imuChar.imageUrl}
                 alt={imuChar.name}
                 referrerPolicy="no-referrer"
-                className="mb-2 h-32 w-auto rounded-lg border border-amber-500/40 object-cover object-top shadow-lg"
+                className="mb-2 h-32 w-auto rounded-lg border-2 border-poster-ink object-cover object-top"
               />
             )}
             <ul className="space-y-1 text-sm">
@@ -271,16 +313,13 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
             </ul>
           </div>
         </div>
-        <div className="rounded-lg border border-amber-500/40 p-4">
+        <Card variant="framed" accent={accent} className="p-4">
           <p className="mb-2 font-semibold">Kampfverlauf</p>
           <AnimatedBattleLog battle={battle} />
-        </div>
-        <button
-          onClick={playAgain}
-          className="self-start rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
-        >
+        </Card>
+        <Button onClick={playAgain} className="self-start">
           Nochmal versuchen
-        </button>
+        </Button>
       </div>
     );
   }

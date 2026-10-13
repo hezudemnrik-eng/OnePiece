@@ -18,9 +18,20 @@ import {
   type CustomCategory,
   type RankableItem,
 } from "@/lib/tierCategories";
+import { checkTierListAchievements, type TierListAchievement } from "@/lib/tierListAchievements";
+import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
+import { incrementXp, unlockAchievement } from "@/lib/supabase";
 import { RankItemCard } from "./RankItemCard";
+import { Button } from "./ui/Button";
+import { Input } from "./ui/Input";
+import { Select } from "./ui/Select";
 
 const TIERS: Tier[] = ["S", "A", "B", "C", "D"];
+// Hard pagination instead of a scrollbar for the unassigned pool (Q96/the
+// "kein Scrollen" core requirement) — categories can hold ~300 items
+// (e.g. "Charaktere"), which rendered as one flat wrapped list blew the
+// page height out to 20×+ the viewport.
+const UNASSIGNED_PAGE_SIZE = 24;
 const STORAGE_KEY = "op-tierlists";
 const NICKNAME_KEY = "op-nickname";
 const DEFAULT_LIST_NAME = "Meine Tierliste";
@@ -91,6 +102,9 @@ export function TierListEditor() {
   const [friendLists, setFriendLists] = useState<Record<string, { category: string; assignments: Assignments }>>({});
   const [friendCodeInput, setFriendCodeInput] = useState("");
   const [friendLoadStatus, setFriendLoadStatus] = useState<"idle" | "loading" | "ok" | "not-found">("idle");
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [newAchievements, setNewAchievements] = useState<TierListAchievement[]>([]);
+  const [unassignedPage, setUnassignedPage] = useState(0);
 
   const items: RankableItem[] = builtInCategory(category)?.items ?? customCategories.find((c) => c.id === category)?.items ?? [];
   const categoryLabel =
@@ -194,10 +208,35 @@ export function TierListEditor() {
     }
   }
 
+  async function finalizeIfComplete(nextAssignments: Assignments) {
+    const assignedCount = Object.keys(nextAssignments).length;
+    if (assignedCount < items.length) return;
+    const earned = checkTierListAchievements(category, assignedCount, items.length);
+    if (earned.length === 0) return;
+    const results = await Promise.all(earned.map(async (a) => ({ a, isNew: await unlockAchievement(a.id) })));
+    const fresh = results.filter((r) => r.isNew).map((r) => r.a);
+    if (fresh.length > 0) {
+      incrementXp(fresh.length * XP_ACHIEVEMENT_BONUS);
+      setNewAchievements(fresh);
+    }
+  }
+
   function assign(itemId: string, tier: Tier) {
     const next = { ...assignments, [itemId]: tier };
     setAssignments(next);
     persist(next);
+    setSelectedItemId(null);
+    finalizeIfComplete(next);
+  }
+
+  /** Tap-to-assign: tap an item to select it, then tap a tier row to place it (Q91/Q157 — no native drag & drop on touch). */
+  function handleItemTap(itemId: string) {
+    setSelectedItemId((prev) => (prev === itemId ? null : itemId));
+  }
+
+  function handleTierTap(tier: Tier) {
+    if (!selectedItemId) return;
+    assign(selectedItemId, tier);
   }
 
   function togglePublic() {
@@ -212,6 +251,9 @@ export function TierListEditor() {
     setListName(DEFAULT_LIST_NAME);
     setAssignments(allLists[storageKey(nextCategory, DEFAULT_LIST_NAME)] ?? {});
     setCompareWith("");
+    setSelectedItemId(null);
+    setNewAchievements([]);
+    setUnassignedPage(0);
   }
 
   function handleCreateCustomCategory() {
@@ -251,7 +293,7 @@ export function TierListEditor() {
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm">
           Kategorie
-          <select
+          <Select
             value={category}
             onChange={(e) => {
               if (e.target.value === "__new__") {
@@ -260,7 +302,6 @@ export function TierListEditor() {
               }
               switchCategory(e.target.value);
             }}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
           >
             {BUILT_IN_CATEGORIES.map((c) => (
               <option key={c.id} value={c.id}>
@@ -273,27 +314,23 @@ export function TierListEditor() {
               </option>
             ))}
             <option value="__new__">+ Eigene Kategorie erstellen</option>
-          </select>
+          </Select>
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Listenname
-          <input
+          <Input
             value={listName}
             onChange={(e) => {
               const name = e.target.value || DEFAULT_LIST_NAME;
               setListName(name);
               setAssignments(allLists[storageKey(category, name)] ?? {});
+              setUnassignedPage(0);
             }}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Vergleichen mit
-          <select
-            value={compareWith}
-            onChange={(e) => setCompareWith(e.target.value)}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
-          >
+          <Select value={compareWith} onChange={(e) => setCompareWith(e.target.value)}>
             <option value="">– keine –</option>
             {namesInCategory.map((name) => (
               <option key={name} value={name}>
@@ -305,7 +342,7 @@ export function TierListEditor() {
                 {name} (Freund)
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         {isSupabaseConfigured() ? (
           <label className="flex items-center gap-2 text-sm">
@@ -328,14 +365,14 @@ export function TierListEditor() {
           {syncState === "synced" && "Synchronisiert ✓"}
           {syncState === "off" && "Nur lokal (Supabase nicht konfiguriert)"}
           {syncState === "auth-error" && (
-            <span className="text-amber-600">
+            <span className="text-danger">
               Nur lokal – Supabase-Anmeldung fehlgeschlagen. Bitte in den
               Supabase-Projekteinstellungen unter Authentication → Sign In
               Methods &bdquo;Anonymous Sign-Ins&ldquo; aktivieren.
             </span>
           )}
           {syncState === "query-error" && (
-            <span className="text-amber-600">
+            <span className="text-danger">
               Nur lokal – Datenbankfehler ({syncErrorDetail}). Vermutlich
               wurde eine Migration noch nicht auf dem Supabase-Projekt
               ausgeführt.
@@ -345,15 +382,10 @@ export function TierListEditor() {
       </div>
 
       {showCustomForm && (
-        <div className="flex flex-col gap-3 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 max-w-md">
+        <div className="flex flex-col gap-3 rounded-lg border border-mode-tierlisten/40 bg-mode-tierlisten/5 p-4 max-w-md">
           <label className="flex flex-col gap-1 text-sm">
             Name der Kategorie
-            <input
-              value={customLabel}
-              onChange={(e) => setCustomLabel(e.target.value)}
-              placeholder="z. B. Teufelsfrüchte"
-              className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
-            />
+            <Input value={customLabel} onChange={(e) => setCustomLabel(e.target.value)} placeholder="z. B. Teufelsfrüchte" />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             Einträge (einer pro Zeile)
@@ -362,20 +394,12 @@ export function TierListEditor() {
               onChange={(e) => setCustomItemsText(e.target.value)}
               rows={5}
               placeholder={"Gomu Gomu no Mi\nMera Mera no Mi\nHie Hie no Mi"}
-              className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5 font-mono text-xs"
+              className="rounded-md border-2 border-foreground bg-white/70 dark:bg-white/5 px-3 py-1.5 font-mono text-xs outline-none focus:border-accent"
             />
           </label>
           <div className="flex gap-3">
-            <button
-              onClick={handleCreateCustomCategory}
-              className="rounded-md bg-amber-600 text-white px-4 py-2 text-sm font-medium hover:bg-amber-700"
-            >
-              Kategorie erstellen
-            </button>
-            <button
-              onClick={() => setShowCustomForm(false)}
-              className="text-sm text-black/50 dark:text-white/40"
-            >
+            <Button onClick={handleCreateCustomCategory}>Kategorie erstellen</Button>
+            <button onClick={() => setShowCustomForm(false)} className="text-sm text-black/50 dark:text-white/40">
               Abbrechen
             </button>
           </div>
@@ -389,31 +413,24 @@ export function TierListEditor() {
         <div className="flex flex-wrap items-end gap-3 rounded-lg border border-black/10 dark:border-white/10 p-3">
           <label className="flex flex-col gap-1 text-sm">
             Dein Name
-            <input
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value || "Spieler")}
-              className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
-            />
+            <Input value={nickname} onChange={(e) => setNickname(e.target.value || "Spieler")} />
           </label>
           <div className="text-sm">
             <p className="text-black/60 dark:text-white/50">Dein Freund-Code</p>
-            <p className="font-mono text-lg tracking-widest">{myShareCode ?? "…"}</p>
+            <p className="font-[family-name:var(--font-mono)] text-lg tracking-widest">{myShareCode ?? "…"}</p>
           </div>
           <label className="flex flex-col gap-1 text-sm">
             Freund-Code eingeben
             <div className="flex gap-2">
-              <input
+              <Input
                 value={friendCodeInput}
                 onChange={(e) => setFriendCodeInput(e.target.value)}
                 placeholder="z. B. AB3XQ9"
-                className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5 font-mono uppercase"
+                className="font-[family-name:var(--font-mono)] uppercase"
               />
-              <button
-                onClick={loadFriendCode}
-                className="rounded-md bg-amber-600 text-white px-3 py-1.5 text-sm font-medium hover:bg-amber-700"
-              >
+              <Button size="sm" onClick={loadFriendCode}>
                 Laden
-              </button>
+              </Button>
             </div>
           </label>
           <p className="text-xs text-black/50 dark:text-white/40">
@@ -427,6 +444,26 @@ export function TierListEditor() {
 
       <h2 className="text-lg font-semibold">{categoryLabel}</h2>
 
+      {newAchievements.length > 0 && (
+        <div className="op-pop-in rounded-xl border border-mode-tierlisten bg-mode-tierlisten/10 p-3">
+          <p className="mb-1 text-sm font-semibold text-mode-tierlisten">🏆 Neue Erfolge freigeschaltet!</p>
+          <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
+            {newAchievements.map((a) => (
+              <li key={a.id}>
+                <span className="font-medium">{a.label}</span> — {a.description}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {selectedItemId && (
+        <p className="text-sm text-mode-tierlisten">
+          „{items.find((i) => i.id === selectedItemId)?.name}“ ausgewählt — tippe jetzt eine Tier-Reihe an, um es
+          dort einzuordnen.
+        </p>
+      )}
+
       <div className="grid gap-3">
         {TIERS.map((tier) => (
           <div
@@ -436,7 +473,10 @@ export function TierListEditor() {
               const id = e.dataTransfer.getData("text/rank-item-id");
               if (id) assign(id, tier);
             }}
-            className="flex items-start gap-3 rounded-lg border border-dashed border-black/15 dark:border-white/15 p-3 min-h-20"
+            onClick={() => handleTierTap(tier)}
+            className={`flex items-start gap-3 rounded-lg border border-dashed p-3 min-h-20 ${
+              selectedItemId ? "border-mode-tierlisten/60 bg-mode-tierlisten/5 cursor-pointer" : "border-black/15 dark:border-white/15"
+            }`}
           >
             <span className="w-8 shrink-0 text-center text-lg font-bold">
               {tier}
@@ -445,10 +485,16 @@ export function TierListEditor() {
               {items
                 .filter((item) => assignments[item.id] === tier)
                 .map((item) => (
-                  <div key={item.id} className="relative">
-                    <RankItemCard item={item} draggable onDragStart={() => {}} />
+                  <div key={item.id} className="relative" onClick={(e) => e.stopPropagation()}>
+                    <RankItemCard
+                      item={item}
+                      draggable
+                      onDragStart={() => {}}
+                      onClick={handleItemTap}
+                      selected={selectedItemId === item.id}
+                    />
                     {compareAssignments && compareAssignments[item.id] && compareAssignments[item.id] !== tier && (
-                      <span className="absolute -top-2 -right-2 rounded-full bg-fuchsia-600 text-white text-[10px] px-1.5 py-0.5">
+                      <span className="absolute -top-2 -right-2 rounded-full bg-mode-tierlisten text-white text-[10px] px-1.5 py-0.5">
                         dort: {compareAssignments[item.id]}
                       </span>
                     )}
@@ -459,16 +505,57 @@ export function TierListEditor() {
         ))}
       </div>
 
-      <div>
-        <h3 className="mb-2 text-sm font-medium text-black/60 dark:text-white/50">
-          Noch nicht eingestuft – zieh einen Eintrag in eine Tier-Reihe
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {unassigned().map((item) => (
-            <RankItemCard key={item.id} item={item} draggable onDragStart={() => {}} />
-          ))}
-        </div>
-      </div>
+      {(() => {
+        const pool = unassigned();
+        const totalPages = Math.max(1, Math.ceil(pool.length / UNASSIGNED_PAGE_SIZE));
+        const page = Math.min(unassignedPage, totalPages - 1);
+        const pageItems = pool.slice(page * UNASSIGNED_PAGE_SIZE, (page + 1) * UNASSIGNED_PAGE_SIZE);
+        return (
+          <div>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-medium text-black/60 dark:text-white/50">
+                Noch nicht eingestuft ({pool.length}) – tippe einen Eintrag an und dann eine Tier-Reihe (oder zieh ihn
+                per Drag & Drop)
+              </h3>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setUnassignedPage((p) => Math.max(0, p - 1))}
+                    disabled={page === 0}
+                  >
+                    ← Zurück
+                  </Button>
+                  <span className="text-black/50 dark:text-white/40">
+                    Seite {page + 1}/{totalPages}
+                  </span>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setUnassignedPage((p) => Math.min(totalPages - 1, p + 1))}
+                    disabled={page >= totalPages - 1}
+                  >
+                    Weiter →
+                  </Button>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {pageItems.map((item) => (
+                <RankItemCard
+                  key={item.id}
+                  item={item}
+                  draggable
+                  onDragStart={() => {}}
+                  onClick={handleItemTap}
+                  selected={selectedItemId === item.id}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

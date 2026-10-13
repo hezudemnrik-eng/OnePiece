@@ -6,6 +6,7 @@ import { classifyFruit, FRUIT_COLORS } from "@/lib/fruitType";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 import { playTick } from "@/lib/sfx";
 import { CharacterCard } from "./CharacterCard";
+import { Button } from "./ui/Button";
 
 type Props = {
   offered: Character[];
@@ -74,7 +75,7 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <p className="text-xs uppercase tracking-[0.2em] text-amber-700 dark:text-amber-400">
+      <p className="text-xs uppercase tracking-[0.2em] text-mode-draft">
         {spinning ? "Rollt…" : readOnly ? "Gerade angeboten" : "Wähle einen Charakter"}
       </p>
       <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
@@ -85,7 +86,7 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
           return (
             <div
               key={i}
-              className="op-parchment flex flex-col items-center gap-3 rounded-2xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-4 shadow-sm"
+              className="op-parchment op-wanted flex flex-col items-center gap-3 rounded-2xl p-4"
             >
               {char.imageUrl && (
                 <div
@@ -97,8 +98,8 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
                     src={char.imageUrl}
                     alt={spinning ? "" : char.name}
                     referrerPolicy="no-referrer"
-                    className={`h-32 w-auto rounded-xl border object-cover object-top shadow-lg transition-opacity ${spinning ? "opacity-70 blur-[1px]" : "opacity-100"}`}
-                    style={{ borderColor: fruitColor ?? "rgba(245, 158, 11, 0.3)" }}
+                    className={`h-32 w-auto rounded-xl border-2 object-cover object-top shadow-lg transition-opacity ${spinning ? "opacity-70 blur-[1px]" : "opacity-100"}`}
+                    style={{ borderColor: fruitColor ?? "var(--poster-ink)" }}
                   />
                 </div>
               )}
@@ -114,26 +115,18 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
                 <CharacterCard character={char} />
               </div>
               {!readOnly && (
-                <button
-                  onClick={() => onPick(char.id)}
-                  disabled={spinning}
-                  className="w-full rounded-md bg-amber-600 text-white px-4 py-2 font-medium shadow transition hover:bg-amber-700 hover:shadow-md disabled:opacity-40"
-                >
+                <Button onClick={() => onPick(char.id)} disabled={spinning} className="w-full shadow hover:shadow-md">
                   Wählen
-                </button>
+                </Button>
               )}
             </div>
           );
         })}
       </div>
       {!readOnly && (
-        <button
-          onClick={onSkip}
-          disabled={spinning || skipsLeft <= 0}
-          className="rounded-md border border-black/15 dark:border-white/15 px-5 py-2 font-medium transition hover:border-amber-500/50 disabled:opacity-40"
-        >
+        <Button variant="secondary" onClick={onSkip} disabled={spinning || skipsLeft <= 0} className="hover:border-mode-draft/50">
           Alle neu würfeln ({skipsLeft} übrig)
-        </button>
+        </Button>
       )}
     </div>
   );

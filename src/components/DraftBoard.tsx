@@ -9,6 +9,7 @@ import {
   currentPlayer,
   getTeam,
   pickCharacter,
+  resolveTeamRoleConflicts,
   skipRoll,
   type DraftState,
   type DraftTeam,
@@ -22,6 +23,9 @@ import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
 import { RollPanel } from "./RollPanel";
 import { TimerBar } from "./TimerBar";
 import { VictoryBanner } from "./VictoryBanner";
+import { Button } from "./ui/Button";
+import { Card } from "./ui/Card";
+import { Input } from "./ui/Input";
 
 const PICK_SECONDS = 30;
 
@@ -43,6 +47,7 @@ export function DraftBoard() {
   const [battle, setBattle] = useState<BattleResult | null>(null);
   const [winnerLabel, setWinnerLabel] = useState<string>("");
   const [roleStepIndex, setRoleStepIndex] = useState(0);
+  const [roleConflictsResolved, setRoleConflictsResolved] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Hotseat mode is shared-device, but whoever's logged in on this device
@@ -63,6 +68,7 @@ export function DraftBoard() {
       .filter(Boolean);
     setDraft(createDraft(names.slice(0, playerCount), ids, teamSize, { teams, spectators }));
     setSecondsLeft(PICK_SECONDS);
+    setRoleConflictsResolved(false);
     setPhase("drafting");
   }
 
@@ -102,8 +108,14 @@ export function DraftBoard() {
     computeBattle(draft);
   }
 
-  function computeBattle(next: DraftState) {
-    const isTeamMode = next.players.some((p) => p.team);
+  function computeBattle(rawNext: DraftState) {
+    const isTeamMode = rawNext.players.some((p) => p.team);
+    // Teammates assigned roles independently of each other — resolve any
+    // clash over the same crew position by lottery before the battle (Q104).
+    const next = isTeamMode ? resolveTeamRoleConflicts(rawNext) : rawNext;
+    setRoleConflictsResolved(
+      isTeamMode && JSON.stringify(next.players.map((p) => p.roleAssignments)) !== JSON.stringify(rawNext.players.map((p) => p.roleAssignments))
+    );
     if (isTeamMode) {
       const sideA = next.players.filter((p) => p.team === "A");
       const sideB = next.players.filter((p) => p.team === "B");
@@ -113,6 +125,7 @@ export function DraftBoard() {
       const sideBNames = sideB.flatMap((p) => getTeam(next, p.id, characters).map((c) => c.name));
       const result = simulateBattle(sideAVersions, sideANames, sideBVersions, sideBNames);
       setBattle(result);
+      setDraft(next);
       const names = next.players
         .filter((p) => p.team === (result.winnerTeam === "A" ? "A" : "B"))
         .map((p) => p.name)
@@ -171,10 +184,10 @@ export function DraftBoard() {
 
   if (phase === "setup") {
     return (
-      <div className="flex flex-col gap-4 max-w-md">
+      <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Anzahl Spieler (2–4)
-          <input
+          <Input
             type="number"
             min={2}
             max={4}
@@ -188,32 +201,29 @@ export function DraftBoard() {
                 return next.slice(0, n);
               });
             }}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
           />
         </label>
         {names.slice(0, playerCount).map((name, i) => (
           <label key={i} className="flex flex-col gap-1 text-sm">
             Name Spieler {i + 1}
-            <input
+            <Input
               value={name}
               onChange={(e) => {
                 const next = [...names];
                 next[i] = e.target.value;
                 setNames(next);
               }}
-              className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
             />
           </label>
         ))}
         <label className="flex flex-col gap-1 text-sm">
           Teamgröße
-          <input
+          <Input
             type="number"
             min={1}
             max={10}
             value={teamSize}
             onChange={(e) => setTeamSize(Math.min(10, Math.max(1, Number(e.target.value) || 1)))}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
           />
         </label>
         {playerCount === 4 && (
@@ -228,20 +238,16 @@ export function DraftBoard() {
         )}
         <label className="flex flex-col gap-1 text-sm">
           Zuschauer (Namen, mit Komma getrennt)
-          <input
+          <Input
             value={spectatorsInput}
             onChange={(e) => setSpectatorsInput(e.target.value)}
             placeholder="z. B. Lena, Tom"
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
           />
         </label>
-        <button
-          onClick={startDraft}
-          className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
-        >
+        <Button onClick={startDraft} className="self-start">
           Draft starten
-        </button>
-      </div>
+        </Button>
+      </Card>
     );
   }
 
@@ -261,10 +267,10 @@ export function DraftBoard() {
         </div>
         <aside className="flex flex-col gap-4">
           {draft.players.map((p) => (
-            <div key={p.id} className="rounded-lg border border-black/10 dark:border-white/10 p-3">
+            <Card key={p.id} variant="framed" accent="draft" className="p-3">
               <p className="mb-2 text-sm font-semibold">
                 {p.name}
-                {p.team && <span className="text-amber-600"> · Team {p.team}</span>} (
+                {p.team && <span className="text-mode-draft"> · Team {p.team}</span>} (
                 {p.pickedCharacterIds.length}/{draft.teamSize})
               </p>
               <ul className="space-y-1 text-sm text-black/70 dark:text-white/60">
@@ -274,7 +280,7 @@ export function DraftBoard() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </Card>
           ))}
           {draft.spectators.length > 0 && (
             <div className="rounded-lg border border-dashed border-black/15 dark:border-white/15 p-3">
@@ -312,24 +318,27 @@ export function DraftBoard() {
       <div className="flex flex-col gap-6">
         {battle && <VictoryBanner won={null} label={`${winnerLabel} gewinnt!`} />}
         <h2 className="text-xl font-semibold">Draft beendet</h2>
+        {roleConflictsResolved && (
+          <p className="text-sm text-mode-draft">⚖️ Zwei Team-Mitglieder wollten dieselbe Rolle — per Los entschieden.</p>
+        )}
         <div className="grid gap-4 sm:grid-cols-2">
           {draft.players.map((p) => (
-            <div key={p.id} className="rounded-lg border border-black/10 dark:border-white/10 p-3">
+            <Card key={p.id} variant="framed" accent="draft" className="p-3">
               <p className="mb-2 font-semibold">{p.name}</p>
               <ul className="space-y-1 text-sm">
                 {p.pickedCharacterIds.map((id) => (
                   <li key={id}>{characters.find((c) => c.id === id)?.name}</li>
                 ))}
               </ul>
-            </div>
+            </Card>
           ))}
         </div>
 
         {battle && (
-          <div className="rounded-lg border border-amber-500/40 p-4">
+          <Card variant="framed" accent="draft" className="p-4">
             <p className="mb-2 font-semibold">Kampfsimulation: {winnerLabel} gewinnt!</p>
             <AnimatedBattleLog battle={battle} />
-          </div>
+          </Card>
         )}
         {!battle && draft.players.length > 2 && (
           <p className="text-sm text-black/60 dark:text-white/50">
