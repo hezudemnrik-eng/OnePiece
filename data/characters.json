@@ -88,7 +88,7 @@
     "crew": "Strohhutbande",
     "role": "Navigator",
     "tier": "C",
-    "devilFruit": "Hito Hito no Mi, Modell: Zou",
+    "devilFruit": null,
     "alive": true,
     "cost": 35,
     "versions": [
@@ -904,7 +904,7 @@
     "crew": "Marine",
     "role": "Sonstige",
     "tier": "A",
-    "devilFruit": "Baku Baku no Mi",
+    "devilFruit": "Woshu Woshu no Mi",
     "alive": true,
     "cost": 80,
     "versions": [
@@ -1840,7 +1840,7 @@
     "crew": "Big-Mom-Piraten",
     "role": "Kämpfer",
     "tier": "B",
-    "devilFruit": "Neko Neko no Mi, Modell: Leopard",
+    "devilFruit": "Kame Kame no Mi",
     "alive": true,
     "cost": 51,
     "versions": [
@@ -3232,7 +3232,7 @@
     "crew": "Donquixote-Piraten",
     "role": "Kämpfer",
     "tier": "C",
-    "devilFruit": "Ushi Ushi no Mi, Modell: Bison",
+    "devilFruit": "Guru Guru no Mi",
     "alive": true,
     "cost": 43,
     "versions": [
