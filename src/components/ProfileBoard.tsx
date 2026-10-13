@@ -635,7 +635,7 @@ export function ProfileBoard() {
             Shop: Duell-Arenen
           </h2>
           <p className="mb-2 text-xs text-black/50 dark:text-white/40">
-            Rein kosmetisch — wirkt sich aus, sobald das Duell-Modus-Redesign die Arena-Hintergründe übernimmt.
+            Rein kosmetisch — färbt den Hintergrund im Duell-Ergebnis ein.
           </p>
           <div className="flex flex-wrap gap-2">
             {shopArenas.map((item) => {
