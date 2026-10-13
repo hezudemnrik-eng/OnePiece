@@ -7,7 +7,6 @@ import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
 import { getLevelProgress } from "@/lib/levels";
 import { getLastPlayedHref } from "@/lib/lastPlayed";
 import { getTodaysChallenge, type DailyChallenge } from "@/lib/dailyChallenge";
-import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
@@ -24,6 +23,14 @@ import {
 function avatarFor(id: string | null) {
   return id ? characters.find((c) => c.id === id) : null;
 }
+
+/** Illustrated artwork (Boss's ChatGPT assets) behind the mode tiles and the "Weiterspielen" hero card. */
+const TILE_IMAGES: Record<string, string> = {
+  "/kampf": "/images/tile-kampf.jpg",
+  "/raetsel-ranking": "/images/tile-raetsel.jpg",
+  "/builder": "/images/tile-builder.jpg",
+  "/shop": "/images/tile-shop.jpg",
+};
 
 function greeting(hour: number): string {
   if (hour < 5) return "Noch wach";
@@ -89,97 +96,109 @@ export function HomeOverview() {
       {isSupabaseConfigured() && !loaded && <LoadingSpinner />}
 
       {isSupabaseConfigured() && loaded && progress && (
-        <Card variant="plain" className="px-4 py-3">
+        <div
+          className="op-card bg-cover bg-center px-4 py-3"
+          style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')" }}
+        >
           <div className="flex items-center justify-between gap-2 mb-1.5 text-sm">
-            <span className="flex min-w-0 items-center gap-1.5 truncate whitespace-nowrap font-semibold">
-              <span aria-hidden>☸️</span>
+            <span className="flex min-w-0 items-center gap-1.5 truncate whitespace-nowrap font-semibold text-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/ship-wheel.webp" alt="" aria-hidden className="h-4 w-4 shrink-0 object-contain" />
               Level {progress.level} · {progress.rankTitle}
             </span>
-            <span className="shrink-0 whitespace-nowrap tabular-nums text-black/50 dark:text-white/40 font-[family-name:var(--font-mono)]">
+            <span className="shrink-0 whitespace-nowrap tabular-nums text-white/70 font-[family-name:var(--font-mono)]">
               {progress.xp - progress.levelStartXp}/{progress.levelEndXp - progress.levelStartXp} XP
             </span>
           </div>
           <ProgressBar progress={progress.progress} size="md" />
-        </Card>
+        </div>
       )}
 
       {myLobby ? (
         <Link href={`/draft/live?code=${myLobby.inviteCode}`}>
-          <Card variant="spotlight" accent="draft" className="flex items-center justify-between gap-2">
-            <span className="min-w-0 text-sm font-semibold">
-              <span className="block truncate whitespace-nowrap">
-                Weiterspielen: Live-Draft <span className="font-mono">{myLobby.inviteCode}</span>
+          <div
+            className="op-card relative flex min-h-[96px] items-end overflow-hidden bg-cover bg-center p-4"
+            style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.78), rgba(0,0,0,0.15)), url('/images/banner-weiterspielen.jpg')" }}
+          >
+            <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+              <span className="min-w-0 text-sm font-semibold text-white">
+                <span className="block truncate whitespace-nowrap">
+                  Weiterspielen: Live-Draft <span className="font-mono">{myLobby.inviteCode}</span>
+                </span>
+                <span className="block truncate whitespace-nowrap font-normal text-white/70">
+                  {myLobby.phase === "lobby" ? "wartet auf Spieler" : "läuft gerade"}
+                </span>
               </span>
-              <span className="block truncate whitespace-nowrap font-normal text-black/60 dark:text-white/50">
-                {myLobby.phase === "lobby" ? "wartet auf Spieler" : "läuft gerade"}
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white text-xl text-white" aria-hidden>
+                →
               </span>
-            </span>
-            <span className="shrink-0 text-accent-ink text-xl" aria-hidden>
-              →
-            </span>
-          </Card>
+            </div>
+          </div>
         </Link>
       ) : lastMode ? (
         <Link href={lastMode.href}>
-          <Card variant="spotlight" accent={lastMode.accent} className="flex items-center justify-between gap-2">
-            <span className="flex min-w-0 items-center gap-2 truncate whitespace-nowrap text-sm font-semibold">
-              <span className="shrink-0 text-xl" aria-hidden>
-                {lastMode.icon}
+          <div
+            className="op-card relative flex min-h-[96px] items-end overflow-hidden bg-cover bg-center p-4"
+            style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.78), rgba(0,0,0,0.15)), url('/images/banner-weiterspielen.jpg')" }}
+          >
+            <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+              <span className="flex min-w-0 items-center gap-2 truncate whitespace-nowrap text-sm font-semibold text-white">
+                <span className="shrink-0 text-xl" aria-hidden>
+                  {lastMode.icon}
+                </span>
+                <span className="truncate">Weiterspielen: {lastMode.title}</span>
               </span>
-              <span className="truncate">Weiterspielen: {lastMode.title}</span>
-            </span>
-            <span className="shrink-0 text-accent-ink text-xl" aria-hidden>
-              →
-            </span>
-          </Card>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white text-xl text-white" aria-hidden>
+                →
+              </span>
+            </div>
+          </div>
         </Link>
       ) : (
-        <Card variant="spotlight" accent="accent">
-          <p className="truncate whitespace-nowrap text-sm font-semibold mb-1">Willkommen an Bord! 🏴‍☠️</p>
-          <p className="truncate whitespace-nowrap text-sm text-black/60 dark:text-white/50">
-            Wähle unten einen Bereich und leg los.
-          </p>
-        </Card>
+        <div
+          className="op-card relative flex min-h-[96px] flex-col justify-end overflow-hidden bg-cover bg-center p-4"
+          style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.78), rgba(0,0,0,0.15)), url('/images/banner-weiterspielen.jpg')" }}
+        >
+          <p className="truncate whitespace-nowrap text-sm font-semibold text-white mb-1">Willkommen an Bord! 🏴‍☠️</p>
+          <p className="truncate whitespace-nowrap text-sm text-white/70">Wähle unten einen Bereich und leg los.</p>
+        </div>
       )}
 
       <div className="grid grid-cols-2 gap-2">
         {[...MODE_GROUPS, SHOP_TILE].map((g) => (
           <Link key={g.href} href={g.href}>
-            <Card
-              variant="spotlight"
-              accent={
-                "id" in g
-                  ? g.id === "kampf"
-                    ? "duell"
-                    : g.id === "raetsel-ranking"
-                      ? "quiz"
-                      : "crew"
-                  : "shop"
-              }
-              className="flex flex-col items-center gap-1 py-4 text-center"
+            <div
+              className="relative flex min-h-[110px] flex-col justify-end overflow-hidden rounded-xl border-[3px] bg-cover bg-center p-3 shadow-[5px_5px_0_0_var(--foreground)]"
+              style={{
+                borderColor: `var(--mode-${"id" in g ? (g.id === "kampf" ? "duell" : g.id === "raetsel-ranking" ? "quiz" : "crew") : "shop"})`,
+                backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.05)), url('${TILE_IMAGES[g.href] ?? ""}')`,
+              }}
             >
-              <span className="text-2xl" aria-hidden>
-                {g.icon}
-              </span>
-              <span className="w-full truncate whitespace-nowrap text-xs font-semibold leading-tight">
-                {g.title}
-              </span>
-            </Card>
+              <div className="flex items-center justify-between gap-1">
+                <span className="truncate whitespace-nowrap text-xs font-semibold leading-tight text-white">{g.title}</span>
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-white text-sm text-white" aria-hidden>
+                  →
+                </span>
+              </div>
+            </div>
           </Link>
         ))}
       </div>
 
       {challenge && (
         <Link href={challenge.href}>
-          <Card variant="parchment" accent={challenge.accent} className="flex items-center gap-3 px-4 py-3">
+          <div
+            className="op-card flex items-center gap-3 bg-cover bg-center px-4 py-3"
+            style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')" }}
+          >
             <span className="shrink-0 text-lg" aria-hidden>
               {challenge.icon}
             </span>
-            <span className="min-w-0 truncate whitespace-nowrap text-sm">
+            <span className="min-w-0 truncate whitespace-nowrap text-sm text-white">
               <span className="font-semibold">Heute: </span>
               {challenge.text}
             </span>
-          </Card>
+          </div>
         </Link>
       )}
 
