@@ -121,7 +121,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   return (
     <main
-      className="flex min-h-[80vh] items-center justify-center bg-cover bg-center px-4 py-12"
+      className="flex min-h-screen items-center justify-center bg-cover bg-center bg-no-repeat px-4 py-12"
       style={{ backgroundImage: "linear-gradient(rgba(10,10,10,0.55), rgba(10,10,10,0.55)), url('/images/map-background.jpg')" }}
     >
       <div className="op-wanted op-parchment w-full max-w-sm flex flex-col gap-5 rounded-xl p-6">
