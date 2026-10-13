@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { characters, getStrongestVersion, type Character } from "@/lib/characters";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
+import { checkDuelAchievements, type DuelAchievement } from "@/lib/duelAchievements";
+import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
+import { incrementXp, unlockAchievement } from "@/lib/supabase";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { VictoryBanner } from "./VictoryBanner";
 import { playAccept, vibrate } from "@/lib/sfx";
@@ -45,6 +48,18 @@ export function DuelBoard() {
   const [fighterB, setFighterB] = useState<Character | null>(null);
   const [battle, setBattle] = useState<BattleResult | null>(null);
   const [history, setHistory] = useState<HistoryRecord[]>(() => loadHistory());
+  const [newAchievements, setNewAchievements] = useState<DuelAchievement[]>([]);
+
+  async function finalizeDuel(winner: Character, loser: Character, result: BattleResult) {
+    const earned = checkDuelAchievements(winner, loser, result);
+    if (earned.length === 0) return;
+    const results = await Promise.all(earned.map(async (a) => ({ a, isNew: await unlockAchievement(a.id) })));
+    const fresh = results.filter((r) => r.isNew).map((r) => r.a);
+    if (fresh.length > 0) {
+      incrementXp(fresh.length * XP_ACHIEVEMENT_BONUS);
+      setNewAchievements(fresh);
+    }
+  }
 
   function startDuel() {
     const a = choiceA === RANDOM ? pickRandomCharacter() : characters.find((c) => c.id === choiceA)!;
@@ -65,7 +80,11 @@ export function DuelBoard() {
       winner: result.winnerTeam === "A" ? a.name : b.name,
     });
     setHistory(loadHistory());
+    setNewAchievements([]);
     setPhase("result");
+    const winner = result.winnerTeam === "A" ? a : b;
+    const loser = result.winnerTeam === "A" ? b : a;
+    finalizeDuel(winner, loser, result);
   }
 
   function reset() {
@@ -73,6 +92,7 @@ export function DuelBoard() {
     setBattle(null);
     setFighterA(null);
     setFighterB(null);
+    setNewAchievements([]);
   }
 
   if (phase === "setup") {
@@ -139,6 +159,18 @@ export function DuelBoard() {
       <div className="flex flex-col gap-6 max-w-xl">
         <VictoryBanner won />
         <h2 className="text-xl font-semibold">{winner.name} gewinnt das Duell!</h2>
+        {newAchievements.length > 0 && (
+          <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
+            <p className="mb-1 text-sm font-semibold text-accent">🏆 Neue Erfolge freigeschaltet!</p>
+            <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
+              {newAchievements.map((a) => (
+                <li key={a.id}>
+                  <span className="font-medium">{a.label}</span> — {a.description}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4">
           {[fighterA, fighterB].map((f, i) => (
             <div

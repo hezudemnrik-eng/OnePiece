@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { buildQuiz, QUIZ_CATEGORY_LABELS, type QuizCategory, type QuizDifficulty, type QuizQuestion } from "@/lib/quiz";
-import { recordQuizResult } from "@/lib/supabase";
+import { checkQuizAchievements, type QuizAchievement } from "@/lib/quizAchievements";
+import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
+import { incrementXp, recordQuizResult, unlockAchievement } from "@/lib/supabase";
 import { playAccept, playSkip, playWin, vibrate } from "@/lib/sfx";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 
@@ -19,6 +21,7 @@ export function QuizSoloBoard() {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
+  const [newAchievements, setNewAchievements] = useState<QuizAchievement[]>([]);
   const [animationsEnabled] = useAnimationsEnabled();
 
   function start() {
@@ -27,7 +30,19 @@ export function QuizSoloBoard() {
     setIndex(0);
     setAnswers([]);
     setSelected(null);
+    setNewAchievements([]);
     setPhase("playing");
+  }
+
+  async function finalizeQuiz(score: number, total: number) {
+    const earned = checkQuizAchievements(score, total, difficulty);
+    if (earned.length === 0) return;
+    const results = await Promise.all(earned.map(async (a) => ({ a, isNew: await unlockAchievement(a.id) })));
+    const fresh = results.filter((r) => r.isNew).map((r) => r.a);
+    if (fresh.length > 0) {
+      incrementXp(fresh.length * XP_ACHIEVEMENT_BONUS);
+      setNewAchievements(fresh);
+    }
   }
 
   function choose(optionIndex: number) {
@@ -53,6 +68,7 @@ export function QuizSoloBoard() {
         const score = nextAnswers.filter((a, i) => a === questions[i].correct).length;
         if (animationsEnabled && score >= questions.length * 0.6) playWin();
         recordQuizResult(score, questions.length, category, difficulty);
+        finalizeQuiz(score, questions.length);
         setPhase("result");
       }
     }, 900);
@@ -174,6 +190,18 @@ export function QuizSoloBoard() {
         <h2 className="text-xl font-semibold">
           {score} / {questions.length} richtig ({pct}%)
         </h2>
+        {newAchievements.length > 0 && (
+          <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
+            <p className="mb-1 text-sm font-semibold text-accent">🏆 Neue Erfolge freigeschaltet!</p>
+            <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
+              {newAchievements.map((a) => (
+                <li key={a.id}>
+                  <span className="font-medium">{a.label}</span> — {a.description}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <ol className="flex flex-col gap-2">
           {questions.map((q, i) => (
             <li

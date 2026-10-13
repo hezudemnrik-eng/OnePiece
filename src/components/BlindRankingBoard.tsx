@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { BLIND_THEMES, buildRound, correctOrder, scoreGuess, type BlindEntry, type BlindScore } from "@/lib/blindRanking";
-import { XP_BLIND_RANKING_COMPLETE } from "@/lib/levels";
+import { checkBlindRankingAchievements, type BlindRankingAchievement } from "@/lib/blindRankingAchievements";
+import { XP_ACHIEVEMENT_BONUS, XP_BLIND_RANKING_COMPLETE } from "@/lib/levels";
 import { playAccept, playSkip, playTick, vibrate } from "@/lib/sfx";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
-import { recordBlindRankingCompletion } from "@/lib/supabase";
+import { incrementXp, recordBlindRankingCompletion, unlockAchievement } from "@/lib/supabase";
 
 type Phase = "setup" | "guessing" | "result";
 
@@ -43,6 +44,7 @@ export function BlindRankingBoard() {
   const [assignments, setAssignments] = useState<(string | null)[]>([]);
   const [score, setScore] = useState<BlindScore | null>(null);
   const [history, setHistory] = useState<HistoryRecord[]>(() => loadHistory());
+  const [newAchievements, setNewAchievements] = useState<BlindRankingAchievement[]>([]);
   const [animationsEnabled] = useAnimationsEnabled();
 
   const theme = BLIND_THEMES.find((t) => t.id === themeId) ?? BLIND_THEMES[0];
@@ -54,7 +56,19 @@ export function BlindRankingBoard() {
     setCurrentIndex(0);
     setAssignments(new Array(r.length).fill(null));
     setScore(null);
+    setNewAchievements([]);
     setPhase("guessing");
+  }
+
+  async function finalizeRound(result: BlindScore) {
+    const earned = checkBlindRankingAchievements(result);
+    if (earned.length === 0) return;
+    const results = await Promise.all(earned.map(async (a) => ({ a, isNew: await unlockAchievement(a.id) })));
+    const fresh = results.filter((r) => r.isNew).map((r) => r.a);
+    if (fresh.length > 0) {
+      incrementXp(fresh.length * XP_ACHIEVEMENT_BONUS);
+      setNewAchievements(fresh);
+    }
   }
 
   function finish(finalAssignments: (string | null)[]) {
@@ -74,6 +88,7 @@ export function BlindRankingBoard() {
     setHistory(loadHistory());
     setPhase("result");
     recordBlindRankingCompletion(XP_BLIND_RANKING_COMPLETE);
+    finalizeRound(result);
   }
 
   function assignRank(rank: number) {
@@ -224,6 +239,18 @@ export function BlindRankingBoard() {
         <h2 className="text-xl font-semibold">
           {score.correctPositions} / {score.total} richtig platziert
         </h2>
+        {newAchievements.length > 0 && (
+          <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
+            <p className="mb-1 text-sm font-semibold text-accent">🏆 Neue Erfolge freigeschaltet!</p>
+            <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
+              {newAchievements.map((a) => (
+                <li key={a.id}>
+                  <span className="font-medium">{a.label}</span> — {a.description}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <ol className="flex flex-col gap-2">
           {guessed.map((entry, i) => {
             const trueIndex = truth.findIndex((e) => e.slotId === entry.slotId);

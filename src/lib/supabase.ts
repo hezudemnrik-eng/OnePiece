@@ -757,6 +757,35 @@ export async function fetchQuizLeaderboard(): Promise<QuizLeaderboardEntry[]> {
     .sort((a, b) => b.totalScore / Math.max(1, b.totalQuestions) - a.totalScore / Math.max(1, a.totalQuestions));
 }
 
+export type GlobalLeaderboardEntry = {
+  userId: string;
+  username: string;
+  avatarCharacterId: string | null;
+  xp: number;
+};
+
+/**
+ * Account-wide XP ranking across every signed-up user (Q180) — distinct from
+ * fetchLeaderboard()/fetchQuizLeaderboard(), which only rank match/quiz
+ * results. `profiles` is already readable by everyone (migration 0001), and
+ * only the already-public username/xp/avatar fields are selected here.
+ */
+export async function fetchGlobalLeaderboard(limit = 50): Promise<GlobalLeaderboardEntry[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, username, avatar_character_id, xp")
+    .not("username", "is", null)
+    .order("xp", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((p) => ({
+    userId: p.id,
+    username: p.username as string,
+    avatarCharacterId: p.avatar_character_id,
+    xp: (p.xp as number) ?? 0,
+  }));
+}
+
 export type QuizSession = {
   id: string;
   invite_code: string;
@@ -890,7 +919,14 @@ export async function unlockAchievement(achievementId: string): Promise<boolean>
 
 // --- Level/rank profile info ---
 
-export type MyLevelInfo = { xp: number; equippedFrame: string | null; berries: number; equippedColor: string | null };
+export type MyLevelInfo = {
+  xp: number;
+  equippedFrame: string | null;
+  berries: number;
+  equippedColor: string | null;
+  equippedTitle: string | null;
+  equippedArena: string | null;
+};
 
 export async function fetchMyLevelInfo(): Promise<MyLevelInfo | null> {
   if (!supabase) return null;
@@ -898,7 +934,7 @@ export async function fetchMyLevelInfo(): Promise<MyLevelInfo | null> {
   if (!userId) return null;
   const { data } = await supabase
     .from("profiles")
-    .select("xp, equipped_frame, berries, equipped_color")
+    .select("xp, equipped_frame, berries, equipped_color, equipped_title, equipped_arena")
     .eq("id", userId)
     .maybeSingle();
   if (!data) return null;
@@ -906,6 +942,8 @@ export async function fetchMyLevelInfo(): Promise<MyLevelInfo | null> {
     xp: (data.xp as number) ?? 0,
     equippedFrame: (data.equipped_frame as string | null) ?? null,
     berries: (data.berries as number) ?? 0,
+    equippedTitle: (data.equipped_title as string | null) ?? null,
+    equippedArena: (data.equipped_arena as string | null) ?? null,
     equippedColor: (data.equipped_color as string | null) ?? null,
   };
 }
@@ -930,6 +968,20 @@ export async function setEquippedColor(colorId: string | null): Promise<void> {
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await supabase.from("profiles").update({ equipped_color: colorId }).eq("id", userId);
+}
+
+export async function setEquippedTitle(titleId: string | null): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("profiles").update({ equipped_title: titleId }).eq("id", userId);
+}
+
+export async function setEquippedArena(arenaId: string | null): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("profiles").update({ equipped_arena: arenaId }).eq("id", userId);
 }
 
 // --- Berry shop (migration 0012) ---

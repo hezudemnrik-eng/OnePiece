@@ -3,9 +3,10 @@
 import { useState } from "react";
 import type { Character } from "@/lib/characters";
 import { CREW_ROLES, rollCandidate, summarizeCrew, type CrewPick } from "@/lib/crewBuilder";
-import { XP_CREW_COMPLETE } from "@/lib/levels";
+import { checkCrewAchievements, type CrewAchievement } from "@/lib/crewAchievements";
+import { XP_ACHIEVEMENT_BONUS, XP_CREW_COMPLETE } from "@/lib/levels";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
-import { recordCrewCompletion } from "@/lib/supabase";
+import { incrementXp, recordCrewCompletion, unlockAchievement } from "@/lib/supabase";
 
 type Phase = "setup" | "rolling" | "done";
 
@@ -39,8 +40,21 @@ export function CrewBuilderBoard() {
   const [rerolls, setRerolls] = useState(0);
   const [rerollUsedThisRound, setRerollUsedThisRound] = useState(false);
   const [history, setHistory] = useState<HistoryRecord[]>(() => loadHistory());
+  const [newAchievements, setNewAchievements] = useState<CrewAchievement[]>([]);
 
   const currentRole = CREW_ROLES[roleIndex];
+
+  async function finalizeCrew(finalPicks: CrewPick[], rerollCount: number) {
+    const summary = summarizeCrew(finalPicks);
+    const earned = checkCrewAchievements(finalPicks, summary, rerollCount);
+    if (earned.length === 0) return;
+    const results = await Promise.all(earned.map(async (a) => ({ a, isNew: await unlockAchievement(a.id) })));
+    const fresh = results.filter((r) => r.isNew).map((r) => r.a);
+    if (fresh.length > 0) {
+      incrementXp(fresh.length * XP_ACHIEVEMENT_BONUS);
+      setNewAchievements(fresh);
+    }
+  }
 
   function reroll() {
     if (rerollUsedThisRound) return;
@@ -70,8 +84,10 @@ export function CrewBuilderBoard() {
         names: next.map((p) => p.character.name),
       });
       setHistory(loadHistory());
+      setNewAchievements([]);
       setPhase("done");
       recordCrewCompletion(XP_CREW_COMPLETE);
+      finalizeCrew(next, rerolls);
     }
   }
 
@@ -81,6 +97,7 @@ export function CrewBuilderBoard() {
     setPicks([]);
     setRerolls(0);
     setRerollUsedThisRound(false);
+    setNewAchievements([]);
     setCandidate(rollCandidate([]));
   }
 
@@ -187,6 +204,18 @@ export function CrewBuilderBoard() {
         <h2 className="text-xl font-semibold">Deine Crew steht!</h2>
         <span className="rounded-full bg-amber-600 text-white px-3 py-1 text-sm font-bold">Note {summary.grade}</span>
       </div>
+      {newAchievements.length > 0 && (
+        <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
+          <p className="mb-1 text-sm font-semibold text-accent">🏆 Neue Erfolge freigeschaltet!</p>
+          <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
+            {newAchievements.map((a) => (
+              <li key={a.id}>
+                <span className="font-medium">{a.label}</span> — {a.description}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <p className="text-sm text-black/60 dark:text-white/50">Gesamtstärke: {summary.totalPower}</p>
       <ol className="flex flex-col gap-2">
         {picks.map((p) => (
