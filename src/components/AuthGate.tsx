@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { characters } from "@/lib/characters";
 import { AccountPanel } from "./AccountPanel";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { SidebarNav } from "./SidebarNav";
+import { ThemeToggle } from "./ThemeToggle";
 import {
   getCurrentAuthUser,
   isSupabaseConfigured,
@@ -79,7 +82,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   if (!loaded) {
     return (
       <main className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-black/50 dark:text-white/40">Verbinde…</p>
+        <LoadingSpinner label="Verbinde…" />
       </main>
     );
   }
@@ -88,14 +91,20 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     return (
       <>
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-black/10 dark:border-white/10 bg-[var(--background)]/85 backdrop-blur px-4 py-3">
-          <Link
-            href="/"
-            className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl text-amber-700 dark:text-amber-400"
-          >
-            <span aria-hidden>🏴‍☠️</span>
-            One Piece Draft-App
-          </Link>
-          <AccountPanel onSignedOut={refreshUser} />
+          <div className="flex items-center gap-3">
+            <SidebarNav />
+            <Link
+              href="/"
+              className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl text-amber-700 dark:text-amber-400"
+            >
+              <span aria-hidden>🏴‍☠️</span>
+              One Piece Draft-App
+            </Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <AccountPanel onSignedOut={refreshUser} />
+          </div>
         </header>
         {children}
       </>

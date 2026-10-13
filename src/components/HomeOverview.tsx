@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { characters } from "@/lib/characters";
+import { MODES } from "@/lib/modes";
+import { LoadingSpinner } from "./LoadingSpinner";
 import {
   fetchLeaderboard,
   fetchMyRecentMatches,
@@ -18,19 +20,6 @@ import {
   type QuizLeaderboardEntry,
   type RecentMatch,
 } from "@/lib/supabase";
-
-const MODES: { href: string; icon: string; title: string; desc: string; matchMode?: MatchMode }[] = [
-  { href: "/draft", icon: "⚔️", title: "PvP-Draft gegen Freunde", desc: "Snake-Draft im Hotseat, danach Kampfsimulation." },
-  { href: "/draft/live", icon: "🌐", title: "Live-Draft (mehrere Geräte)", desc: "Lobby mit Code teilen, jeder draftet von seinem Gerät.", matchMode: "live-draft" },
-  { href: "/imu", icon: "👁️", title: "Gegen Imu", desc: "Solo-Draft gegen einen übermächtigen Boss-Gegner.", matchMode: "imu" },
-  { href: "/zufallsgegner", icon: "🎲", title: "Gegen Zufallsgegner", desc: "Ranked-Übungsrunde gegen eine leichtere KI.", matchMode: "zufallsgegner" },
-  { href: "/duell", icon: "⚡", title: "Gegeneinander", desc: "1-gegen-1-Duell: zwei Charaktere, ein Sieger." },
-  { href: "/crew", icon: "🧭", title: "Crew zusammenstellen", desc: "Pro Rolle einen zufälligen Charakter behalten oder neu würfeln, bis die Crew steht." },
-  { href: "/fusion", icon: "🧬", title: "Fusions-Pirat", desc: "Teufelsfrucht, Haki, Body, Weapon, Race, Sensei & Mind würfeln — alle Picks auf einen Blick." },
-  { href: "/blind-ranking", icon: "🙈", title: "Blind Ranking", desc: "Verdeckte Charaktere nach Thema einordnen, erst danach wird aufgedeckt." },
-  { href: "/quiz", icon: "❓", title: "One-Piece-Quiz", desc: "Trivia zu Charakteren, Crews & Teufelsfrüchten — solo oder mit Freunden." },
-  { href: "/tierlisten", icon: "📜", title: "Tierlisten", desc: "Charaktere, Arcs, Inseln & mehr in S–D einstufen und vergleichen." },
-];
 
 const MODE_LABELS: Record<MatchMode, string> = {
   imu: "Gegen Imu",
@@ -103,19 +92,21 @@ export function HomeOverview() {
         </p>
       </div>
 
+      {isSupabaseConfigured() && !loaded && <LoadingSpinner />}
+
       {isSupabaseConfigured() && loaded && (
         <>
           {myStats && (
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-xl border border-black/10 dark:border-white/10 bg-[var(--surface)]/60 py-4">
+              <div className="op-card py-4">
                 <p className="text-2xl font-bold text-emerald-600">{myStats.wins}</p>
                 <p className="text-xs text-black/50 dark:text-white/40">Siege</p>
               </div>
-              <div className="rounded-xl border border-black/10 dark:border-white/10 bg-[var(--surface)]/60 py-4">
+              <div className="op-card py-4">
                 <p className="text-2xl font-bold text-rose-500">{myStats.losses}</p>
                 <p className="text-xs text-black/50 dark:text-white/40">Niederlagen</p>
               </div>
-              <div className="rounded-xl border border-black/10 dark:border-white/10 bg-[var(--surface)]/60 py-4">
+              <div className="op-card py-4">
                 <p className="text-2xl font-bold text-amber-600">
                   {Math.round((myStats.wins / Math.max(1, myStats.wins + myStats.losses)) * 100)}%
                 </p>
@@ -342,7 +333,7 @@ export function HomeOverview() {
             <Link
               key={l.href}
               href={l.href}
-              className="group rounded-xl border border-black/10 dark:border-white/10 bg-[var(--surface)]/60 p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-500 hover:shadow-lg"
+              className="group op-card op-parchment p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-amber-500 hover:shadow-lg"
             >
               <div className="mb-2 flex items-center gap-2">
                 <span className="text-2xl" aria-hidden>
