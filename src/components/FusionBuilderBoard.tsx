@@ -3,6 +3,8 @@
 import { useState } from "react";
 import {
   FUSION_CATEGORIES,
+  computeBounty,
+  formatBerry,
   rollFusionOption,
   type FusionCategoryId,
   type FusionOption,
@@ -68,6 +70,45 @@ function FusionTile({
   );
 }
 
+// Bigger "wanted poster"-style pick card for the picking phase: large
+// portrait, just the character's name — no stat text — so you recognize who
+// you're picking by face, not by reading a trait description.
+function FusionPickCard({
+  categoryLabel,
+  option,
+  onClick,
+}: {
+  categoryLabel: string;
+  option: FusionOption;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex flex-col items-center gap-1.5 rounded-xl border-2 border-amber-500/50 bg-gradient-to-b from-amber-500/10 to-transparent p-2 text-center shadow-sm hover:border-amber-500 hover:bg-amber-500/15 active:bg-amber-500/20"
+    >
+      <span className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+        {categoryLabel}
+      </span>
+      {option.sourceImageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={option.sourceImageUrl}
+          alt={option.sourceName}
+          referrerPolicy="no-referrer"
+          className="h-20 w-20 rounded-full border-2 border-amber-500/50 object-cover object-top shadow-md"
+        />
+      ) : (
+        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-amber-500/15 text-xl font-bold text-amber-700 dark:text-amber-400">
+          {option.sourceName.slice(0, 2).toUpperCase()}
+        </span>
+      )}
+      <span className="text-sm font-semibold leading-tight">{option.sourceName}</span>
+    </button>
+  );
+}
+
 export function FusionBuilderBoard() {
   const [phase, setPhase] = useState<Phase>("setup");
   const [candidates, setCandidates] = useState<Record<FusionCategoryId, FusionOption>>(
@@ -110,7 +151,7 @@ export function FusionBuilderBoard() {
         <p className="text-sm text-black/60 dark:text-white/50">
           Alle {FUSION_CATEGORIES.length} Kategorien (
           {FUSION_CATEGORIES.map((c) => c.label).join(", ")}) liegen gleichzeitig aus. Wähle pro Runde eine davon —
-          die restlichen werden danach neu gewürfelt, bis dein Fusions-Pirat komplett ist.
+          die restlichen werden danach neu gewürfelt. Am Ende bekommst du ein Kopfgeld für deinen Fusions-Piraten.
         </p>
         <button
           onClick={start}
@@ -133,7 +174,7 @@ export function FusionBuilderBoard() {
             const candidate = candidates[category.id];
             if (!candidate) return null;
             return (
-              <FusionTile
+              <FusionPickCard
                 key={category.id}
                 categoryLabel={category.label}
                 option={candidate}
@@ -160,9 +201,16 @@ export function FusionBuilderBoard() {
     );
   }
 
+  const bounty = computeBounty(picks);
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <h2 className="text-xl font-semibold">Dein Fusions-Pirat ist bereit!</h2>
+      <h2 className="font-[family-name:var(--font-display)] text-2xl text-amber-700 dark:text-amber-400">
+        Dein Fusions-Pirat ist bereit!
+      </h2>
+      <div className="rounded-xl border border-amber-500/50 bg-gradient-to-b from-amber-500/10 to-transparent p-4 text-center">
+        <p className="text-xs uppercase tracking-widest text-black/50 dark:text-white/40 mb-1">Kopfgeld</p>
+        <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">{formatBerry(bounty)}</p>
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         {FUSION_CATEGORIES.map((category) => {
           const pick = picks.find((p) => p.categoryId === category.id);
