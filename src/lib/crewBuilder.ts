@@ -33,19 +33,52 @@ const GRADE_THRESHOLDS: Array<{ min: number; grade: Tier }> = [
   { min: 0, grade: "D" },
 ];
 
+export type SynergyGroup = { crew: string; count: number; bonus: number };
+
 export type CrewSummary = {
   totalPower: number;
+  basePower: number;
+  synergyBonus: number;
+  synergyGroups: SynergyGroup[];
   grade: Tier;
 };
 
-/** Total crew power (role-fit-adjusted stat sum across all filled slots) and a letter grade for it. */
+// Flat bonus per crewmate beyond the first sharing the same origin crew
+// (Q132) — linear in group size rather than per-pair, so a full same-crew
+// roster gives a meaningful but not run-away bonus (e.g. 10 Strawhats:
+// +9*60 = +540, roughly one grade tier's worth).
+const SYNERGY_BONUS_PER_EXTRA_MEMBER = 60;
+
+function computeSynergy(picks: CrewPick[]): { bonus: number; groups: SynergyGroup[] } {
+  const counts = new Map<string, number>();
+  for (const { character } of picks) counts.set(character.crew, (counts.get(character.crew) ?? 0) + 1);
+  const groups = Array.from(counts.entries())
+    .filter(([, count]) => count >= 2)
+    .map(([crew, count]) => ({ crew, count, bonus: (count - 1) * SYNERGY_BONUS_PER_EXTRA_MEMBER }));
+  const bonus = groups.reduce((sum, g) => sum + g.bonus, 0);
+  return { bonus, groups };
+}
+
+/** Total crew power (role-fit-adjusted stat sum plus same-crew synergy bonus) and a letter grade for it. */
 export function summarizeCrew(picks: CrewPick[]): CrewSummary {
-  const totalPower = picks.reduce((sum, { role, character }) => {
+  const basePower = picks.reduce((sum, { role, character }) => {
     const stats = applyRoleFit(getStrongestVersion(character).stats, character.role, role);
     return sum + stats.staerke + stats.haki + stats.intelligenz + stats.geschwindigkeit + stats.durabilitaet;
   }, 0);
+  const { bonus: synergyBonus, groups: synergyGroups } = computeSynergy(picks);
+  const totalPower = basePower + synergyBonus;
   const grade = GRADE_THRESHOLDS.find((t) => totalPower >= t.min)?.grade ?? "D";
-  return { totalPower, grade };
+  return { totalPower, basePower, synergyBonus, synergyGroups, grade };
+}
+
+/** Rolls a full random opposing crew (one random character per role) for the Crew-Builder team-duel feature (Q137). */
+export function rollOpposingCrew(rng: () => number = Math.random): CrewPick[] {
+  const picks: CrewPick[] = [];
+  for (const role of CREW_ROLES) {
+    const candidate = rollCandidate(picks.map((p) => p.character.id), rng);
+    if (candidate) picks.push({ role, character: candidate });
+  }
+  return picks;
 }
 
 export { roleFit };

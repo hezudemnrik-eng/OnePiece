@@ -4,9 +4,12 @@ type Props = {
   item: RankableItem;
   draggable?: boolean;
   onDragStart?: (itemId: string) => void;
+  /** Tap-to-assign alternative to drag & drop (no native DnD on touch devices). */
+  onClick?: (itemId: string) => void;
+  selected?: boolean;
 };
 
-export function RankItemCard({ item, draggable = false, onDragStart }: Props) {
+export function RankItemCard({ item, draggable = false, onDragStart, onClick, selected }: Props) {
   return (
     <div
       draggable={draggable}
@@ -14,9 +17,10 @@ export function RankItemCard({ item, draggable = false, onDragStart }: Props) {
         e.dataTransfer.setData("text/rank-item-id", item.id);
         onDragStart?.(item.id);
       }}
-      className={`op-card flex items-center gap-2 px-3 py-2 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:border-amber-500/50 ${
+      onClick={onClick ? () => onClick(item.id) : undefined}
+      className={`op-card flex items-center gap-2 px-3 py-2 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:border-mode-tierlisten/50 ${
         draggable ? "cursor-grab" : ""
-      }`}
+      } ${onClick ? "cursor-pointer" : ""} ${selected ? "ring-2 ring-mode-tierlisten" : ""}`}
     >
       {item.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -28,7 +32,7 @@ export function RankItemCard({ item, draggable = false, onDragStart }: Props) {
           className="h-10 w-10 shrink-0 rounded-full object-cover object-top border border-black/10 dark:border-white/10"
         />
       ) : (
-        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-xs font-bold text-amber-700 dark:text-amber-400">
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mode-tierlisten/15 text-xs font-bold text-mode-tierlisten">
           {item.name.slice(0, 2).toUpperCase()}
         </span>
       )}
