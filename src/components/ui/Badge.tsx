@@ -22,7 +22,7 @@ export function Badge({ rarity, className = "", children, ...rest }: Props) {
   const rarityClass = rarity ? RARITY_CLASSES[rarity] : "bg-black/10 dark:bg-white/10";
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${rarityClass} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full border-2 border-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${rarityClass} ${className}`}
       {...rest}
     >
       {children}

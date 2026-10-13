@@ -21,7 +21,7 @@ export function PageShell({ title, subtitle, accent = "accent", maxWidthClassNam
   const a = MODE_ACCENT_CLASSES[accent];
   return (
     <main className={`mx-auto ${maxWidthClassName} px-4 py-8`}>
-      <h1 className={`font-[family-name:var(--font-display)] text-3xl mb-1 ${a.text}`}>{title}</h1>
+      <h1 className={`op-ink-text font-[family-name:var(--font-display)] text-3xl mb-1 ${a.text}`}>{title}</h1>
       {subtitle && <p className="text-sm text-black/60 dark:text-white/50 mb-6">{subtitle}</p>}
       {children}
     </main>

@@ -9,10 +9,11 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: "bg-accent text-white hover:brightness-90 disabled:hover:brightness-100",
-  secondary:
-    "border border-black/15 dark:border-white/15 hover:bg-black/5 dark:hover:bg-white/5",
-  danger: "bg-danger text-white hover:brightness-90 disabled:hover:brightness-100",
+  primary: "op-ink-btn bg-accent text-white hover:brightness-95 disabled:hover:brightness-100",
+  secondary: "op-ink-btn bg-transparent hover:bg-black/5 dark:hover:bg-white/5",
+  danger: "op-ink-btn bg-danger text-white hover:brightness-95 disabled:hover:brightness-100",
+  // Deliberately left plain (no ink border) — minor/de-emphasized actions
+  // like "Zurück" or "Abbrechen" shouldn't compete visually with real buttons.
   ghost: "hover:bg-black/5 dark:hover:bg-white/5",
 };
 

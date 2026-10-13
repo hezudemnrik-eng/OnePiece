@@ -86,7 +86,7 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
           return (
             <div
               key={i}
-              className="op-parchment flex flex-col items-center gap-3 rounded-2xl border border-mode-draft/40 bg-gradient-to-b from-mode-draft/10 to-transparent p-4 shadow-sm"
+              className="op-parchment op-ink flex flex-col items-center gap-3 rounded-2xl bg-mode-draft/10 p-4"
             >
               {char.imageUrl && (
                 <div
