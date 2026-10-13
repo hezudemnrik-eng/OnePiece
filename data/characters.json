@@ -337,7 +337,7 @@
         "label": "Marineford",
         "stats": {
           "staerke": 95,
-          "haki": 90,
+          "haki": 97,
           "intelligenz": 65,
           "geschwindigkeit": 40,
           "durabilitaet": 85
@@ -1394,7 +1394,7 @@
         "stats": {
           "staerke": 87,
           "haki": 93,
-          "intelligenz": 99,
+          "intelligenz": 78,
           "geschwindigkeit": 92,
           "durabilitaet": 92
         }
@@ -1420,7 +1420,7 @@
           "haki": 78,
           "intelligenz": 75,
           "geschwindigkeit": 72,
-          "durabilitaet": 71
+          "durabilitaet": 88
         }
       }
     ],
