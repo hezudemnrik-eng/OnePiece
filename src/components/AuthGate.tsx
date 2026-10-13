@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { characters } from "@/lib/characters";
 import { AccountPanel } from "./AccountPanel";
+import { BottomNav } from "./BottomNav";
+import { IconRail } from "./IconRail";
 import { LoadingSpinner } from "./LoadingSpinner";
-import { SidebarNav } from "./SidebarNav";
 import { ThemeToggle } from "./ThemeToggle";
 import {
   getCurrentAuthUser,
@@ -90,23 +91,24 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   if (user && user.username && !user.isAnonymous) {
     return (
       <>
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-black/10 dark:border-white/10 bg-[var(--background)]/85 backdrop-blur px-4 py-3">
-          <div className="flex items-center gap-3">
-            <SidebarNav />
+        <IconRail />
+        <div className="md:pl-16">
+          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-black/10 dark:border-white/10 bg-[var(--background)]/85 backdrop-blur px-4 py-3">
             <Link
               href="/"
-              className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl text-amber-700 dark:text-amber-400"
+              className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl text-accent"
             >
               <span aria-hidden>🏴‍☠️</span>
               One Piece Draft-App
             </Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <AccountPanel onSignedOut={refreshUser} />
-          </div>
-        </header>
-        {children}
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <AccountPanel onSignedOut={refreshUser} />
+            </div>
+          </header>
+          <div className="pb-16 md:pb-0">{children}</div>
+        </div>
+        <BottomNav />
       </>
     );
   }
@@ -133,7 +135,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     <main className="flex min-h-[80vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm flex flex-col gap-5">
         <div className="text-center">
-          <p className="font-[family-name:var(--font-display)] text-3xl text-amber-700 dark:text-amber-400">
+          <p className="font-[family-name:var(--font-display)] text-3xl text-accent">
             One Piece Draft-App
           </p>
           <p className="mt-1 text-sm text-black/60 dark:text-white/50">
@@ -144,13 +146,13 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         <div className="flex gap-2 rounded-lg border border-black/10 dark:border-white/10 p-1 text-sm">
           <button
             onClick={() => setMode("login")}
-            className={`flex-1 rounded-md py-1.5 font-medium ${mode === "login" ? "bg-amber-600 text-white" : "text-black/60 dark:text-white/50"}`}
+            className={`flex-1 rounded-md py-1.5 font-medium ${mode === "login" ? "bg-accent text-white" : "text-black/60 dark:text-white/50"}`}
           >
             Anmelden
           </button>
           <button
             onClick={() => setMode("signup")}
-            className={`flex-1 rounded-md py-1.5 font-medium ${mode === "signup" ? "bg-amber-600 text-white" : "text-black/60 dark:text-white/50"}`}
+            className={`flex-1 rounded-md py-1.5 font-medium ${mode === "signup" ? "bg-accent text-white" : "text-black/60 dark:text-white/50"}`}
           >
             Registrieren
           </button>
@@ -194,7 +196,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
                     type="button"
                     onClick={() => setAvatarId(c.id)}
                     title={c.name}
-                    className={`relative rounded-full overflow-hidden border-2 ${avatarId === c.id ? "border-amber-500" : "border-transparent"}`}
+                    className={`relative rounded-full overflow-hidden border-2 ${avatarId === c.id ? "border-accent" : "border-transparent"}`}
                   >
                     {c.imageUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -207,12 +209,12 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
           </>
         )}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <button
           onClick={handleSubmit}
           disabled={busy || !username || !password || (mode === "signup" && !inviteCode)}
-          className="rounded-md bg-amber-600 text-white px-4 py-2.5 font-medium hover:bg-amber-700 disabled:opacity-40"
+          className="rounded-md bg-accent text-white px-4 py-2.5 font-medium hover:brightness-90 disabled:opacity-40"
         >
           {mode === "signup" ? "Account erstellen" : "Anmelden"}
         </button>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Pirata_One } from "next/font/google";
+import { Baloo_2, Geist, Geist_Mono, Pirata_One } from "next/font/google";
 import Script from "next/script";
 import { AuthGate } from "@/components/AuthGate";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme";
@@ -15,6 +15,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Playful, rounded display face for headings and mode titles — the main
+// --font-display (see globals.css's @theme inline block).
+const baloo2 = Baloo_2({
+  variable: "--font-baloo",
+  weight: ["600", "700", "800"],
+  subsets: ["latin"],
+});
+
+// Blackletter mood font, now reserved for rare dramatic flavor (--font-mystery)
+// rather than the everyday display face — see globals.css.
 const pirataOne = Pirata_One({
   variable: "--font-pirata",
   weight: "400",
@@ -42,7 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="de"
-      className={`${geistSans.variable} ${geistMono.variable} ${pirataOne.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${baloo2.variable} ${pirataOne.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {/* Applies a saved manual light/dark override before first paint, so

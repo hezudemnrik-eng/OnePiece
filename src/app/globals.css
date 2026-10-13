@@ -5,16 +5,62 @@
   --foreground: #1a2332;
   --surface: #ffffff;
   --accent: #d97706;
+  /* Success now rides the brand gold instead of a separate green (Q23) —
+     aliased rather than hardcoded so it always tracks --accent. */
+  --success: var(--accent);
+  --danger: #e11d48;
   /* Unified corner radius for every card-like surface app-wide. */
   --radius-card: 1rem;
+
+  /* Per-mode accent tints (Q29) — purely decorative accents (icons, active
+     nav item, card highlight borders), never a full replacement for the
+     brand gold used on primary actions/XP/currency. */
+  --mode-draft: var(--accent);
+  --mode-duell: var(--accent);
+  --mode-zufallsgegner: var(--accent);
+  --mode-imu: #7f1d1d;
+  --mode-quiz: #2563eb;
+  --mode-tierlisten: #7c3aed;
+  --mode-blind-ranking: #4f46e5;
+  --mode-crew: #0d9488;
+  --mode-fusion: #c026d3;
+
+  /* Rarity tiers for character/cosmetic highlighting (Q27). Gold reuses the
+     brand accent; legendary additionally gets the .op-legendary-glow
+     animation below. */
+  --rarity-bronze: #92400e;
+  --rarity-silver: #9ca3af;
+  --rarity-gold: var(--accent);
+  --rarity-legendary: #c026d3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-mode-draft: var(--mode-draft);
+  --color-mode-duell: var(--mode-duell);
+  --color-mode-zufallsgegner: var(--mode-zufallsgegner);
+  --color-mode-imu: var(--mode-imu);
+  --color-mode-quiz: var(--mode-quiz);
+  --color-mode-tierlisten: var(--mode-tierlisten);
+  --color-mode-blind-ranking: var(--mode-blind-ranking);
+  --color-mode-crew: var(--mode-crew);
+  --color-mode-fusion: var(--mode-fusion);
+  --color-rarity-bronze: var(--rarity-bronze);
+  --color-rarity-silver: var(--rarity-silver);
+  --color-rarity-gold: var(--rarity-gold);
+  --color-rarity-legendary: var(--rarity-legendary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-pirata);
+  /* Playful rounded display face for headings/mode titles (Q11/Q17) —
+     Pirata One (blackletter) is kept as --font-mystery for rare dramatic
+     flavor (e.g. the Imu intro) instead of being the everyday display font. */
+  --font-display: var(--font-baloo);
+  --font-mystery: var(--font-pirata);
 }
 
 /* System dark mode applies unless the user picked "light" explicitly via
@@ -25,6 +71,15 @@
     --foreground: #ede6d6;
     --surface: #121f33;
     --accent: #f0b429;
+    --danger: #fb7185;
+    --mode-imu: #dc2626;
+    --mode-quiz: #60a5fa;
+    --mode-tierlisten: #a78bfa;
+    --mode-blind-ranking: #818cf8;
+    --mode-crew: #2dd4bf;
+    --mode-fusion: #e879f9;
+    --rarity-silver: #d1d5db;
+    --rarity-legendary: #e879f9;
   }
 }
 
@@ -34,6 +89,15 @@
   --foreground: #ede6d6;
   --surface: #121f33;
   --accent: #f0b429;
+  --danger: #fb7185;
+  --mode-imu: #dc2626;
+  --mode-quiz: #60a5fa;
+  --mode-tierlisten: #a78bfa;
+  --mode-blind-ranking: #818cf8;
+  --mode-crew: #2dd4bf;
+  --mode-fusion: #e879f9;
+  --rarity-silver: #d1d5db;
+  --rarity-legendary: #e879f9;
 }
 
 body {
@@ -108,6 +172,25 @@ body {
 }
 .op-s-tier-glow {
   animation: op-s-tier-glow 1.6s ease-in-out infinite;
+}
+
+/* Richer two-tone glow (gold + magenta) reserved for legendary-rarity
+   items — a step up from the single-color S-tier glow above. */
+@keyframes op-legendary-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(240, 180, 41, 0.5),
+      0 0 0 0 rgba(192, 38, 211, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 28px 8px rgba(240, 180, 41, 0.55),
+      0 0 44px 14px rgba(192, 38, 211, 0.3);
+  }
+}
+.op-legendary-glow {
+  animation: op-legendary-glow 1.8s ease-in-out infinite;
 }
 
 @keyframes op-slide-in {
@@ -192,6 +275,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .op-pop-in,
   .op-s-tier-glow,
+  .op-legendary-glow,
   .op-slide-in,
   .op-turn-pulse,
   .op-banner-in,
