@@ -211,6 +211,18 @@ body {
   box-shadow: 5px 5px 0 0 var(--poster-ink);
 }
 
+/* Form fields (Input/Select/textarea) default to a dark-mode-reactive fill
+   meant for a dark page background — wrong inside a .op-wanted card, which
+   is always light paper regardless of theme. Higher specificity than the
+   Tailwind utility classes, so it reliably wins without a className-order
+   gamble. */
+.op-wanted input,
+.op-wanted select,
+.op-wanted textarea {
+  background-color: #fff;
+  color: var(--poster-ink);
+}
+
 /* Comic-lettering stroke for display-font headings — a thin outline in
    every direction instead of a soft blurred drop-shadow. Fixed semi-opaque
    black regardless of theme (reads as a dark contour on both the cream

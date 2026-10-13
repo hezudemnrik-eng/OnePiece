@@ -51,6 +51,7 @@ import { VictoryBanner } from "./VictoryBanner";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { Input } from "./ui/Input";
+import { Select } from "./ui/Select";
 
 const PICK_SECONDS = 30;
 const ROLES_SECONDS = 45;
@@ -554,14 +555,10 @@ export function LiveDraftBoard() {
       <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Anzahl Spieler (2 oder 4)
-          <select
-            value={playerCount}
-            onChange={(e) => setPlayerCount(Number(e.target.value))}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
-          >
+          <Select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))}>
             <option value={2}>2</option>
             <option value={4}>4</option>
-          </select>
+          </Select>
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Teamgröße

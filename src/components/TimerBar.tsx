@@ -10,7 +10,7 @@ export function TimerBar({ secondsLeft, totalSeconds }: Props) {
     <div className="flex items-center gap-2">
       <div className="h-1.5 w-20 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
         <div
-          className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${low ? "bg-rose-500" : "bg-amber-500"}`}
+          className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${low ? "bg-danger" : "bg-accent"}`}
           style={{ width: `${pct}%` }}
         />
       </div>

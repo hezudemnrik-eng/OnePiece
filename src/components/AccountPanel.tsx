@@ -70,7 +70,7 @@ export function AccountPanel({ onSignedOut }: Props) {
             src={avatar.imageUrl}
             alt={avatar.name}
             referrerPolicy="no-referrer"
-            className={`h-9 w-9 rounded-full object-cover object-top border border-black/10 dark:border-white/10 ${frameClass}`}
+            className={`h-9 w-9 rounded-full object-cover object-top border-2 border-foreground ${frameClass}`}
           />
         )}
         <span className="absolute -bottom-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold tabular-nums text-white">

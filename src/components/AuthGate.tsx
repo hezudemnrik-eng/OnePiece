@@ -8,6 +8,8 @@ import { BottomNav } from "./BottomNav";
 import { IconRail } from "./IconRail";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { ThemeToggle } from "./ThemeToggle";
+import { Button } from "./ui/Button";
+import { Input } from "./ui/Input";
 import {
   getCurrentAuthUser,
   isSupabaseConfigured,
@@ -78,10 +80,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       <>
         <IconRail />
         <div className="md:pl-16">
-          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-black/10 dark:border-white/10 bg-[var(--background)]/85 backdrop-blur px-4 py-3">
+          <header className="sticky top-0 z-20 flex items-center justify-between border-b-2 border-foreground bg-[var(--background)]/95 backdrop-blur px-4 py-3">
             <Link
               href="/"
-              className="flex items-center gap-2 font-[family-name:var(--font-display)] text-xl text-accent"
+              className="op-ink-text flex items-center gap-2 font-[family-name:var(--font-display)] text-xl text-accent"
             >
               <span aria-hidden>🏴‍☠️</span>
               One Piece Draft-App
@@ -118,26 +120,26 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   return (
     <main className="flex min-h-[80vh] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm flex flex-col gap-5">
+      <div className="op-wanted op-parchment w-full max-w-sm flex flex-col gap-5 rounded-xl p-6">
         <div className="text-center">
-          <p className="font-[family-name:var(--font-display)] text-3xl text-accent">
+          <p className="op-ink-text font-[family-name:var(--font-display)] text-3xl text-accent">
             One Piece Draft-App
           </p>
-          <p className="mt-1 text-sm text-black/60 dark:text-white/50">
+          <p className="mt-1 text-sm opacity-70">
             {mode === "signup" ? "Account erstellen, um loszulegen" : "Anmelden, um weiterzumachen"}
           </p>
         </div>
 
-        <div className="flex gap-2 rounded-lg border border-black/10 dark:border-white/10 p-1 text-sm">
+        <div className="flex gap-2 rounded-lg border-2 border-poster-ink p-1 text-sm">
           <button
             onClick={() => setMode("login")}
-            className={`flex-1 rounded-md py-1.5 font-medium ${mode === "login" ? "bg-accent text-white" : "text-black/60 dark:text-white/50"}`}
+            className={`flex-1 rounded-md py-1.5 font-medium ${mode === "login" ? "bg-accent text-poster-ink" : "opacity-60"}`}
           >
             Anmelden
           </button>
           <button
             onClick={() => setMode("signup")}
-            className={`flex-1 rounded-md py-1.5 font-medium ${mode === "signup" ? "bg-accent text-white" : "text-black/60 dark:text-white/50"}`}
+            className={`flex-1 rounded-md py-1.5 font-medium ${mode === "signup" ? "bg-accent text-poster-ink" : "opacity-60"}`}
           >
             Registrieren
           </button>
@@ -145,31 +147,21 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
         <label className="flex flex-col gap-1 text-sm">
           Nutzername
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-2"
-          />
+          <Input value={username} onChange={(e) => setUsername(e.target.value)} />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Passwort
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-2"
-          />
+          <Input value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
         </label>
 
         {mode === "signup" && (
           <>
             <label className="flex flex-col gap-1 text-sm">
               Einladungscode
-              <input
+              <Input
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
                 placeholder="von deinem Freund bekommen"
-                className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-2"
               />
             </label>
             <div className="flex flex-col gap-2 text-sm">
@@ -181,7 +173,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
                     type="button"
                     onClick={() => setAvatarId(c.id)}
                     title={c.name}
-                    className={`relative rounded-full overflow-hidden border-2 ${avatarId === c.id ? "border-accent" : "border-transparent"}`}
+                    className={`relative rounded-full overflow-hidden border-2 ${avatarId === c.id ? "border-accent" : "border-poster-ink/30"}`}
                   >
                     {c.imageUrl && (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -196,13 +188,12 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
         {error && <p className="text-sm text-danger">{error}</p>}
 
-        <button
+        <Button
           onClick={handleSubmit}
           disabled={busy || !username || !password || (mode === "signup" && !inviteCode)}
-          className="rounded-md bg-accent text-white px-4 py-2.5 font-medium hover:brightness-90 disabled:opacity-40"
         >
           {mode === "signup" ? "Account erstellen" : "Anmelden"}
-        </button>
+        </Button>
       </div>
     </main>
   );
