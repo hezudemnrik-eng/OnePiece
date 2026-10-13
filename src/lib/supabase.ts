@@ -437,6 +437,19 @@ export async function incrementXp(delta: number): Promise<void> {
   await supabase.rpc("increment_xp", { delta });
 }
 
+/**
+ * Mode-aware XP award (see migration 0011's award_xp()): logs the run and
+ * applies per-mode diminishing returns server-side (crew/blind-ranking only)
+ * before clamping to the shared daily cap. Prefer this over incrementXp for
+ * any XP tied to completing a specific game mode.
+ */
+export async function awardModeXp(mode: string, baseXp: number): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.rpc("award_xp", { p_mode: mode, p_base_xp: baseXp });
+}
+
 export type MatchMode = "imu" | "zufallsgegner" | "live-draft";
 
 /** Appends one match result for the signed-in user (solo-vs-AI and live-draft only — see migration 0007). */
@@ -449,7 +462,7 @@ export async function recordMatchResult(
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await supabase.from("match_results").insert({ user_id: userId, mode, opponent_label: opponentLabel, result });
-  await incrementXp(result === "win" ? XP_MATCH_WIN : XP_MATCH_LOSS);
+  await awardModeXp(mode, result === "win" ? XP_MATCH_WIN : XP_MATCH_LOSS);
 }
 
 export type LeaderboardEntry = {
@@ -599,7 +612,7 @@ export async function recordQuizResult(
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await supabase.from("quiz_results").insert({ user_id: userId, score, total, category, difficulty });
-  await incrementXp(XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
+  await awardModeXp("quiz", XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
 }
 
 export type QuizLeaderboardEntry = {
@@ -717,7 +730,7 @@ export async function submitQuizScore(sessionId: string, score: number): Promise
     .update({ score, finished_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq("session_id", sessionId)
     .eq("user_id", userId);
-  await incrementXp(XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
+  await awardModeXp("quiz", XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
 }
 
 export async function fetchQuizParticipants(sessionId: string): Promise<QuizParticipant[]> {
@@ -738,21 +751,21 @@ export async function recordCrewCompletion(xp: number): Promise<void> {
   if (!supabase) return;
   const userId = await ensureSupabaseSession();
   if (!userId) return;
-  await incrementXp(xp);
+  await awardModeXp("crew", xp);
 }
 
 export async function recordBlindRankingCompletion(xp: number): Promise<void> {
   if (!supabase) return;
   const userId = await ensureSupabaseSession();
   if (!userId) return;
-  await incrementXp(xp);
+  await awardModeXp("blind-ranking", xp);
 }
 
 export async function recordFusionCompletion(xp: number): Promise<void> {
   if (!supabase) return;
   const userId = await ensureSupabaseSession();
   if (!userId) return;
-  await incrementXp(xp);
+  await awardModeXp("fusion", xp);
 }
 
 // --- Achievements (currently Fusions-Pirat badges, see fusionAchievements.ts) ---

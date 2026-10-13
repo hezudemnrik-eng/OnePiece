@@ -23,7 +23,7 @@ const RANK_TIERS: RankTier[] = [
 /** Cumulative XP needed to REACH a given level (level 1 = 0 XP). */
 export function xpForLevel(level: number): number {
   if (level <= 1) return 0;
-  return 20 * level * (level - 1);
+  return 35 * level * (level - 1);
 }
 
 export function levelFromXp(xp: number): number {
@@ -60,6 +60,15 @@ export function getLevelProgress(xp: number): LevelProgress {
   const progress = span > 0 ? Math.min(1, Math.max(0, (xp - levelStartXp) / span)) : 1;
   return { level, rankTitle: rankTitleForLevel(level), xp, levelStartXp, levelEndXp, progress };
 }
+
+// Kept in sync with daily_xp_cap() in migration 0011 — the actual
+// enforcement is server-side (can't be bypassed from the client), this is
+// just for anything that wants to reference the same number.
+export const DAILY_XP_CAP = 400;
+
+// Modes subject to diminishing returns on repeats (see award_xp() in
+// migration 0011) — flat-XP modes with no real win/loss or skill signal.
+export const FARMABLE_MODES = ["crew", "blind-ranking"] as const;
 
 // Flat/scaled XP awards per completed action across the app.
 export const XP_MATCH_WIN = 25;
