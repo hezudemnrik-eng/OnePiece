@@ -22,6 +22,13 @@ export const MODE_GROUPS: { id: ModeGroupId; href: string; icon: string; title: 
   { id: "builder", href: "/builder", icon: "🧭", title: "Builder" },
 ];
 
+/**
+ * The Berry-shop's own tile (not a MODE_GROUP — it has no sub-pages to
+ * route a hub into, just its own standalone page), shown alongside the 3
+ * mode groups on Home and in the desktop icon rail.
+ */
+export const SHOP_TILE = { href: "/shop", icon: "🛒", title: "Shop" };
+
 /** Every game mode's nav entry — shared by the category hub pages and (formerly) the sidebar. */
 export const MODES: GameMode[] = [
   {

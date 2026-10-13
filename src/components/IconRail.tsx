@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MODE_GROUPS, MODES } from "@/lib/modes";
+import { MODE_GROUPS, MODES, SHOP_TILE } from "@/lib/modes";
 
 function isGroupActive(pathname: string, groupHref: string, groupId: string): boolean {
   if (pathname === groupHref) return true;
@@ -15,7 +15,11 @@ export function IconRail() {
   const [expanded, setExpanded] = useState(false);
   const pathname = usePathname();
 
-  const items = [{ href: "/", icon: "🏠", title: "Home" }, ...MODE_GROUPS];
+  const items: { href: string; icon: string; title: string; id?: string }[] = [
+    { href: "/", icon: "🏠", title: "Home" },
+    ...MODE_GROUPS,
+    SHOP_TILE,
+  ];
 
   return (
     <nav
@@ -32,7 +36,7 @@ export function IconRail() {
       </button>
       <div className="flex flex-col gap-1 px-2">
         {items.map((item) => {
-          const active = "id" in item ? isGroupActive(pathname, item.href, item.id) : pathname === item.href;
+          const active = item.id ? isGroupActive(pathname, item.href, item.id) : pathname === item.href;
           return (
             <Link
               key={item.href}

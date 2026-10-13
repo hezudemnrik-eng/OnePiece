@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { characters } from "@/lib/characters";
 import { AVATAR_CHOICES } from "@/lib/avatarChoices";
 import {
@@ -14,6 +15,8 @@ import { DUEL_ACHIEVEMENTS } from "@/lib/duelAchievements";
 import { QUIZ_ACHIEVEMENTS } from "@/lib/quizAchievements";
 import { CREW_ACHIEVEMENTS } from "@/lib/crewAchievements";
 import { BLIND_RANKING_ACHIEVEMENTS } from "@/lib/blindRankingAchievements";
+import { DRAFT_ACHIEVEMENTS } from "@/lib/draftAchievements";
+import { TIER_LIST_ACHIEVEMENTS } from "@/lib/tierListAchievements";
 import { formatBerry } from "@/lib/fusionTraits";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { FriendsPanel } from "./FriendsPanel";
@@ -21,22 +24,16 @@ import { Card } from "./ui/Card";
 import { ProgressBar } from "./ui/ProgressBar";
 import {
   ensureProfile,
-  equipShopItem,
   fetchGlobalLeaderboard,
   fetchLeaderboard,
   fetchMyAchievements,
   fetchMyLevelInfo,
   fetchMyRecentMatches,
-  fetchMyShopPurchases,
   fetchQuizLeaderboard,
   fetchShopItems,
   getCurrentAuthUser,
-  purchaseShopItem,
   setAvatarCharacterId,
-  setEquippedArena,
-  setEquippedColor,
   setEquippedFrame,
-  setEquippedTitle,
   type AuthUser,
   type GlobalLeaderboardEntry,
   type LeaderboardEntry,
@@ -58,9 +55,11 @@ const MODE_LABELS: Record<MatchMode, string> = {
 const ACHIEVEMENT_GROUPS = [
   { label: "Fusions-Pirat", items: FUSION_ACHIEVEMENTS },
   { label: "Duell", items: DUEL_ACHIEVEMENTS },
+  { label: "Draft", items: DRAFT_ACHIEVEMENTS },
   { label: "Quiz", items: QUIZ_ACHIEVEMENTS },
   { label: "Crew Builder", items: CREW_ACHIEVEMENTS },
   { label: "Blind Ranking", items: BLIND_RANKING_ACHIEVEMENTS },
+  { label: "Tierlisten", items: TIER_LIST_ACHIEVEMENTS },
 ];
 const TOTAL_ACHIEVEMENTS = ACHIEVEMENT_GROUPS.reduce((sum, g) => sum + g.items.length, 0);
 
@@ -84,12 +83,9 @@ export function ProfileBoard() {
   const [equippedFrame, setEquippedFrameState] = useState<string | null>(null);
   const [equippedColor, setEquippedColorState] = useState<string | null>(null);
   const [equippedTitle, setEquippedTitleState] = useState<string | null>(null);
-  const [equippedArena, setEquippedArenaState] = useState<string | null>(null);
   const [berries, setBerries] = useState(0);
   const [unlockedAchievements, setUnlockedAchievements] = useState<Set<string>>(new Set());
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
-  const [ownedItems, setOwnedItems] = useState<Set<string>>(new Set());
-  const [shopBusyId, setShopBusyId] = useState<string | null>(null);
   const [shareCode, setShareCode] = useState<string | null>(null);
   const [codeCopied, setCodeCopied] = useState(false);
   const [avatarId, setAvatarId] = useState<string | null>(null);
@@ -106,22 +102,19 @@ export function ProfileBoard() {
       fetchMyLevelInfo(),
       fetchMyAchievements(),
       fetchShopItems(),
-      fetchMyShopPurchases(),
       fetchLeaderboard(),
       fetchQuizLeaderboard(),
       fetchMyRecentMatches(10),
       fetchGlobalLeaderboard(),
-    ]).then(([authUser, levelInfo, achievements, items, purchases, board, quizBoard, matches, globalBoard]) => {
+    ]).then(([authUser, levelInfo, achievements, items, board, quizBoard, matches, globalBoard]) => {
       setUser(authUser);
       setProgress(getLevelProgress(levelInfo?.xp ?? 0));
       setEquippedFrameState(levelInfo?.equippedFrame ?? null);
       setEquippedColorState(levelInfo?.equippedColor ?? null);
       setEquippedTitleState(levelInfo?.equippedTitle ?? null);
-      setEquippedArenaState(levelInfo?.equippedArena ?? null);
       setBerries(levelInfo?.berries ?? 0);
       setUnlockedAchievements(achievements);
       setShopItems(items);
-      setOwnedItems(purchases);
       setAvatarId(authUser?.avatarCharacterId ?? null);
       setLeaderboard(board);
       setQuizLeaderboard(quizBoard);
@@ -146,9 +139,7 @@ export function ProfileBoard() {
   const unlockedFrames = framesUnlockedAtLevel(progress.level);
   const shopFrames = shopItems.filter((i) => i.category === "frame");
   const shopColors = shopItems.filter((i) => i.category === "color");
-  const shopAvatars = shopItems.filter((i) => i.category === "avatar");
   const shopTitles = shopItems.filter((i) => i.category === "title");
-  const shopArenas = shopItems.filter((i) => i.category === "arena");
   const activeFrameClass =
     COSMETIC_FRAMES.find((f) => f.id === equippedFrame)?.className ??
     shopFrames.find((f) => f.id === equippedFrame)?.className ??
@@ -178,59 +169,6 @@ export function ProfileBoard() {
       setTimeout(() => setCodeCopied(false), 1500);
     } catch {
       // clipboard unavailable — the code is still shown as selectable text
-    }
-  }
-
-  async function handleShopAction(item: ShopItem) {
-    if (shopBusyId) return;
-    const owned = ownedItems.has(item.id);
-    const currentlyEquipped: Record<string, string | null> = {
-      frame: equippedFrame,
-      color: equippedColor,
-      title: equippedTitle,
-      arena: equippedArena,
-      avatar: avatarId,
-    };
-    // Avatars always have *some* value equipped (the free picker further up
-    // provides the fallback), so clicking an owned avatar item re-equips it
-    // rather than toggling it off like frame/color/title/arena can.
-    const isEquipped = item.category !== "avatar" && currentlyEquipped[item.category] === item.id;
-    setShopBusyId(item.id);
-    try {
-      if (!owned) {
-        const ok = await purchaseShopItem(item.id);
-        if (ok) {
-          setOwnedItems((prev) => new Set(prev).add(item.id));
-          setBerries((b) => b - item.price);
-        }
-        return;
-      }
-      if (isEquipped) {
-        if (item.category === "frame") {
-          setEquippedFrameState(null);
-          await setEquippedFrame(null);
-        } else if (item.category === "color") {
-          setEquippedColorState(null);
-          await setEquippedColor(null);
-        } else if (item.category === "title") {
-          setEquippedTitleState(null);
-          await setEquippedTitle(null);
-        } else if (item.category === "arena") {
-          setEquippedArenaState(null);
-          await setEquippedArena(null);
-        }
-        return;
-      }
-      const ok = await equipShopItem(item.id);
-      if (ok) {
-        if (item.category === "frame") setEquippedFrameState(item.id);
-        else if (item.category === "color") setEquippedColorState(item.id);
-        else if (item.category === "title") setEquippedTitleState(item.id);
-        else if (item.category === "arena") setEquippedArenaState(item.id);
-        else if (item.category === "avatar") setAvatarId(item.id);
-      }
-    } finally {
-      setShopBusyId(null);
     }
   }
 
@@ -502,167 +440,20 @@ export function ProfileBoard() {
 
       <div>
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
-          Shop: Rahmen
+          Shop
         </h2>
-        <div className="flex flex-wrap gap-2">
-          {shopFrames.map((item) => {
-            const owned = ownedItems.has(item.id);
-            const isActive = equippedFrame === item.id;
-            const isLocked = progress.level < item.minLevel;
-            return (
-              <button
-                key={item.id}
-                onClick={() => !isLocked && handleShopAction(item)}
-                disabled={isLocked || shopBusyId === item.id}
-                className={`rounded-md border px-3 py-1.5 text-sm ${
-                  isActive ? "border-accent bg-accent/10 font-semibold" : "border-black/15 dark:border-white/15"
-                } ${isLocked ? "opacity-40 cursor-not-allowed" : "hover:border-accent"}`}
-              >
-                {item.label}
-                {isLocked ? (
-                  <span className="ml-1 text-xs">(ab Lv. {item.minLevel})</span>
-                ) : (
-                  <span className="ml-1 text-xs">{owned ? (isActive ? "· ausgerüstet" : "· ausrüsten") : `· ${formatBerry(item.price)}`}</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+        <Link href="/shop">
+          <Card variant="spotlight" accent="shop" className="flex items-center justify-between">
+            <span className="text-sm font-semibold">
+              Rahmen, Farben, Avatare, Titel & Arenen kaufen
+              <span className="block font-normal text-black/60 dark:text-white/50">{formatBerry(berries)} verfügbar</span>
+            </span>
+            <span className="text-accent-ink text-xl" aria-hidden>
+              →
+            </span>
+          </Card>
+        </Link>
       </div>
-
-      <div>
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
-          Shop: Namensfarbe
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {shopColors.map((item) => {
-            const owned = ownedItems.has(item.id);
-            const isActive = equippedColor === item.id;
-            const isLocked = progress.level < item.minLevel;
-            return (
-              <button
-                key={item.id}
-                onClick={() => !isLocked && handleShopAction(item)}
-                disabled={isLocked || shopBusyId === item.id}
-                className={`rounded-md border px-3 py-1.5 text-sm ${item.className} ${
-                  isActive ? "border-accent bg-accent/10 font-semibold" : "border-black/15 dark:border-white/15"
-                } ${isLocked ? "opacity-40 cursor-not-allowed" : "hover:border-accent"}`}
-              >
-                {item.label}
-                {isLocked ? (
-                  <span className="ml-1 text-xs">(ab Lv. {item.minLevel})</span>
-                ) : (
-                  <span className="ml-1 text-xs">{owned ? (isActive ? "· ausgerüstet" : "· ausrüsten") : `· ${formatBerry(item.price)}`}</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {shopAvatars.length > 0 && (
-        <div>
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
-            Shop: Avatare
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {shopAvatars.map((item) => {
-              const character = characters.find((c) => c.id === item.id);
-              const owned = ownedItems.has(item.id);
-              const isActive = avatarId === item.id;
-              const isLocked = progress.level < item.minLevel;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => !isLocked && handleShopAction(item)}
-                  disabled={isLocked || shopBusyId === item.id}
-                  className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm ${
-                    isActive ? "border-accent bg-accent/10 font-semibold" : "border-black/15 dark:border-white/15"
-                  } ${isLocked ? "opacity-40 cursor-not-allowed" : "hover:border-accent"}`}
-                >
-                  {character?.imageUrl && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={character.imageUrl} alt="" referrerPolicy="no-referrer" className="h-6 w-6 rounded-full object-cover object-top" />
-                  )}
-                  {item.label}
-                  {isLocked ? (
-                    <span className="text-xs">(ab Lv. {item.minLevel})</span>
-                  ) : (
-                    <span className="text-xs">{owned ? (isActive ? "· ausgerüstet" : "· ausrüsten") : `· ${formatBerry(item.price)}`}</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {shopTitles.length > 0 && (
-        <div>
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
-            Shop: Titel
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {shopTitles.map((item) => {
-              const owned = ownedItems.has(item.id);
-              const isActive = equippedTitle === item.id;
-              const isLocked = progress.level < item.minLevel;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => !isLocked && handleShopAction(item)}
-                  disabled={isLocked || shopBusyId === item.id}
-                  className={`rounded-md border px-3 py-1.5 text-sm ${item.className} ${
-                    isActive ? "border-accent bg-accent/10 font-semibold" : "border-black/15 dark:border-white/15"
-                  } ${isLocked ? "opacity-40 cursor-not-allowed" : "hover:border-accent"}`}
-                >
-                  {item.label}
-                  {isLocked ? (
-                    <span className="ml-1 text-xs">(ab Lv. {item.minLevel})</span>
-                  ) : (
-                    <span className="ml-1 text-xs">{owned ? (isActive ? "· ausgerüstet" : "· ausrüsten") : `· ${formatBerry(item.price)}`}</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {shopArenas.length > 0 && (
-        <div>
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
-            Shop: Duell-Arenen
-          </h2>
-          <p className="mb-2 text-xs text-black/50 dark:text-white/40">
-            Rein kosmetisch — färbt den Hintergrund im Duell-Ergebnis ein.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {shopArenas.map((item) => {
-              const owned = ownedItems.has(item.id);
-              const isActive = equippedArena === item.id;
-              const isLocked = progress.level < item.minLevel;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => !isLocked && handleShopAction(item)}
-                  disabled={isLocked || shopBusyId === item.id}
-                  className={`rounded-md border px-3 py-1.5 text-sm ${item.className} ${
-                    isActive ? "border-accent bg-accent/10 font-semibold" : "border-black/15 dark:border-white/15"
-                  } ${isLocked ? "opacity-40 cursor-not-allowed" : "hover:border-accent"}`}
-                >
-                  {item.label}
-                  {isLocked ? (
-                    <span className="ml-1 text-xs">(ab Lv. {item.minLevel})</span>
-                  ) : (
-                    <span className="ml-1 text-xs">{owned ? (isActive ? "· ausgerüstet" : "· ausrüsten") : `· ${formatBerry(item.price)}`}</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
 
       <div>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">

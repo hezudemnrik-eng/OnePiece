@@ -15,7 +15,8 @@ export type ModeAccent =
   | "tierlisten"
   | "blind-ranking"
   | "crew"
-  | "fusion";
+  | "fusion"
+  | "shop";
 
 type AccentClasses = {
   text: string;
@@ -95,5 +96,12 @@ export const MODE_ACCENT_CLASSES: Record<ModeAccent, AccentClasses> = {
     borderSoft: "border-mode-fusion/40",
     bgSoft: "bg-mode-fusion/10",
     fromSoft: "from-mode-fusion/10",
+  },
+  shop: {
+    text: "text-mode-shop",
+    border: "border-mode-shop",
+    borderSoft: "border-mode-shop/40",
+    bgSoft: "bg-mode-shop/10",
+    fromSoft: "from-mode-shop/10",
   },
 };
