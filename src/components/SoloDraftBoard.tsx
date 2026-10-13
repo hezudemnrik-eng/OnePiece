@@ -15,10 +15,19 @@ import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
 import { RollPanel } from "./RollPanel";
 import { TimerBar } from "./TimerBar";
 import { VictoryBanner } from "./VictoryBanner";
+import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { Input } from "./ui/Input";
 import type { ModeAccent } from "./ui/modeAccents";
+
+const TIER_RARITY: Record<Character["tier"], "legendary" | "gold" | "silver" | "bronze"> = {
+  S: "legendary",
+  A: "gold",
+  B: "silver",
+  C: "bronze",
+  D: "bronze",
+};
 
 const PICK_SECONDS = 30;
 
@@ -281,17 +290,20 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
               ))}
             </ul>
           </Card>
-          <div
-            className={`rounded-lg border p-3 ${isBossFight ? "op-s-tier-glow border-mode-imu/50 bg-gradient-to-b from-mode-imu/10 to-transparent" : "border-black/10 dark:border-white/10"}`}
-          >
-            <p className="mb-2 font-semibold">{opponentName}</p>
+          <div className={`op-wanted op-parchment relative rounded-lg p-3 ${isBossFight ? "op-s-tier-glow" : ""}`}>
+            {isBossFight && imuChar && (
+              <Badge rarity={TIER_RARITY[imuChar.tier]} className="absolute -top-2 -right-2">
+                {imuChar.tier}
+              </Badge>
+            )}
+            <p className="mb-2 font-[family-name:var(--font-display)]">{opponentName}</p>
             {imuChar?.imageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={imuChar.imageUrl}
                 alt={imuChar.name}
                 referrerPolicy="no-referrer"
-                className="mb-2 h-32 w-auto rounded-lg border border-mode-imu/40 object-cover object-top shadow-lg"
+                className="mb-2 h-32 w-auto rounded-lg border-2 border-poster-ink object-cover object-top"
               />
             )}
             <ul className="space-y-1 text-sm">

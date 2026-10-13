@@ -236,31 +236,31 @@ export function ProfileBoard() {
 
   return (
     <div className="flex flex-col gap-8 max-w-2xl">
-      <Card variant="framed" className="flex items-center gap-4 p-5">
+      <div className="op-wanted op-parchment flex items-center gap-4 rounded-xl p-5">
         {avatar?.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={avatar.imageUrl}
             alt={avatar.name}
             referrerPolicy="no-referrer"
-            className={`h-20 w-20 rounded-full object-cover object-top border border-black/10 dark:border-white/10 ${activeFrameClass}`}
+            className={`h-20 w-20 rounded-full object-cover object-top border-2 border-poster-ink ${activeFrameClass}`}
           />
         ) : (
           <span
-            className={`flex h-20 w-20 items-center justify-center rounded-full bg-accent/15 text-2xl font-bold text-accent ${activeFrameClass}`}
+            className={`flex h-20 w-20 items-center justify-center rounded-full border-2 border-poster-ink bg-accent/15 text-2xl font-bold ${activeFrameClass}`}
           >
             {user.username?.slice(0, 2).toUpperCase()}
           </span>
         )}
         <div>
-          <p className={`text-xl font-semibold ${activeColorClass}`}>{user.username}</p>
+          <p className={`font-[family-name:var(--font-display)] text-xl ${activeColorClass}`}>{user.username}</p>
           {activeTitle && <p className={`text-sm ${activeTitle.className}`}>{activeTitle.label}</p>}
           <p className="font-[family-name:var(--font-display)] text-lg text-accent">
             {progress.rankTitle} · Level {progress.level}
           </p>
-          <p className="text-sm text-black/60 dark:text-white/50">{formatBerry(berries)}</p>
+          <p className="text-sm opacity-70">{formatBerry(berries)}</p>
         </div>
-      </Card>
+      </div>
 
       <div>
         <div className="mb-1 flex items-center justify-between text-xs text-black/50 dark:text-white/40">

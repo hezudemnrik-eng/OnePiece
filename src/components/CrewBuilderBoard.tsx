@@ -11,8 +11,16 @@ import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { incrementXp, recordCrewCompletion, unlockAchievement } from "@/lib/supabase";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { VictoryBanner } from "./VictoryBanner";
+import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
-import { Card } from "./ui/Card";
+
+const TIER_RARITY: Record<Character["tier"], "legendary" | "gold" | "silver" | "bronze"> = {
+  S: "legendary",
+  A: "gold",
+  B: "silver",
+  C: "bronze",
+  D: "bronze",
+};
 
 type Phase = "setup" | "rolling" | "done" | "duel";
 
@@ -168,26 +176,29 @@ export function CrewBuilderBoard() {
         </div>
         <h2 className="text-xl font-semibold">{currentRole}</h2>
         {candidate && (
-          <Card variant="spotlight" accent="crew" className="flex flex-col items-center gap-3">
+          <div className="op-wanted op-parchment relative flex flex-col items-center gap-3 rounded-xl p-4">
+            <Badge rarity={TIER_RARITY[candidate.tier]} className="absolute -top-2 -right-2">
+              {candidate.tier}
+            </Badge>
             {candidate.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={candidate.imageUrl}
                 alt={candidate.name}
                 referrerPolicy="no-referrer"
-                className="h-36 w-auto rounded-lg border border-mode-crew/40 object-cover object-top shadow-lg"
+                className="h-36 w-auto rounded-lg border-2 border-poster-ink object-cover object-top"
               />
             ) : (
-              <span className="flex h-36 w-28 items-center justify-center rounded-lg bg-mode-crew/15 text-3xl font-bold text-mode-crew">
+              <span className="flex h-36 w-28 items-center justify-center rounded-lg border-2 border-poster-ink bg-mode-crew/15 text-3xl font-bold">
                 {candidate.name.slice(0, 2).toUpperCase()}
               </span>
             )}
-            <p className="text-lg font-semibold">{candidate.name}</p>
-            <p className="text-sm text-black/60 dark:text-white/50">
+            <p className="font-[family-name:var(--font-display)] text-lg">{candidate.name}</p>
+            <p className="text-sm opacity-70">
               {candidate.crew} · eigentlich {candidate.role}
               {candidate.role !== currentRole && " (Rollen-Mismatch möglich)"}
             </p>
-          </Card>
+          </div>
         )}
         <div className="flex gap-3">
           <Button onClick={keep}>✅ Behalten für {currentRole}</Button>

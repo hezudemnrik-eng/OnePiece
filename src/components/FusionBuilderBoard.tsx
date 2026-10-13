@@ -14,7 +14,6 @@ import { fusionXpForBounty, XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { incrementXp, recordFusionCompletion, unlockAchievement } from "@/lib/supabase";
 import { Button } from "./ui/Button";
-import { Card } from "./ui/Card";
 
 type Phase = "setup" | "rolling" | "done";
 
@@ -94,25 +93,23 @@ function FusionPickCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-col items-center gap-1.5 rounded-xl border-2 border-mode-fusion/50 bg-gradient-to-b from-mode-fusion/10 to-transparent p-2 text-center shadow-sm hover:border-mode-fusion hover:bg-mode-fusion/15 active:bg-mode-fusion/20"
+      className="op-wanted op-parchment flex flex-col items-center gap-1.5 rounded-xl p-2 text-center transition hover:brightness-95 active:brightness-90"
     >
-      <span className="text-xs font-semibold uppercase tracking-wider text-mode-fusion">
-        {categoryLabel}
-      </span>
+      <span className="text-xs font-semibold uppercase tracking-wider opacity-70">{categoryLabel}</span>
       {option.sourceImageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={option.sourceImageUrl}
           alt={option.sourceName}
           referrerPolicy="no-referrer"
-          className="h-20 w-20 rounded-full border-2 border-mode-fusion/50 object-cover object-top shadow-md"
+          className="h-20 w-20 rounded-full border-2 border-poster-ink object-cover object-top"
         />
       ) : (
-        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-mode-fusion/15 text-xl font-bold text-mode-fusion">
+        <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-poster-ink bg-mode-fusion/15 text-xl font-bold">
           {option.sourceName.slice(0, 2).toUpperCase()}
         </span>
       )}
-      <span className="text-sm font-semibold leading-tight">{option.sourceName}</span>
+      <span className="font-[family-name:var(--font-display)] text-sm leading-tight">{option.sourceName}</span>
     </button>
   );
 }
@@ -227,13 +224,13 @@ export function FusionBuilderBoard() {
   const bounty = computeBounty(picks);
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <h2 className="font-[family-name:var(--font-display)] text-2xl text-mode-fusion">
+      <h2 className="op-ink-text font-[family-name:var(--font-display)] text-2xl text-mode-fusion">
         Dein Fusions-Pirat ist bereit!
       </h2>
-      <Card variant="spotlight" accent="fusion" className="text-center">
-        <p className="text-xs uppercase tracking-widest text-black/50 dark:text-white/40 mb-1">Kopfgeld</p>
-        <p className="text-2xl font-bold text-mode-fusion">{formatBerry(bounty)}</p>
-      </Card>
+      <div className="op-wanted op-parchment rounded-xl p-6 text-center">
+        <p className="text-xs uppercase tracking-[0.3em] opacity-70">Gesucht — Kopfgeld</p>
+        <p className="font-[family-name:var(--font-display)] text-3xl">{formatBerry(bounty)}</p>
+      </div>
       {newAchievements.length > 0 && (
         <div className="op-pop-in rounded-xl border border-mode-fusion bg-mode-fusion/10 p-3">
           <p className="mb-1 text-sm font-semibold text-mode-fusion">🏆 Neue Erfolge freigeschaltet!</p>
