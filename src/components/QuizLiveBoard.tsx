@@ -14,6 +14,7 @@ import {
 } from "@/lib/supabase";
 import { playAccept, playSkip, playWin, vibrate } from "@/lib/sfx";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 type View = "loading" | "home" | "create-form" | "join-form" | "playing" | "finished";
 const COUNT_CHOICES = [5, 10, 20, 50, 100];
@@ -131,7 +132,7 @@ export function QuizLiveBoard() {
   }
 
   if (view === "loading") {
-    return <p className="text-sm text-black/60 dark:text-white/50">Verbinde…</p>;
+    return <LoadingSpinner label="Verbinde…" />;
   }
 
   if (view === "home") {

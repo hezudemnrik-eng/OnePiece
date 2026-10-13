@@ -22,6 +22,7 @@ import {
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
+import { LoadingSpinner } from "./LoadingSpinner";
 import {
   createLiveDraft,
   ensureSupabaseSession,
@@ -410,7 +411,7 @@ export function LiveDraftBoard() {
   }
 
   if (effectiveView === "loading") {
-    return <p className="text-sm text-black/60 dark:text-white/50">Verbinde…</p>;
+    return <LoadingSpinner label="Verbinde…" />;
   }
 
   if (effectiveView === "home") {

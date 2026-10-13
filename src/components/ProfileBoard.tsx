@@ -10,6 +10,7 @@ import {
 } from "@/lib/levels";
 import { FUSION_ACHIEVEMENTS } from "@/lib/fusionAchievements";
 import { formatBerry } from "@/lib/fusionTraits";
+import { LoadingSpinner } from "./LoadingSpinner";
 import {
   equipShopItem,
   fetchMyAchievements,
@@ -57,7 +58,7 @@ export function ProfileBoard() {
   }, []);
 
   if (!loaded) {
-    return <p className="text-sm text-black/50 dark:text-white/40">Lade Profil…</p>;
+    return <LoadingSpinner label="Lade Profil…" />;
   }
 
   if (!user || !progress) {

@@ -5,6 +5,8 @@
   --foreground: #1a2332;
   --surface: #ffffff;
   --accent: #d97706;
+  /* Unified corner radius for every card-like surface app-wide. */
+  --radius-card: 1rem;
 }
 
 @theme inline {
@@ -15,13 +17,23 @@
   --font-display: var(--font-pirata);
 }
 
+/* System dark mode applies unless the user picked "light" explicitly via
+   the manual toggle (useThemePreference / ThemeScript in layout.tsx). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --background: #0c1626;
     --foreground: #ede6d6;
     --surface: #121f33;
     --accent: #f0b429;
   }
+}
+
+/* Manual override: forces dark regardless of system preference. */
+:root[data-theme="dark"] {
+  --background: #0c1626;
+  --foreground: #ede6d6;
+  --surface: #121f33;
+  --accent: #f0b429;
 }
 
 body {
@@ -32,6 +44,38 @@ body {
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* --- Shared pirate-flavored surface styles --- */
+
+/* Treasure-map/parchment texture: layered diagonal hatching + soft stains,
+   all CSS gradients (no image asset) so it tiles cleanly at any size and
+   adapts to the light/dark background color automatically. */
+.op-parchment {
+  background-image:
+    repeating-linear-gradient(135deg, rgba(120, 72, 16, 0.05) 0px, rgba(120, 72, 16, 0.05) 1px, transparent 1px, transparent 14px),
+    radial-gradient(ellipse 50% 35% at 15% 20%, rgba(120, 72, 16, 0.07), transparent),
+    radial-gradient(ellipse 40% 30% at 85% 80%, rgba(120, 72, 16, 0.06), transparent);
+  background-color: var(--surface);
+}
+
+/* Base card: the one corner-radius + surface treatment every card-like
+   block in the app should share. */
+.op-card {
+  border-radius: var(--radius-card);
+  background-color: color-mix(in srgb, var(--surface) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+/* Decorative wood/rope frame: a thick amber "plank" border plus a dashed
+   inner "rope" ring. Opt-in on top of .op-card for spots that should feel
+   extra treasure-map-y (profile, fusion board) rather than everywhere. */
+.op-framed {
+  border-width: 3px;
+  border-color: color-mix(in srgb, #92400e 70%, var(--foreground) 10%);
+  box-shadow:
+    inset 0 0 0 4px var(--background),
+    inset 0 0 0 6px color-mix(in srgb, #92400e 55%, transparent);
 }
 
 /* --- Draft animations --- */
@@ -131,13 +175,28 @@ body {
   animation: op-round-in 0.25s ease-out;
 }
 
+/* Themed loading spinner (a slowly spinning ship's wheel) — see
+   LoadingSpinner.tsx, which pairs this with the actual 🧭 glyph. */
+@keyframes op-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.op-spin {
+  animation: op-spin 2.2s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .op-pop-in,
   .op-s-tier-glow,
   .op-slide-in,
   .op-turn-pulse,
   .op-banner-in,
-  .op-round-in {
+  .op-round-in,
+  .op-spin {
     animation: none !important;
   }
 }
