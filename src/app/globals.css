@@ -40,6 +40,7 @@
   --mode-blind-ranking: #4f46e5;
   --mode-crew: #0d9488;
   --mode-fusion: #c026d3;
+  --mode-shop: #15803d;
 
   /* Rarity tiers for character/cosmetic highlighting (Q27). Gold reuses the
      brand accent; legendary additionally gets the .op-legendary-glow
@@ -70,6 +71,7 @@
   --color-mode-blind-ranking: var(--mode-blind-ranking);
   --color-mode-crew: var(--mode-crew);
   --color-mode-fusion: var(--mode-fusion);
+  --color-mode-shop: var(--mode-shop);
   --color-rarity-bronze: var(--rarity-bronze);
   --color-rarity-silver: var(--rarity-silver);
   --color-rarity-gold: var(--rarity-gold);
@@ -107,6 +109,7 @@
     --mode-blind-ranking: #818cf8;
     --mode-crew: #2dd4bf;
     --mode-fusion: #e879f9;
+    --mode-shop: #4ade80;
     --rarity-silver: #d1d5db;
     --rarity-legendary: #e879f9;
   }
@@ -125,6 +128,7 @@
   --mode-blind-ranking: #818cf8;
   --mode-crew: #2dd4bf;
   --mode-fusion: #e879f9;
+  --mode-shop: #4ade80;
   --rarity-silver: #d1d5db;
   --rarity-legendary: #e879f9;
 }
@@ -137,6 +141,11 @@ body {
   background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  /* Safety net against any single unbreakable line (long username, long
+     mode title, …) blowing out the viewport width on mobile — no visible
+     content should ever need the horizontal scroll this would otherwise
+     allow. */
+  overflow-x: hidden;
 }
 
 /* --- Shared pirate-flavored surface styles --- */

@@ -44,6 +44,25 @@ export const DRAFT_ACHIEVEMENTS: DraftAchievement[] = [
     check: (roster, _opponentRoster, won, _rerolls, roleAssignments) =>
       roster.length > 0 && won && roster.every((c) => roleAssignments?.[c.id] === c.role),
   },
+  {
+    id: "draft_crew_loyal",
+    label: "Eine Crew, ein Sieg",
+    description: "Ein komplettes Team aus derselben Crew gedraftet und gewonnen.",
+    check: (roster, _opponentRoster, won) =>
+      roster.length > 0 && won && roster.every((c) => c.crew === roster[0].crew),
+  },
+  {
+    id: "draft_lucky_dice",
+    label: "Würfelglück",
+    description: "Trotz mindestens 10 Rerolls am Ende gewonnen.",
+    check: (roster, _opponentRoster, won, rerolls) => roster.length > 0 && won && rerolls >= 10,
+  },
+  {
+    id: "draft_balanced_team",
+    label: "Ausgeglichenes Team",
+    description: "Mit Charakteren aus mindestens 4 verschiedenen Tier-Stufen gewonnen.",
+    check: (roster, _opponentRoster, won) => roster.length > 0 && won && new Set(roster.map((c) => c.tier)).size >= 4,
+  },
 ];
 
 /** Returns every achievement a finished draft match satisfies, for one player's roster/result. */

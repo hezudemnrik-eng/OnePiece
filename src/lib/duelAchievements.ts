@@ -35,6 +35,24 @@ export const DUEL_ACHIEVEMENTS: DuelAchievement[] = [
     description: "Ein Duell über mindestens 50 Runden durchgestanden.",
     check: (_winner, _loser, battle) => battle.rounds.length >= 50,
   },
+  {
+    id: "duel_giant_slayer",
+    label: "Riesentöter",
+    description: "Ein D-Tier-Charakter besiegt einen S-Tier-Charakter.",
+    check: (winner, loser) => winner.tier === "D" && loser.tier === "S",
+  },
+  {
+    id: "duel_mirror_match",
+    label: "Bruderkampf",
+    description: "Zwei Charaktere derselben Crew gegeneinander, einer siegt.",
+    check: (winner, loser) => Boolean(winner.crew) && winner.crew === loser.crew,
+  },
+  {
+    id: "duel_century",
+    label: "Jahrhundertkampf",
+    description: "Ein Duell über mindestens 100 Runden durchgestanden.",
+    check: (_winner, _loser, battle) => battle.rounds.length >= 100,
+  },
 ];
 
 /** Returns every achievement a finished duel satisfies. */

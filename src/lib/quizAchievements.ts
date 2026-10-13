@@ -26,6 +26,24 @@ export const QUIZ_ACHIEVEMENTS: QuizAchievement[] = [
     description: "Ein Quiz mit 50 oder mehr Fragen abgeschlossen.",
     check: (_score, total) => total >= 50,
   },
+  {
+    id: "quiz_foundation",
+    label: "Fundament gelegt",
+    description: "Mindestens 10 Fragen auf Schwierigkeit 'leicht' komplett richtig.",
+    check: (score, total, difficulty) => difficulty === "leicht" && total >= 10 && score === total,
+  },
+  {
+    id: "quiz_allrounder",
+    label: "Allrounder",
+    description: "Mindestens 90% richtig bei 20 oder mehr gemischten Fragen.",
+    check: (score, total, difficulty) => difficulty === "alle" && total >= 20 && score / total >= 0.9,
+  },
+  {
+    id: "quiz_century",
+    label: "Jahrhundert-Quiz",
+    description: "Ein Quiz mit 100 oder mehr Fragen abgeschlossen.",
+    check: (_score, total) => total >= 100,
+  },
 ];
 
 /** Returns every achievement a finished quiz run satisfies. */

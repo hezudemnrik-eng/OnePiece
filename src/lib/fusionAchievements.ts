@@ -56,6 +56,18 @@ export const FUSION_ACHIEVEMENTS: FusionAchievement[] = [
     description: "Praktisch das höchstmögliche Kopfgeld erreicht.",
     check: (_picks, bounty) => bounty >= 4_900_000_000,
   },
+  {
+    id: "fusion_haki_master",
+    label: "Außergewöhnliches Haki",
+    description: "Den bestmöglichen Haki-Pick getroffen.",
+    check: (picks) => (picks.find((p) => p.categoryId === "haki")?.score ?? 0) >= 90,
+  },
+  {
+    id: "fusion_genius_mind",
+    label: "Strategisches Genie",
+    description: "Den bestmöglichen Mind-Pick getroffen.",
+    check: (picks) => (picks.find((p) => p.categoryId === "mind")?.score ?? 0) >= 90,
+  },
 ];
 
 /** Returns every achievement a finished fusion satisfies. */

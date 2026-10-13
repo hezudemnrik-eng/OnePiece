@@ -26,6 +26,24 @@ export const BLIND_RANKING_ACHIEVEMENTS: BlindRankingAchievement[] = [
     description: "Gesamtabweichung von höchstens 2 Plätzen über die ganze Runde.",
     check: (score) => score.total > 0 && score.positionError <= 2,
   },
+  {
+    id: "blind_big_perfect",
+    label: "Scharfsinniger Analyst",
+    description: "Eine Runde mit mindestens 10 Charakteren komplett richtig einsortiert.",
+    check: (score) => score.total >= 10 && score.correctPositions === score.total,
+  },
+  {
+    id: "blind_marathon",
+    label: "Langer Atem",
+    description: "Eine Runde mit mindestens 12 Charakteren abgeschlossen.",
+    check: (score) => score.total >= 12,
+  },
+  {
+    id: "blind_solid_eye",
+    label: "Gutes Auge",
+    description: "Mindestens 75% richtig bei 6 oder mehr Charakteren.",
+    check: (score) => score.total >= 6 && score.correctPositions / score.total >= 0.75,
+  },
 ];
 
 /** Returns every achievement a finished blind-ranking round satisfies. */

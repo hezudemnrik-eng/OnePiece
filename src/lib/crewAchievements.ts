@@ -26,6 +26,24 @@ export const CREW_ACHIEVEMENTS: CrewAchievement[] = [
     description: "Eine komplette Crew ohne einen einzigen Reroll zusammengestellt.",
     check: (picks, _summary, rerolls) => picks.length > 0 && rerolls === 0,
   },
+  {
+    id: "crew_high_synergy",
+    label: "Perfekt eingespielt",
+    description: "Eine Crew mit mindestens 300 Synergie-Bonus zusammengestellt.",
+    check: (_picks, summary) => summary.synergyBonus >= 300,
+  },
+  {
+    id: "crew_power_cap",
+    label: "Übermächtige Crew",
+    description: "Eine Crew mit mindestens 4000 Gesamtstärke zusammengestellt.",
+    check: (_picks, summary) => summary.totalPower >= 4000,
+  },
+  {
+    id: "crew_alliance",
+    label: "Bündnis der Verbannten",
+    description: "Jede Rolle mit einem Mitglied aus einer anderen Crew besetzt.",
+    check: (picks) => picks.length > 1 && new Set(picks.map((p) => p.character.crew)).size === picks.length,
+  },
 ];
 
 /** Returns every achievement a finished crew satisfies. */

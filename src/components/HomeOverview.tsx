@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { characters } from "@/lib/characters";
-import { MODES, MODE_GROUPS } from "@/lib/modes";
+import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
 import { getLevelProgress } from "@/lib/levels";
 import { getLastPlayedHref } from "@/lib/lastPlayed";
 import { getTodaysChallenge, type DailyChallenge } from "@/lib/dailyChallenge";
@@ -80,8 +80,8 @@ export function HomeOverview() {
   const onlineFriends = friends.filter((f) => f.online);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6 flex flex-col gap-4">
-      <p className="text-sm text-black/60 dark:text-white/50">
+    <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-6 flex flex-col gap-4">
+      <p className="truncate whitespace-nowrap text-sm text-black/60 dark:text-white/50">
         {greetingText ?? "Willkommen"}
         {username ? `, ${username}` : ""}.
       </p>
@@ -90,11 +90,11 @@ export function HomeOverview() {
 
       {isSupabaseConfigured() && loaded && progress && (
         <Card variant="plain" className="px-4 py-3">
-          <div className="flex items-center justify-between mb-1.5 text-sm">
-            <span className="font-semibold">
+          <div className="flex items-center justify-between gap-2 mb-1.5 text-sm">
+            <span className="truncate whitespace-nowrap font-semibold">
               Level {progress.level} · {progress.rankTitle}
             </span>
-            <span className="tabular-nums text-black/50 dark:text-white/40 font-[family-name:var(--font-mono)]">
+            <span className="shrink-0 whitespace-nowrap tabular-nums text-black/50 dark:text-white/40 font-[family-name:var(--font-mono)]">
               {progress.xp - progress.levelStartXp}/{progress.levelEndXp - progress.levelStartXp} XP
             </span>
           </div>
@@ -104,51 +104,65 @@ export function HomeOverview() {
 
       {myLobby ? (
         <Link href={`/draft/live?code=${myLobby.inviteCode}`}>
-          <Card variant="spotlight" accent="draft" className="flex items-center justify-between">
-            <span className="text-sm font-semibold">
-              Weiterspielen: Live-Draft <span className="font-mono">{myLobby.inviteCode}</span>
-              <span className="block font-normal text-black/60 dark:text-white/50">
+          <Card variant="spotlight" accent="draft" className="flex items-center justify-between gap-2">
+            <span className="min-w-0 text-sm font-semibold">
+              <span className="block truncate whitespace-nowrap">
+                Weiterspielen: Live-Draft <span className="font-mono">{myLobby.inviteCode}</span>
+              </span>
+              <span className="block truncate whitespace-nowrap font-normal text-black/60 dark:text-white/50">
                 {myLobby.phase === "lobby" ? "wartet auf Spieler" : "läuft gerade"}
               </span>
             </span>
-            <span className="text-accent-ink text-xl" aria-hidden>
+            <span className="shrink-0 text-accent-ink text-xl" aria-hidden>
               →
             </span>
           </Card>
         </Link>
       ) : lastMode ? (
         <Link href={lastMode.href}>
-          <Card variant="spotlight" accent={lastMode.accent} className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-sm font-semibold">
-              <span className="text-xl" aria-hidden>
+          <Card variant="spotlight" accent={lastMode.accent} className="flex items-center justify-between gap-2">
+            <span className="flex min-w-0 items-center gap-2 truncate whitespace-nowrap text-sm font-semibold">
+              <span className="shrink-0 text-xl" aria-hidden>
                 {lastMode.icon}
               </span>
-              Weiterspielen: {lastMode.title}
+              <span className="truncate">Weiterspielen: {lastMode.title}</span>
             </span>
-            <span className="text-accent-ink text-xl" aria-hidden>
+            <span className="shrink-0 text-accent-ink text-xl" aria-hidden>
               →
             </span>
           </Card>
         </Link>
       ) : (
         <Card variant="spotlight" accent="accent">
-          <p className="text-sm font-semibold mb-1">Willkommen an Bord! 🏴‍☠️</p>
-          <p className="text-sm text-black/60 dark:text-white/50">Wähle unten einen Bereich und leg los.</p>
+          <p className="truncate whitespace-nowrap text-sm font-semibold mb-1">Willkommen an Bord! 🏴‍☠️</p>
+          <p className="truncate whitespace-nowrap text-sm text-black/60 dark:text-white/50">
+            Wähle unten einen Bereich und leg los.
+          </p>
         </Card>
       )}
 
-      <div className="grid grid-cols-3 gap-2">
-        {MODE_GROUPS.map((g) => (
-          <Link key={g.id} href={g.href}>
+      <div className="grid grid-cols-2 gap-2">
+        {[...MODE_GROUPS, SHOP_TILE].map((g) => (
+          <Link key={g.href} href={g.href}>
             <Card
               variant="spotlight"
-              accent={g.id === "kampf" ? "duell" : g.id === "raetsel-ranking" ? "quiz" : "crew"}
+              accent={
+                "id" in g
+                  ? g.id === "kampf"
+                    ? "duell"
+                    : g.id === "raetsel-ranking"
+                      ? "quiz"
+                      : "crew"
+                  : "shop"
+              }
               className="flex flex-col items-center gap-1 py-4 text-center"
             >
               <span className="text-2xl" aria-hidden>
                 {g.icon}
               </span>
-              <span className="text-xs font-semibold leading-tight">{g.title}</span>
+              <span className="w-full truncate whitespace-nowrap text-xs font-semibold leading-tight">
+                {g.title}
+              </span>
             </Card>
           </Link>
         ))}
@@ -157,10 +171,10 @@ export function HomeOverview() {
       {challenge && (
         <Link href={challenge.href}>
           <Card variant="parchment" accent={challenge.accent} className="flex items-center gap-3 px-4 py-3">
-            <span className="text-lg" aria-hidden>
+            <span className="shrink-0 text-lg" aria-hidden>
               {challenge.icon}
             </span>
-            <span className="text-sm">
+            <span className="min-w-0 truncate whitespace-nowrap text-sm">
               <span className="font-semibold">Heute: </span>
               {challenge.text}
             </span>
@@ -169,7 +183,7 @@ export function HomeOverview() {
       )}
 
       {isSupabaseConfigured() && loaded && onlineFriends.length > 0 && (
-        <div className="flex items-center gap-2 text-sm text-black/60 dark:text-white/50">
+        <div className="flex items-center gap-2 whitespace-nowrap text-sm text-black/60 dark:text-white/50">
           <div className="flex -space-x-2">
             {onlineFriends.slice(0, 5).map((p) => {
               const avatar = avatarFor(p.avatarCharacterId);
