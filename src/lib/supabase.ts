@@ -794,6 +794,8 @@ export type QuizSession = {
   difficulty: string;
   questions: unknown[];
   created_at: string;
+  /** Index of the question that's currently "live" for everyone — the round-robin turn pointer (Q123, migration 0015). */
+  current_index: number;
 };
 
 /** Creates a multiplayer quiz lobby with a fixed, shared question set. */
@@ -847,18 +849,6 @@ export async function joinQuizSession(sessionId: string, username: string): Prom
     .upsert({ session_id: sessionId, user_id: userId, username }, { onConflict: "session_id,user_id" });
 }
 
-export async function submitQuizScore(sessionId: string, score: number): Promise<void> {
-  if (!supabase) return;
-  const userId = await ensureSupabaseSession();
-  if (!userId) return;
-  await supabase
-    .from("quiz_participants")
-    .update({ score, finished_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-    .eq("session_id", sessionId)
-    .eq("user_id", userId);
-  await awardModeXp("quiz", XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
-}
-
 export async function fetchQuizParticipants(sessionId: string): Promise<QuizParticipant[]> {
   if (!supabase) return [];
   const { data } = await supabase
@@ -867,6 +857,71 @@ export async function fetchQuizParticipants(sessionId: string): Promise<QuizPart
     .eq("session_id", sessionId)
     .order("score", { ascending: false, nullsFirst: false });
   return (data as QuizParticipant[]) ?? [];
+}
+
+/** Turn order for the round-robin live quiz (Q123) — join order, earliest first. */
+export async function fetchQuizTurnOrder(sessionId: string): Promise<{ userId: string; username: string }[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("quiz_participants")
+    .select("user_id, username, joined_at")
+    .eq("session_id", sessionId)
+    .order("joined_at", { ascending: true });
+  return (data ?? []).map((p) => ({ userId: p.user_id as string, username: p.username as string }));
+}
+
+/** Refetches just the session row — used to poll the shared current_index turn pointer. */
+export async function fetchQuizSession(sessionId: string): Promise<QuizSession | null> {
+  if (!supabase) return null;
+  const { data } = await supabase.from("quiz_sessions").select().eq("id", sessionId).maybeSingle();
+  return (data as QuizSession) ?? null;
+}
+
+/** Atomically advances the shared turn pointer by one — fails harmlessly (returns false) if another client already advanced it first. */
+export async function advanceQuizTurn(sessionId: string, expectedIndex: number): Promise<boolean> {
+  if (!supabase) return false;
+  const { data } = await supabase.rpc("advance_quiz_turn", { p_session_id: sessionId, p_expected_index: expectedIndex });
+  return data === true;
+}
+
+/** Called by whoever's turn it is, right after answering — adds one point to their own running score if they got it right. */
+export async function awardQuizTurnPoint(sessionId: string, correct: boolean): Promise<void> {
+  if (!supabase || !correct) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  const { data } = await supabase
+    .from("quiz_participants")
+    .select("score")
+    .eq("session_id", sessionId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  const nextScore = (data?.score ?? 0) + 1;
+  await supabase
+    .from("quiz_participants")
+    .update({ score: nextScore, updated_at: new Date().toISOString() })
+    .eq("session_id", sessionId)
+    .eq("user_id", userId);
+}
+
+/** Called once by each client when it detects the shared quiz has ended — awards XP for this participant's own final score. */
+export async function finalizeQuizParticipant(sessionId: string): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  const { data } = await supabase
+    .from("quiz_participants")
+    .select("score, finished_at")
+    .eq("session_id", sessionId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!data || data.finished_at) return; // already finalized
+  const score = data.score ?? 0;
+  await supabase
+    .from("quiz_participants")
+    .update({ finished_at: new Date().toISOString() })
+    .eq("session_id", sessionId)
+    .eq("user_id", userId);
+  await awardModeXp("quiz", XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
 }
 
 // --- Account-wide XP for modes that otherwise only keep local history ---

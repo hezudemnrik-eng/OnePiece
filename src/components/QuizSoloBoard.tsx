@@ -1,21 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { buildQuiz, QUIZ_CATEGORY_LABELS, type QuizCategory, type QuizDifficulty, type QuizQuestion } from "@/lib/quiz";
+import {
+  buildQuiz,
+  QUIZ_CATEGORY_LABELS,
+  QUIZ_SPOILER_SAGAS,
+  type QuizCategory,
+  type QuizDifficulty,
+  type QuizQuestion,
+} from "@/lib/quiz";
+import { loadSeenQuestionIds, rememberQuestionIds } from "@/lib/quizHistory";
 import { checkQuizAchievements, type QuizAchievement } from "@/lib/quizAchievements";
 import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
 import { incrementXp, recordQuizResult, unlockAchievement } from "@/lib/supabase";
 import { playAccept, playSkip, playWin, vibrate } from "@/lib/sfx";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
+import { Button } from "./ui/Button";
+import { Card } from "./ui/Card";
+import { Select } from "./ui/Select";
 
 type Phase = "setup" | "playing" | "result";
 
 const COUNT_CHOICES = [5, 10, 20, 50, 100];
+const NO_SPOILER_LIMIT = "alle";
 
 export function QuizSoloBoard() {
   const [phase, setPhase] = useState<Phase>("setup");
   const [category, setCategory] = useState<QuizCategory | "alle">("alle");
   const [difficulty, setDifficulty] = useState<QuizDifficulty | "alle">("alle");
+  const [spoilerSaga, setSpoilerSaga] = useState<string>(NO_SPOILER_LIMIT);
   const [count, setCount] = useState(10);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [index, setIndex] = useState(0);
@@ -25,7 +38,10 @@ export function QuizSoloBoard() {
   const [animationsEnabled] = useAnimationsEnabled();
 
   function start() {
-    const qs = buildQuiz(count, { category, difficulty });
+    const maxArcIndex =
+      spoilerSaga === NO_SPOILER_LIMIT ? undefined : QUIZ_SPOILER_SAGAS.find((s) => s.saga === spoilerSaga)?.maxArcIndex;
+    const qs = buildQuiz(count, { category, difficulty, maxArcIndex }, Math.random, loadSeenQuestionIds());
+    rememberQuestionIds(qs.map((q) => q.id));
     setQuestions(qs);
     setIndex(0);
     setAnswers([]);
@@ -83,31 +99,37 @@ export function QuizSoloBoard() {
       <div className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Kategorie
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as QuizCategory | "alle")}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
-          >
+          <Select value={category} onChange={(e) => setCategory(e.target.value as QuizCategory | "alle")}>
             <option value="alle">Alle Kategorien</option>
             {Object.entries(QUIZ_CATEGORY_LABELS).map(([key, label]) => (
               <option key={key} value={key}>
                 {label}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Schwierigkeit
-          <select
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value as QuizDifficulty | "alle")}
-            className="rounded-md border border-black/15 dark:border-white/15 bg-white/70 dark:bg-white/5 px-3 py-1.5"
-          >
+          <Select value={difficulty} onChange={(e) => setDifficulty(e.target.value as QuizDifficulty | "alle")}>
             <option value="alle">Alle Schwierigkeiten</option>
             <option value="leicht">Leicht</option>
             <option value="mittel">Mittel</option>
             <option value="schwer">Schwer</option>
-          </select>
+          </Select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          Spoiler-Schutz: nur bis einschließlich…
+          <Select value={spoilerSaga} onChange={(e) => setSpoilerSaga(e.target.value)}>
+            <option value={NO_SPOILER_LIMIT}>Keine Einschränkung (ganze Story)</option>
+            {QUIZ_SPOILER_SAGAS.map((s) => (
+              <option key={s.saga} value={s.saga}>
+                {s.saga}
+              </option>
+            ))}
+          </Select>
+          <span className="text-xs text-black/50 dark:text-white/40">
+            Betrifft nur Fragen zu Arcs/Inseln und deren Reihenfolge — Charakter- und Statfragen sind davon unabhängig.
+          </span>
         </label>
         <div className="flex flex-col gap-1 text-sm">
           Anzahl Fragen
@@ -116,19 +138,14 @@ export function QuizSoloBoard() {
               <button
                 key={c}
                 onClick={() => setCount(c)}
-                className={`rounded-md border px-3 py-1.5 text-sm ${count === c ? "border-amber-500 bg-amber-500/10 font-semibold" : "border-black/15 dark:border-white/15"}`}
+                className={`rounded-md border px-3 py-1.5 text-sm ${count === c ? "border-mode-quiz bg-mode-quiz/10 font-semibold" : "border-black/15 dark:border-white/15"}`}
               >
                 {c}
               </button>
             ))}
           </div>
         </div>
-        <button
-          onClick={start}
-          className="rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
-        >
-          Quiz starten
-        </button>
+        <Button onClick={start}>Quiz starten</Button>
       </div>
     );
   }
@@ -143,14 +160,14 @@ export function QuizSoloBoard() {
           </span>
           <span>{QUIZ_CATEGORY_LABELS[q.category]}</span>
         </div>
-        <div className="op-parchment rounded-xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-6 flex flex-col items-center gap-4">
+        <Card variant="spotlight" accent="quiz" className="flex flex-col items-center gap-4">
           {q.imageUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={q.imageUrl}
               alt=""
               referrerPolicy="no-referrer"
-              className="h-40 w-auto rounded-lg border border-amber-500/30 object-cover object-top shadow-lg"
+              className="h-40 w-auto rounded-lg border border-mode-quiz/30 object-cover object-top shadow-lg"
             />
           )}
           <p className="text-center text-lg font-medium">{q.prompt}</p>
@@ -166,10 +183,10 @@ export function QuizSoloBoard() {
                   disabled={selected !== null}
                   className={`rounded-md border px-4 py-2.5 text-sm text-left transition ${
                     showState && isCorrect
-                      ? "border-emerald-500 bg-emerald-500/15 font-semibold"
+                      ? "border-success bg-success/15 font-semibold"
                       : showState && isSelected && !isCorrect
-                        ? "border-rose-500 bg-rose-500/15"
-                        : "border-black/15 dark:border-white/15 hover:border-amber-500/50"
+                        ? "border-danger bg-danger/15"
+                        : "border-black/15 dark:border-white/15 hover:border-mode-quiz/50"
                   }`}
                 >
                   {opt}
@@ -177,7 +194,7 @@ export function QuizSoloBoard() {
               );
             })}
           </div>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -191,8 +208,8 @@ export function QuizSoloBoard() {
           {score} / {questions.length} richtig ({pct}%)
         </h2>
         {newAchievements.length > 0 && (
-          <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
-            <p className="mb-1 text-sm font-semibold text-accent">🏆 Neue Erfolge freigeschaltet!</p>
+          <div className="op-pop-in rounded-xl border border-mode-quiz bg-mode-quiz/10 p-3">
+            <p className="mb-1 text-sm font-semibold text-mode-quiz">🏆 Neue Erfolge freigeschaltet!</p>
             <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
               {newAchievements.map((a) => (
                 <li key={a.id}>
@@ -206,7 +223,7 @@ export function QuizSoloBoard() {
           {questions.map((q, i) => (
             <li
               key={q.id}
-              className={`rounded-lg border p-3 text-sm ${answers[i] === q.correct ? "border-emerald-500/40" : "border-rose-500/40"}`}
+              className={`rounded-lg border p-3 text-sm ${answers[i] === q.correct ? "border-success/40" : "border-danger/40"}`}
             >
               <p className="font-medium">{q.prompt}</p>
               <p className="text-black/60 dark:text-white/50">
@@ -216,12 +233,9 @@ export function QuizSoloBoard() {
             </li>
           ))}
         </ol>
-        <button
-          onClick={reset}
-          className="self-start rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
-        >
+        <Button onClick={reset} className="self-start">
           Nochmal spielen
-        </button>
+        </Button>
       </div>
     );
   }
