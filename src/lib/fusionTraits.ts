@@ -62,27 +62,67 @@ const WEAPON_STYLES: Record<string, string> = {
 
 // Confidently non-human races only; everyone else defaults to "Mensch",
 // which is correct for the large majority of named One Piece characters.
+// Devil Fruit transformations (Zoan users like Dalton, Momonosuke, Yamato)
+// don't change a character's base race — only Chopper is special-cased
+// below because he was literally a reindeer before his fruit.
 const RACES: Record<string, string> = {
+  // Fischmensch (Fish-Man)
   jinbe: "Fischmensch",
   arlong: "Fischmensch",
   "hody-jones": "Fischmensch",
+  "fisher-tiger": "Fischmensch",
+  hatchan: "Fischmensch",
+  chew: "Fischmensch",
+  kuroobi: "Fischmensch",
+  aladine: "Fischmensch",
+  // Meermensch (Merfolk/mermaid — a distinct race from Fish-Men in canon)
+  neptune: "Meermensch",
+  shirahoshi: "Meermensch",
+  fukaboshi: "Meermensch",
+  ryuboshi: "Meermensch",
+  manboshi: "Meermensch",
+  otohime: "Meermensch",
+  "madam-shyarly": "Meermensch",
+  camie: "Meermensch",
+  // Chopper's Hito Hito no Mi made him human-like, but he was born a reindeer
   chopper: "Rentier (Mensch-Mensch-Frucht)",
+  // Mink (Zou)
   inuarashi: "Mink",
   nekomamushi: "Mink",
   pedro: "Mink",
   carrot: "Mink",
+  wanda: "Mink",
+  pekoms: "Mink",
+  // Riese (Giant)
   dorry: "Riese",
+  brogy: "Riese",
   oimo: "Riese",
   kashii: "Riese",
   "jaguar-saul": "Riese",
+  hajrudin: "Riese",
+  // Zwerg (Tontatta dwarf)
+  leo: "Zwerg",
+  // Lunarianer — King is confirmed as one of the last Lunarians
+  king: "Lunarianer",
+  // Oddities worth keeping for flavor
+  pappug: "Seestern",
+  zunesha: "Elefant",
+  // House rule for this app: not a canon One Piece race, kept per request
+  "bartholomew-kuma": "Bukanier",
 };
 
 const RACE_SCORE: Record<string, number> = {
   Riese: 25,
+  Lunarianer: 20,
   Fischmensch: 15,
   Mink: 15,
+  Meermensch: 13,
   "Rentier (Mensch-Mensch-Frucht)": 12,
+  Bukanier: 10,
+  Zwerg: 8,
   Mensch: 5,
+  Seestern: 3,
+  Elefant: 30,
 };
 
 // Legendary mentor figures from canon — flavor only ("trained by a legend"),
