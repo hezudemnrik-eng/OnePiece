@@ -218,3 +218,16 @@ export function rollFusionOption(categoryId: FusionCategoryId, rng: () => number
   const pool = category.pool();
   return pool[Math.floor(rng() * pool.length)];
 }
+
+/** Turns the 7 picked traits into a dramatic, One-Piece-style bounty — a flavor formula for the game, not a canon figure. */
+export function computeBounty(picks: FusionOption[]): number {
+  const total = picks.reduce((sum, p) => sum + p.score, 0);
+  const maxPossible = 90 + 100 + 100 + 85 + 25 + 100 + 100; // rough ceiling across all 7 categories
+  const ratio = Math.min(1, total / maxPossible);
+  const bounty = Math.pow(ratio, 2.3) * 5_000_000_000;
+  return Math.max(3_000_000, Math.round(bounty / 10_000) * 10_000);
+}
+
+export function formatBerry(amount: number): string {
+  return `${amount.toLocaleString("de-DE")} Berry`;
+}
