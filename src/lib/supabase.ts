@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { DraftState } from "./draft";
 import type { BattleResult } from "./battle-sim";
+import { XP_MATCH_LOSS, XP_MATCH_WIN, XP_QUIZ_BASE, XP_QUIZ_PER_CORRECT } from "./levels";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -428,6 +429,14 @@ export async function fetchPublicListsByShareCode(
   };
 }
 
+/** Atomically adds `delta` to the signed-in user's account-wide xp (see migration 0010). */
+export async function incrementXp(delta: number): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.rpc("increment_xp", { delta });
+}
+
 export type MatchMode = "imu" | "zufallsgegner" | "live-draft";
 
 /** Appends one match result for the signed-in user (solo-vs-AI and live-draft only — see migration 0007). */
@@ -440,6 +449,7 @@ export async function recordMatchResult(
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await supabase.from("match_results").insert({ user_id: userId, mode, opponent_label: opponentLabel, result });
+  await incrementXp(result === "win" ? XP_MATCH_WIN : XP_MATCH_LOSS);
 }
 
 export type LeaderboardEntry = {
@@ -589,6 +599,7 @@ export async function recordQuizResult(
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await supabase.from("quiz_results").insert({ user_id: userId, score, total, category, difficulty });
+  await incrementXp(XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
 }
 
 export type QuizLeaderboardEntry = {
@@ -706,6 +717,7 @@ export async function submitQuizScore(sessionId: string, score: number): Promise
     .update({ score, finished_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq("session_id", sessionId)
     .eq("user_id", userId);
+  await incrementXp(XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
 }
 
 export async function fetchQuizParticipants(sessionId: string): Promise<QuizParticipant[]> {
@@ -716,4 +728,71 @@ export async function fetchQuizParticipants(sessionId: string): Promise<QuizPart
     .eq("session_id", sessionId)
     .order("score", { ascending: false, nullsFirst: false });
   return (data as QuizParticipant[]) ?? [];
+}
+
+// --- Account-wide XP for modes that otherwise only keep local history ---
+// Crew-Builder and Blind Ranking have no leaderboard/result table of their
+// own (just localStorage) — these just award XP on completion.
+
+export async function recordCrewCompletion(xp: number): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await incrementXp(xp);
+}
+
+export async function recordBlindRankingCompletion(xp: number): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await incrementXp(xp);
+}
+
+export async function recordFusionCompletion(xp: number): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await incrementXp(xp);
+}
+
+// --- Achievements (currently Fusions-Pirat badges, see fusionAchievements.ts) ---
+
+export async function fetchMyAchievements(): Promise<Set<string>> {
+  if (!supabase) return new Set();
+  const userId = await ensureSupabaseSession();
+  if (!userId) return new Set();
+  const { data } = await supabase.from("achievements").select("achievement_id").eq("user_id", userId);
+  return new Set((data ?? []).map((r) => r.achievement_id as string));
+}
+
+/** Inserts the achievement if not already unlocked; returns true when it was newly unlocked. */
+export async function unlockAchievement(achievementId: string): Promise<boolean> {
+  if (!supabase) return false;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return false;
+  const { error } = await supabase
+    .from("achievements")
+    .insert({ user_id: userId, achievement_id: achievementId });
+  // A unique-violation (code 23505) means it was already unlocked — not an error for our purposes.
+  return !error;
+}
+
+// --- Level/rank profile info ---
+
+export type MyLevelInfo = { xp: number; equippedFrame: string | null };
+
+export async function fetchMyLevelInfo(): Promise<MyLevelInfo | null> {
+  if (!supabase) return null;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return null;
+  const { data } = await supabase.from("profiles").select("xp, equipped_frame").eq("id", userId).maybeSingle();
+  if (!data) return null;
+  return { xp: (data.xp as number) ?? 0, equippedFrame: (data.equipped_frame as string | null) ?? null };
+}
+
+export async function setEquippedFrame(frameId: string | null): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("profiles").update({ equipped_frame: frameId }).eq("id", userId);
 }

@@ -3,7 +3,9 @@
 import { useState } from "react";
 import type { Character } from "@/lib/characters";
 import { CREW_ROLES, rollCandidate, summarizeCrew, type CrewPick } from "@/lib/crewBuilder";
+import { XP_CREW_COMPLETE } from "@/lib/levels";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
+import { recordCrewCompletion } from "@/lib/supabase";
 
 type Phase = "setup" | "rolling" | "done";
 
@@ -69,6 +71,7 @@ export function CrewBuilderBoard() {
       });
       setHistory(loadHistory());
       setPhase("done");
+      recordCrewCompletion(XP_CREW_COMPLETE);
     }
   }
 
