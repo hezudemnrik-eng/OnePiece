@@ -81,16 +81,13 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         <IconRail />
         <div className="md:pl-16">
           <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b-2 border-foreground bg-[var(--background)]/95 backdrop-blur px-3 py-3 sm:px-4">
-            <Link
-              href="/"
-              className="op-ink-text flex min-w-0 shrink-0 items-center gap-2 font-[family-name:var(--font-display)] text-xl text-accent"
-            >
-              <span aria-hidden>🏴‍☠️</span>
-              {/* Full title only where the header actually has room for it (Q143) —
-                  on narrow phones it used to wrap word-by-word down the whole
-                  header once AccountPanel's content pushed it below its
-                  content-driven minimum width. */}
-              <span className="hidden sm:inline whitespace-nowrap">One Piece Draft-App</span>
+            <Link href="/" className="flex min-w-0 shrink-0 items-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/logo.webp"
+                alt="One Piece Draft"
+                className="h-9 w-auto shrink-0 object-contain sm:h-10"
+              />
             </Link>
             <div className="flex min-w-0 items-center gap-3">
               <ThemeToggle />
@@ -123,12 +120,14 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <main className="flex min-h-[80vh] items-center justify-center px-4 py-12">
+    <main
+      className="flex min-h-[80vh] items-center justify-center bg-cover bg-center px-4 py-12"
+      style={{ backgroundImage: "linear-gradient(rgba(10,10,10,0.55), rgba(10,10,10,0.55)), url('/images/map-background.jpg')" }}
+    >
       <div className="op-wanted op-parchment w-full max-w-sm flex flex-col gap-5 rounded-xl p-6">
         <div className="text-center">
-          <p className="op-ink-text font-[family-name:var(--font-display)] text-3xl text-accent">
-            One Piece Draft-App
-          </p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/logo.webp" alt="One Piece Draft" className="mx-auto h-20 w-auto object-contain" />
           <p className="mt-1 text-sm opacity-70">
             {mode === "signup" ? "Account erstellen, um loszulegen" : "Anmelden, um weiterzumachen"}
           </p>

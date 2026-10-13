@@ -92,7 +92,8 @@ export function HomeOverview() {
         <Card variant="plain" className="px-4 py-3">
           <div className="flex items-center justify-between gap-2 mb-1.5 text-sm">
             <span className="flex min-w-0 items-center gap-1.5 truncate whitespace-nowrap font-semibold">
-              <span aria-hidden>☸️</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/ship-wheel.webp" alt="" aria-hidden className="h-4 w-4 shrink-0 object-contain" />
               Level {progress.level} · {progress.rankTitle}
             </span>
             <span className="shrink-0 whitespace-nowrap tabular-nums text-black/50 dark:text-white/40 font-[family-name:var(--font-mono)]">
