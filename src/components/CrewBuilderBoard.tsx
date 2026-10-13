@@ -124,7 +124,7 @@ export function CrewBuilderBoard() {
         </div>
         <h2 className="text-xl font-semibold">{currentRole}</h2>
         {candidate && (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-6">
+          <div className="op-parchment flex flex-col items-center gap-3 rounded-xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-6">
             {candidate.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img

@@ -143,7 +143,7 @@ export function DuelBoard() {
           {[fighterA, fighterB].map((f, i) => (
             <div
               key={f.id}
-              className={`flex flex-col items-center gap-2 rounded-lg border p-4 ${
+              className={`op-parchment flex flex-col items-center gap-2 rounded-lg border p-4 ${
                 f.id === winner.id ? "border-amber-500 bg-amber-500/10" : "border-black/10 dark:border-white/10"
               }`}
             >

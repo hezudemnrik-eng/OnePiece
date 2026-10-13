@@ -127,7 +127,7 @@ export function QuizSoloBoard() {
           </span>
           <span>{QUIZ_CATEGORY_LABELS[q.category]}</span>
         </div>
-        <div className="rounded-xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-6 flex flex-col items-center gap-4">
+        <div className="op-parchment rounded-xl border border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-transparent p-6 flex flex-col items-center gap-4">
           {q.imageUrl && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
