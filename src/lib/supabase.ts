@@ -102,12 +102,46 @@ export async function getCurrentAuthUser(): Promise<AuthUser | null> {
   };
 }
 
-/** Checks a registration invite code against the shared setting in app_settings. */
-export async function checkInviteCode(code: string): Promise<boolean> {
-  if (!supabase) return false;
-  const { data } = await supabase.from("app_settings").select("value").eq("key", "invite_code").maybeSingle();
-  if (!data) return true; // no code configured yet — don't block registration
-  return data.value.trim().toLowerCase() === code.trim().toLowerCase();
+export type InviteCode = {
+  code: string;
+  createdAt: string;
+  usedBy: string | null;
+  usedAt: string | null;
+};
+
+/**
+ * Mints a new single-use registration code under the signed-in user's own
+ * account. Only actually succeeds for an admin account — enforced by the
+ * `invite_codes` insert RLS policy (migration 0016), not by this function —
+ * a non-admin call just comes back with a (translated) permission error.
+ */
+export async function createInviteCode(): Promise<{ code?: string; error?: string }> {
+  if (!supabase) return { error: "Supabase ist nicht konfiguriert." };
+  const userId = await ensureSupabaseSession();
+  if (!userId) return { error: "Nicht angemeldet." };
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const code = randomShareCode(8);
+    const { error } = await supabase.from("invite_codes").insert({ code, created_by: userId });
+    if (!error) return { code };
+    if (error.code === "42501") return { error: "Nur das Admin-Konto darf Einladungscodes erstellen." };
+    if (error.code !== "23505") return { error: error.message }; // not a collision — stop retrying
+  }
+  return { error: "Konnte keinen eindeutigen Code erstellen, bitte nochmal versuchen." };
+}
+
+/** Invite codes created by the signed-in user — only returns rows for an admin account (see RLS policy on invite_codes). */
+export async function fetchMyInviteCodes(): Promise<InviteCode[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("invite_codes")
+    .select("code, created_at, used_by, used_at")
+    .order("created_at", { ascending: false });
+  return (data ?? []).map((r) => ({
+    code: r.code as string,
+    createdAt: r.created_at as string,
+    usedBy: r.used_by as string | null,
+    usedAt: r.used_at as string | null,
+  }));
 }
 
 /**
@@ -136,9 +170,8 @@ export async function signUpWithUsername(
   const trimmed = username.trim();
   if (trimmed.length < 3) return { error: "Nutzername muss mindestens 3 Zeichen haben." };
   if (password.length < 6) return { error: "Passwort muss mindestens 6 Zeichen haben." };
-
-  const codeOk = await checkInviteCode(inviteCode);
-  if (!codeOk) return { error: "Einladungscode ist falsch." };
+  const trimmedCode = inviteCode.trim();
+  if (!trimmedCode) return { error: "Einladungscode wird benötigt." };
 
   await ensureSupabaseSession(); // ensures an anonymous session (and its data) exists to upgrade
   const { data: sessionData } = await supabase.auth.getSession();
@@ -149,7 +182,7 @@ export async function signUpWithUsername(
   const res = await fetch("/api/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ accessToken, username: trimmed, password, email, avatarCharacterId }),
+    body: JSON.stringify({ accessToken, username: trimmed, password, email, avatarCharacterId, inviteCode: trimmedCode }),
   });
   const body: { error?: string } = await res.json().catch(() => ({ error: "Registrierung fehlgeschlagen." }));
   if (!res.ok) return { error: body.error ?? "Registrierung fehlgeschlagen." };

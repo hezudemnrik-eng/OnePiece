@@ -17,6 +17,7 @@ import { BLIND_RANKING_ACHIEVEMENTS } from "@/lib/blindRankingAchievements";
 import { formatBerry } from "@/lib/fusionTraits";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { FriendsPanel } from "./FriendsPanel";
+import { InviteCodesPanel } from "./InviteCodesPanel";
 import { Card } from "./ui/Card";
 import { ProgressBar } from "./ui/ProgressBar";
 import {
@@ -318,6 +319,8 @@ export function ProfileBoard() {
         </h2>
         <FriendsPanel />
       </div>
+
+      {user?.isAdmin && <InviteCodesPanel />}
 
       {myStats && (
         <div>

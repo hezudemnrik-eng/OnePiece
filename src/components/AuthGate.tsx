@@ -161,7 +161,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
               <Input
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value)}
-                placeholder="von deinem Freund bekommen"
+                placeholder="von Henrik bekommen"
               />
             </label>
             <div className="flex flex-col gap-2 text-sm">
