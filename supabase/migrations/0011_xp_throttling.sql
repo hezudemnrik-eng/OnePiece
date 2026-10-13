@@ -76,6 +76,10 @@ $$;
 
 -- Flat/uncapped-by-mode XP (match wins/losses, quiz score, achievement
 -- bonuses) — still subject to the daily cap, just no per-repeat decay.
+-- Replaces the 0010 version, which returned void — Postgres won't let
+-- create-or-replace change a function's return type, so drop it first.
+drop function if exists public.increment_xp(int);
+
 create or replace function public.increment_xp(delta int)
 returns int
 language plpgsql
