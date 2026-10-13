@@ -9,31 +9,51 @@ import {
   type LevelProgress,
 } from "@/lib/levels";
 import { FUSION_ACHIEVEMENTS } from "@/lib/fusionAchievements";
+import { formatBerry } from "@/lib/fusionTraits";
 import {
+  equipShopItem,
   fetchMyAchievements,
   fetchMyLevelInfo,
+  fetchMyShopPurchases,
+  fetchShopItems,
   getCurrentAuthUser,
+  purchaseShopItem,
+  setEquippedColor,
   setEquippedFrame,
   type AuthUser,
+  type ShopItem,
 } from "@/lib/supabase";
 
 export function ProfileBoard() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [progress, setProgress] = useState<LevelProgress | null>(null);
   const [equippedFrame, setEquippedFrameState] = useState<string | null>(null);
+  const [equippedColor, setEquippedColorState] = useState<string | null>(null);
+  const [berries, setBerries] = useState(0);
   const [unlockedAchievements, setUnlockedAchievements] = useState<Set<string>>(new Set());
+  const [shopItems, setShopItems] = useState<ShopItem[]>([]);
+  const [ownedItems, setOwnedItems] = useState<Set<string>>(new Set());
+  const [shopBusyId, setShopBusyId] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    Promise.all([getCurrentAuthUser(), fetchMyLevelInfo(), fetchMyAchievements()]).then(
-      ([authUser, levelInfo, achievements]) => {
-        setUser(authUser);
-        setProgress(getLevelProgress(levelInfo?.xp ?? 0));
-        setEquippedFrameState(levelInfo?.equippedFrame ?? null);
-        setUnlockedAchievements(achievements);
-        setLoaded(true);
-      }
-    );
+    Promise.all([
+      getCurrentAuthUser(),
+      fetchMyLevelInfo(),
+      fetchMyAchievements(),
+      fetchShopItems(),
+      fetchMyShopPurchases(),
+    ]).then(([authUser, levelInfo, achievements, items, purchases]) => {
+      setUser(authUser);
+      setProgress(getLevelProgress(levelInfo?.xp ?? 0));
+      setEquippedFrameState(levelInfo?.equippedFrame ?? null);
+      setEquippedColorState(levelInfo?.equippedColor ?? null);
+      setBerries(levelInfo?.berries ?? 0);
+      setUnlockedAchievements(achievements);
+      setShopItems(items);
+      setOwnedItems(purchases);
+      setLoaded(true);
+    });
   }, []);
 
   if (!loaded) {
@@ -46,12 +66,52 @@ export function ProfileBoard() {
 
   const avatar = user.avatarCharacterId ? characters.find((c) => c.id === user.avatarCharacterId) : null;
   const unlockedFrames = framesUnlockedAtLevel(progress.level);
-  const activeFrameClass = COSMETIC_FRAMES.find((f) => f.id === equippedFrame)?.className ?? "";
+  const shopFrames = shopItems.filter((i) => i.category === "frame");
+  const shopColors = shopItems.filter((i) => i.category === "color");
+  const activeFrameClass =
+    COSMETIC_FRAMES.find((f) => f.id === equippedFrame)?.className ??
+    shopFrames.find((f) => f.id === equippedFrame)?.className ??
+    "";
+  const activeColorClass = shopColors.find((c) => c.id === equippedColor)?.className ?? "";
 
   async function equipFrame(frameId: string) {
     const applied = frameId === "none" ? null : frameId;
     setEquippedFrameState(applied);
     await setEquippedFrame(applied);
+  }
+
+  async function handleShopAction(item: ShopItem) {
+    if (shopBusyId) return;
+    const owned = ownedItems.has(item.id);
+    const isEquipped = item.category === "frame" ? equippedFrame === item.id : equippedColor === item.id;
+    setShopBusyId(item.id);
+    try {
+      if (!owned) {
+        const ok = await purchaseShopItem(item.id);
+        if (ok) {
+          setOwnedItems((prev) => new Set(prev).add(item.id));
+          setBerries((b) => b - item.price);
+        }
+        return;
+      }
+      if (isEquipped) {
+        if (item.category === "frame") {
+          setEquippedFrameState(null);
+          await setEquippedFrame(null);
+        } else if (item.category === "color") {
+          setEquippedColorState(null);
+          await setEquippedColor(null);
+        }
+        return;
+      }
+      const ok = await equipShopItem(item.id);
+      if (ok) {
+        if (item.category === "frame") setEquippedFrameState(item.id);
+        else if (item.category === "color") setEquippedColorState(item.id);
+      }
+    } finally {
+      setShopBusyId(null);
+    }
   }
 
   return (
@@ -73,10 +133,11 @@ export function ProfileBoard() {
           </span>
         )}
         <div>
-          <p className="text-xl font-semibold">{user.username}</p>
+          <p className={`text-xl font-semibold ${activeColorClass}`}>{user.username}</p>
           <p className="font-[family-name:var(--font-display)] text-lg text-amber-700 dark:text-amber-400">
             {progress.rankTitle} · Level {progress.level}
           </p>
+          <p className="text-sm text-black/60 dark:text-white/50">{formatBerry(berries)}</p>
         </div>
       </div>
 
@@ -116,6 +177,70 @@ export function ProfileBoard() {
               >
                 {frame.label}
                 {!isUnlocked && <span className="ml-1 text-xs">(ab Lv. {frame.minLevel})</span>}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
+          Shop: Rahmen
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {shopFrames.map((item) => {
+            const owned = ownedItems.has(item.id);
+            const isActive = equippedFrame === item.id;
+            const isLocked = progress.level < item.minLevel;
+            return (
+              <button
+                key={item.id}
+                onClick={() => !isLocked && handleShopAction(item)}
+                disabled={isLocked || shopBusyId === item.id}
+                className={`rounded-md border px-3 py-1.5 text-sm ${
+                  isActive
+                    ? "border-amber-500 bg-amber-500/10 font-semibold"
+                    : "border-black/15 dark:border-white/15"
+                } ${isLocked ? "opacity-40 cursor-not-allowed" : "hover:border-amber-500"}`}
+              >
+                {item.label}
+                {isLocked ? (
+                  <span className="ml-1 text-xs">(ab Lv. {item.minLevel})</span>
+                ) : (
+                  <span className="ml-1 text-xs">{owned ? (isActive ? "· ausgerüstet" : "· ausrüsten") : `· ${formatBerry(item.price)}`}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
+          Shop: Namensfarbe
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {shopColors.map((item) => {
+            const owned = ownedItems.has(item.id);
+            const isActive = equippedColor === item.id;
+            const isLocked = progress.level < item.minLevel;
+            return (
+              <button
+                key={item.id}
+                onClick={() => !isLocked && handleShopAction(item)}
+                disabled={isLocked || shopBusyId === item.id}
+                className={`rounded-md border px-3 py-1.5 text-sm ${item.className} ${
+                  isActive
+                    ? "border-amber-500 bg-amber-500/10 font-semibold"
+                    : "border-black/15 dark:border-white/15"
+                } ${isLocked ? "opacity-40 cursor-not-allowed" : "hover:border-amber-500"}`}
+              >
+                {item.label}
+                {isLocked ? (
+                  <span className="ml-1 text-xs">(ab Lv. {item.minLevel})</span>
+                ) : (
+                  <span className="ml-1 text-xs">{owned ? (isActive ? "· ausgerüstet" : "· ausrüsten") : `· ${formatBerry(item.price)}`}</span>
+                )}
               </button>
             );
           })}
