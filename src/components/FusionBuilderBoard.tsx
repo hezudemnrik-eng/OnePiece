@@ -13,6 +13,8 @@ import { checkFusionAchievements, type FusionAchievement } from "@/lib/fusionAch
 import { fusionXpForBounty, XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { incrementXp, recordFusionCompletion, unlockAchievement } from "@/lib/supabase";
+import { Button } from "./ui/Button";
+import { Card } from "./ui/Card";
 
 type Phase = "setup" | "rolling" | "done";
 
@@ -47,8 +49,8 @@ function FusionTile({
       disabled={!onClick}
       className={`flex w-full items-center gap-2 rounded-lg border p-2 text-left disabled:cursor-default ${
         onClick
-          ? "border-amber-500/40 bg-amber-500/5 hover:bg-amber-500/15 active:bg-amber-500/20"
-          : "border-amber-500/30 bg-amber-500/5"
+          ? "border-mode-fusion/40 bg-mode-fusion/5 hover:bg-mode-fusion/15 active:bg-mode-fusion/20"
+          : "border-mode-fusion/30 bg-mode-fusion/5"
       } ${justLocked ? "op-pop-in" : ""}`}
     >
       {option.sourceImageUrl ? (
@@ -57,15 +59,15 @@ function FusionTile({
           src={option.sourceImageUrl}
           alt={option.sourceName}
           referrerPolicy="no-referrer"
-          className="h-10 w-10 shrink-0 rounded-full border border-amber-500/40 object-cover object-top"
+          className="h-10 w-10 shrink-0 rounded-full border border-mode-fusion/40 object-cover object-top"
         />
       ) : (
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-xs font-bold text-amber-700 dark:text-amber-400">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mode-fusion/15 text-xs font-bold text-mode-fusion">
           {option.sourceName.slice(0, 2).toUpperCase()}
         </span>
       )}
       <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-mode-fusion">
           {categoryLabel}
         </p>
         <p className="truncate text-xs font-medium" title={option.traitLabel}>
@@ -92,9 +94,9 @@ function FusionPickCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-col items-center gap-1.5 rounded-xl border-2 border-amber-500/50 bg-gradient-to-b from-amber-500/10 to-transparent p-2 text-center shadow-sm hover:border-amber-500 hover:bg-amber-500/15 active:bg-amber-500/20"
+      className="flex flex-col items-center gap-1.5 rounded-xl border-2 border-mode-fusion/50 bg-gradient-to-b from-mode-fusion/10 to-transparent p-2 text-center shadow-sm hover:border-mode-fusion hover:bg-mode-fusion/15 active:bg-mode-fusion/20"
     >
-      <span className="text-xs font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400">
+      <span className="text-xs font-semibold uppercase tracking-wider text-mode-fusion">
         {categoryLabel}
       </span>
       {option.sourceImageUrl ? (
@@ -103,10 +105,10 @@ function FusionPickCard({
           src={option.sourceImageUrl}
           alt={option.sourceName}
           referrerPolicy="no-referrer"
-          className="h-20 w-20 rounded-full border-2 border-amber-500/50 object-cover object-top shadow-md"
+          className="h-20 w-20 rounded-full border-2 border-mode-fusion/50 object-cover object-top shadow-md"
         />
       ) : (
-        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-amber-500/15 text-xl font-bold text-amber-700 dark:text-amber-400">
+        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-mode-fusion/15 text-xl font-bold text-mode-fusion">
           {option.sourceName.slice(0, 2).toUpperCase()}
         </span>
       )}
@@ -176,12 +178,9 @@ export function FusionBuilderBoard() {
           {FUSION_CATEGORIES.map((c) => c.label).join(", ")}) liegen gleichzeitig aus. Wähle pro Runde eine davon —
           die restlichen werden danach neu gewürfelt. Am Ende bekommst du ein Kopfgeld für deinen Fusions-Piraten.
         </p>
-        <button
-          onClick={start}
-          className="self-start rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700"
-        >
+        <Button onClick={start} className="self-start">
           Fusion starten
-        </button>
+        </Button>
       </div>
     );
   }
@@ -228,16 +227,16 @@ export function FusionBuilderBoard() {
   const bounty = computeBounty(picks);
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
-      <h2 className="font-[family-name:var(--font-display)] text-2xl text-amber-700 dark:text-amber-400">
+      <h2 className="font-[family-name:var(--font-display)] text-2xl text-mode-fusion">
         Dein Fusions-Pirat ist bereit!
       </h2>
-      <div className="rounded-xl border border-amber-500/50 bg-gradient-to-b from-amber-500/10 to-transparent p-4 text-center">
+      <Card variant="spotlight" accent="fusion" className="text-center">
         <p className="text-xs uppercase tracking-widest text-black/50 dark:text-white/40 mb-1">Kopfgeld</p>
-        <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">{formatBerry(bounty)}</p>
-      </div>
+        <p className="text-2xl font-bold text-mode-fusion">{formatBerry(bounty)}</p>
+      </Card>
       {newAchievements.length > 0 && (
-        <div className="op-pop-in rounded-xl border border-amber-400 bg-amber-400/10 p-3">
-          <p className="mb-1 text-sm font-semibold text-amber-700 dark:text-amber-400">🏆 Neue Erfolge freigeschaltet!</p>
+        <div className="op-pop-in rounded-xl border border-mode-fusion bg-mode-fusion/10 p-3">
+          <p className="mb-1 text-sm font-semibold text-mode-fusion">🏆 Neue Erfolge freigeschaltet!</p>
           <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
             {newAchievements.map((a) => (
               <li key={a.id}>
@@ -254,9 +253,9 @@ export function FusionBuilderBoard() {
           return <FusionTile key={category.id} categoryLabel={category.label} option={pick} justLocked />;
         })}
       </div>
-      <button onClick={start} className="self-start rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700">
+      <Button onClick={start} className="self-start">
         Neuen Fusions-Piraten würfeln
-      </button>
+      </Button>
     </div>
   );
 }
