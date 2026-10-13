@@ -44,6 +44,36 @@ function FusionCard({ categoryLabel, option }: { categoryLabel: string; option: 
   );
 }
 
+// Compact tile for the finished overview: small enough that all 7 fit on one
+// phone screen without scrolling, unlike the big selection cards above.
+function FusionResultTile({ categoryLabel, option }: { categoryLabel: string; option: FusionOption }) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-2">
+      {option.sourceImageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={option.sourceImageUrl}
+          alt={option.sourceName}
+          referrerPolicy="no-referrer"
+          className="h-10 w-10 shrink-0 rounded-full border border-amber-500/40 object-cover object-top"
+        />
+      ) : (
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-xs font-bold text-amber-700 dark:text-amber-400">
+          {option.sourceName.slice(0, 2).toUpperCase()}
+        </span>
+      )}
+      <div className="min-w-0">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+          {categoryLabel}
+        </p>
+        <p className="truncate text-xs font-medium" title={option.traitLabel}>
+          {option.traitLabel}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function FusionBuilderBoard() {
   const [phase, setPhase] = useState<Phase>("setup");
   const [candidates, setCandidates] = useState<Record<FusionCategoryId, FusionOption>>(
@@ -138,13 +168,13 @@ export function FusionBuilderBoard() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-4xl">
+    <div className="flex flex-col gap-4 max-w-2xl">
       <h2 className="text-xl font-semibold">Dein Fusions-Pirat ist bereit!</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         {FUSION_CATEGORIES.map((category) => {
           const pick = picks.find((p) => p.categoryId === category.id);
           if (!pick) return null;
-          return <FusionCard key={category.id} categoryLabel={category.label} option={pick} />;
+          return <FusionResultTile key={category.id} categoryLabel={category.label} option={pick} />;
         })}
       </div>
       <button onClick={start} className="self-start rounded-md bg-amber-600 text-white px-4 py-2 font-medium hover:bg-amber-700">
