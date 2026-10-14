@@ -88,6 +88,13 @@ export const XP_BLIND_RANKING_COMPLETE = 18;
 export const XP_FUSION_BASE = 15;
 export const XP_ACHIEVEMENT_BONUS = 20;
 
+// Kept in sync with daily_quest_xp_bonus()/daily_quest_berry_bonus() in
+// migration 0020 — the actual award happens server-side via claim_daily_quest().
+// Deliberately higher than a single normal run's XP so the daily quest feels
+// worth doing (Boss, 2026-10-14: "mehr XP und Berries für die Tagesquest").
+export const DAILY_QUEST_XP_BONUS = 60;
+export const DAILY_QUEST_BERRY_BONUS = 80;
+
 /** Fusions-Pirat XP scales with the bounty: +1 XP per 100M Berry, capped. */
 export function fusionXpForBounty(bounty: number): number {
   return XP_FUSION_BASE + Math.min(50, Math.floor(bounty / 100_000_000));

@@ -5,7 +5,7 @@ import { characters, getStrongestVersion, type Character, type Stats } from "@/l
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { checkDuelAchievements, type DuelAchievement } from "@/lib/duelAchievements";
 import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
-import { fetchMyLevelInfo, fetchShopItems, incrementXp, unlockAchievement } from "@/lib/supabase";
+import { fetchMyLevelInfo, fetchShopItems, incrementXp, recordDuelCompletion, unlockAchievement } from "@/lib/supabase";
 import { ARENA_IMAGES } from "@/lib/arenaImages";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { VictoryBanner } from "./VictoryBanner";
@@ -176,6 +176,7 @@ export function DuelBoard() {
     setHistory(loadHistory());
     setNewAchievements([]);
     setPhase("result");
+    recordDuelCompletion();
     if (a.length === 1 && b.length === 1) {
       const winner = result.winnerTeam === "A" ? a[0] : b[0];
       const loser = result.winnerTeam === "A" ? b[0] : a[0];

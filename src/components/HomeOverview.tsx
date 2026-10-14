@@ -11,6 +11,7 @@ import { ICON_IMAGES } from "@/lib/iconImages";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
+  fetchDailyQuestClaimedToday,
   fetchFriends,
   fetchMyLevelInfo,
   fetchRelevantLiveDrafts,
@@ -59,6 +60,7 @@ export function HomeOverview() {
   // rather than directly in the render body.
   const [greetingText, setGreetingText] = useState<string | null>(null);
   const [challenge, setChallenge] = useState<DailyChallenge | null>(null);
+  const [questClaimed, setQuestClaimed] = useState(false);
   const [loaded, setLoaded] = useState(() => !isSupabaseConfigured());
 
   useEffect(() => {
@@ -72,15 +74,20 @@ export function HomeOverview() {
       setChallenge(getTodaysChallenge(now));
     });
     if (!isSupabaseConfigured()) return;
-    Promise.all([getCurrentAuthUser(), fetchMyLevelInfo(), fetchFriends(), fetchRelevantLiveDrafts()]).then(
-      ([user, level, friendList, drafts]) => {
-        setUsername(user?.username ?? null);
-        setLevelInfo(level);
-        setFriends(friendList);
-        setMyLobby(drafts.find((d) => d.isMine) ?? null);
-        setLoaded(true);
-      }
-    );
+    Promise.all([
+      getCurrentAuthUser(),
+      fetchMyLevelInfo(),
+      fetchFriends(),
+      fetchRelevantLiveDrafts(),
+      fetchDailyQuestClaimedToday(),
+    ]).then(([user, level, friendList, drafts, questClaimedToday]) => {
+      setUsername(user?.username ?? null);
+      setLevelInfo(level);
+      setFriends(friendList);
+      setMyLobby(drafts.find((d) => d.isMine) ?? null);
+      setQuestClaimed(questClaimedToday);
+      setLoaded(true);
+    });
   }, []);
 
   const progress = levelInfo ? getLevelProgress(levelInfo.xp) : null;
@@ -192,7 +199,7 @@ export function HomeOverview() {
       </div>
 
       {challenge && (
-        <Link href={challenge.href}>
+        <Link href="/questbuch">
           <div
             className="op-card flex items-center gap-3 bg-cover bg-center px-4 py-3"
             style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')" }}
@@ -202,13 +209,19 @@ export function HomeOverview() {
               <img src={ICON_IMAGES[challenge.icon]} alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain drop-shadow-md" />
             ) : (
               <span className="shrink-0 text-xl drop-shadow-md" aria-hidden>
-                {challenge.icon}
+                📖
               </span>
             )}
-            <span className="min-w-0 truncate whitespace-nowrap text-sm text-white">
-              <span className="font-semibold">Heute: </span>
-              {challenge.text}
-            </span>
+            {questClaimed ? (
+              <span className="min-w-0 truncate whitespace-nowrap text-sm text-white">
+                <span className="font-semibold">Tagesquest erledigt ✅</span> — Questbuch öffnen
+              </span>
+            ) : (
+              <span className="min-w-0 truncate whitespace-nowrap text-sm text-white">
+                <span className="font-semibold">Heute: </span>
+                {challenge.text}
+              </span>
+            )}
           </div>
         </Link>
       )}
