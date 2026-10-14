@@ -85,7 +85,9 @@ export function CrewBuilderBoard() {
     vibrate(15);
     setRerolls((r) => r + 1);
     setRerollUsedThisRound(true);
-    setCandidate(rollCandidate([...picks.map((p) => p.character.id), ...(candidate ? [candidate.id] : [])]));
+    setCandidate(
+      rollCandidate(currentRole, [...picks.map((p) => p.character.id), ...(candidate ? [candidate.id] : [])])
+    );
   }
 
   function keep() {
@@ -97,7 +99,7 @@ export function CrewBuilderBoard() {
     if (roleIndex + 1 < CREW_ROLES.length) {
       setRoleIndex(roleIndex + 1);
       setRerollUsedThisRound(false);
-      setCandidate(rollCandidate(next.map((p) => p.character.id)));
+      setCandidate(rollCandidate(CREW_ROLES[roleIndex + 1], next.map((p) => p.character.id)));
     } else {
       const summary = summarizeCrew(next);
       saveHistory({
@@ -121,7 +123,7 @@ export function CrewBuilderBoard() {
     setRerolls(0);
     setRerollUsedThisRound(false);
     setNewAchievements([]);
-    setCandidate(rollCandidate([]));
+    setCandidate(rollCandidate(CREW_ROLES[0], []));
   }
 
   function startTeamDuel() {
