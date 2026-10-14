@@ -9,10 +9,10 @@ function NavIcon({ icon }: { icon: string }) {
   const image = ICON_IMAGES[icon];
   if (image) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={image} alt="" aria-hidden className="h-12 w-12 object-contain drop-shadow-md" />;
+    return <img src={image} alt="" aria-hidden className="h-16 w-16 object-contain drop-shadow-md" />;
   }
   return (
-    <span className="text-3xl drop-shadow-md" aria-hidden>
+    <span className="text-4xl drop-shadow-md" aria-hidden>
       {icon}
     </span>
   );
@@ -26,7 +26,7 @@ function isGroupActive(pathname: string, groupHref: string, groupId: string): bo
 /** Gold "lit coin" highlight behind the active icon — the only active/inactive
  * cue now that the text labels are gone (Q163, bigger icons without names). */
 function navSlotClass(active: boolean): string {
-  return `flex items-center justify-center rounded-xl p-1.5 transition ${
+  return `flex items-center justify-center rounded-xl p-2 transition ${
     active ? "bg-[rgba(244,197,66,0.35)] shadow-[0_0_0_2px_rgba(244,197,66,0.65)]" : ""
   }`;
 }
