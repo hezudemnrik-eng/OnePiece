@@ -10,6 +10,7 @@ import {
   getLevelProgress,
   type LevelProgress,
 } from "@/lib/levels";
+import { FRAME_IMAGES } from "@/lib/frameImages";
 import { FUSION_ACHIEVEMENTS } from "@/lib/fusionAchievements";
 import { DUEL_ACHIEVEMENTS } from "@/lib/duelAchievements";
 import { QUIZ_ACHIEVEMENTS } from "@/lib/quizAchievements";
@@ -147,6 +148,7 @@ export function ProfileBoard() {
     "";
   const activeColorClass = shopColors.find((c) => c.id === equippedColor)?.className ?? "";
   const activeTitle = shopTitles.find((t) => t.id === equippedTitle);
+  const activeFrameImage = equippedFrame ? (FRAME_IMAGES[equippedFrame] ?? null) : null;
   const myUserId = user.id;
   const myStats = leaderboard.find((e) => e.userId === myUserId);
   const filteredRecent = matchFilter === "alle" ? recent : recent.filter((m) => m.mode === matchFilter);
@@ -176,7 +178,25 @@ export function ProfileBoard() {
   return (
     <div className="flex flex-col gap-8 max-w-2xl">
       <div className="op-wanted op-parchment flex items-center gap-4 rounded-xl p-5">
-        {avatar?.imageUrl ? (
+        {activeFrameImage ? (
+          <span className="relative flex h-[8.5rem] w-[8.5rem] shrink-0 items-center justify-center">
+            {avatar?.imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatar.imageUrl}
+                alt={avatar.name}
+                referrerPolicy="no-referrer"
+                className="h-20 w-20 rounded-full object-cover object-top"
+              />
+            ) : (
+              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-accent/15 text-2xl font-bold">
+                {user.username?.slice(0, 2).toUpperCase()}
+              </span>
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={activeFrameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+          </span>
+        ) : avatar?.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={avatar.imageUrl}
