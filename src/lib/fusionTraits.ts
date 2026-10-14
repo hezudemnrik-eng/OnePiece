@@ -278,7 +278,7 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
     label: "Sensei",
     pool: () =>
       SENSEI_IDS.map(charById)
-        .filter((c): c is Character => Boolean(c) && (c.tier === "S" || c.tier === "A" || c.tier === "B"))
+        .filter((c): c is Character => !!c && (c.tier === "S" || c.tier === "A" || c.tier === "B"))
         .map((c) => {
           const { haki, intelligenz } = getStrongestVersion(c).stats;
           return {
