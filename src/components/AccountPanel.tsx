@@ -14,7 +14,7 @@ import {
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 import { COSMETIC_FRAMES, getLevelProgress } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
-import { BERRY_ICON } from "@/lib/iconImages";
+import { BERRY_ICON, LOGOUT_ICON } from "@/lib/iconImages";
 
 type Props = {
   /** Called after a successful logout so the parent (AuthGate) can re-check auth state. */
@@ -121,7 +121,8 @@ export function AccountPanel({ onSignedOut }: Props) {
         className="shrink-0 text-black/50 dark:text-white/40 hover:underline"
       >
         <span className="sm:hidden" aria-hidden>
-          🚪
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={LOGOUT_ICON} alt="" className="h-10 w-10 object-contain drop-shadow-md" />
         </span>
         <span className="hidden sm:inline">Abmelden</span>
       </button>

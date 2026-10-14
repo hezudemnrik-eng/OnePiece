@@ -27,7 +27,8 @@ import {
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { checkDraftAchievements, type DraftAchievement } from "@/lib/draftAchievements";
-import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
+import { COSMETIC_FRAMES, XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
+import { FRAME_IMAGES } from "@/lib/frameImages";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
@@ -35,6 +36,8 @@ import {
   ensureSupabaseSession,
   fetchLiveDraftByCode,
   fetchLiveDraftById,
+  fetchPublicProfilesCosmetics,
+  fetchShopItems,
   getCurrentAuthUser,
   incrementXp,
   recordMatchResult,
@@ -42,6 +45,8 @@ import {
   unlockAchievement,
   writeLiveDraft,
   type LiveDraftSession,
+  type PublicProfileCosmetics,
+  type ShopItem,
 } from "@/lib/supabase";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
@@ -69,6 +74,56 @@ function loadNickname(): string {
   }
 }
 
+/** Avatar+Rahmen+Titel+Namensfarbe for a seated player, mirroring FriendsPanel's Avatar — falls back to the bare name when no profile cosmetics are loaded yet (e.g. an open seat, or before the lookup resolves). */
+function PlayerIdentity({
+  userId,
+  name,
+  cosmetics,
+  shopItems,
+}: {
+  userId?: string | null;
+  name: string;
+  cosmetics: Record<string, PublicProfileCosmetics>;
+  shopItems: ShopItem[];
+}) {
+  const c = userId ? cosmetics[userId] : undefined;
+  const avatar = c?.avatarCharacterId ? characters.find((ch) => ch.id === c.avatarCharacterId) : null;
+  const frameImage = c?.equippedFrame ? FRAME_IMAGES[c.equippedFrame] : undefined;
+  const frameClass = c?.equippedFrame
+    ? COSMETIC_FRAMES.find((f) => f.id === c.equippedFrame)?.className ??
+      shopItems.find((i) => i.category === "frame" && i.id === c.equippedFrame)?.className ??
+      ""
+    : "";
+  const colorClass = c?.equippedColor
+    ? shopItems.find((i) => i.category === "color" && i.id === c.equippedColor)?.className ?? ""
+    : "";
+  const title = c?.equippedTitle ? shopItems.find((i) => i.category === "title" && i.id === c.equippedTitle) : undefined;
+
+  return (
+    <span className="inline-flex min-w-0 items-center gap-1.5">
+      {avatar?.imageUrl && (
+        <span className="relative flex h-9 w-9 shrink-0 items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={avatar.imageUrl}
+            alt=""
+            referrerPolicy="no-referrer"
+            className={`h-7 w-7 rounded-full object-cover object-top ${frameImage ? "" : frameClass}`}
+          />
+          {frameImage && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+          )}
+        </span>
+      )}
+      <span className="min-w-0 truncate">
+        <span className={`font-semibold ${colorClass}`}>{name}</span>
+        {title && <span className="ml-1 text-xs opacity-70">{title.label}</span>}
+      </span>
+    </span>
+  );
+}
+
 export function LiveDraftBoard() {
   const searchParams = useSearchParams();
   const autoJoinedRef = useRef(false);
@@ -93,6 +148,9 @@ export function LiveDraftBoard() {
   const [joinAsSpectator, setJoinAsSpectator] = useState(false);
 
   const [newAchievements, setNewAchievements] = useState<DraftAchievement[]>([]);
+  const [shopItems, setShopItems] = useState<ShopItem[]>([]);
+  const [cosmetics, setCosmetics] = useState<Record<string, PublicProfileCosmetics>>({});
+  const loadedCosmeticsKeyRef = useRef("");
 
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -130,10 +188,32 @@ export function LiveDraftBoard() {
     getCurrentAuthUser().then((u) => {
       if (!cancelled && u?.username) setNickname(u.username);
     });
+    fetchShopItems().then((items) => {
+      if (!cancelled) setShopItems(items);
+    });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  // Co-players' frame/title/color, keyed by userId — fetched whenever the
+  // set of seated players changes (not on every realtime/poll tick, since
+  // most of those just update picks/turns, not who's seated).
+  useEffect(() => {
+    const seatedIds = (session?.state.players ?? [])
+      .map((p) => p.userId)
+      .filter((id): id is string => Boolean(id));
+    const key = Array.from(new Set(seatedIds)).sort().join(",");
+    if (!key || key === loadedCosmeticsKeyRef.current) return;
+    loadedCosmeticsKeyRef.current = key;
+    fetchPublicProfilesCosmetics(seatedIds).then((rows) => {
+      setCosmetics((prev) => {
+        const next = { ...prev };
+        for (const row of rows) next[row.userId] = row;
+        return next;
+      });
+    });
+  }, [session]);
 
   // Lets the Übersicht's "weiterspielen" links (/draft/live?code=XXXX) jump
   // straight back into a lobby or in-progress draft without retyping the code.
@@ -638,10 +718,15 @@ export function LiveDraftBoard() {
               key={i}
               className="rounded-md border border-black/10 dark:border-white/10 px-3 py-2 text-sm flex items-center justify-between gap-3"
             >
-              <span>
-                Sitz {i + 1}: {p.userId ? p.name : <em className="text-black/40 dark:text-white/30">offen</em>}
-                {p.team && ` · Team ${p.team}`}
-                {p.userId === myUserId && <span className="ml-2 text-mode-draft text-xs">Du</span>}
+              <span className="flex min-w-0 items-center gap-1">
+                <span className="shrink-0">Sitz {i + 1}:</span>
+                {p.userId ? (
+                  <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} />
+                ) : (
+                  <em className="text-black/40 dark:text-white/30">offen</em>
+                )}
+                {p.team && <span className="shrink-0">· Team {p.team}</span>}
+                {p.userId === myUserId && <span className="shrink-0 text-mode-draft text-xs">Du</span>}
               </span>
               {teamModeEnabled && isHost && p.userId && (
                 <div className="flex gap-1 shrink-0">
@@ -717,10 +802,12 @@ export function LiveDraftBoard() {
         <aside className="flex flex-col gap-4">
           {session.state.players.map((p) => (
             <Card key={p.id} variant="framed" accent="draft" className="p-3">
-              <p className="mb-2 text-sm font-semibold">
-                {p.name}
-                {p.team && <span className="text-mode-draft"> · Team {p.team}</span>} ({p.pickedCharacterIds.length}/
-                {session.state.teamSize})
+              <p className="mb-2 flex items-center gap-1 text-sm">
+                <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} />
+                {p.team && <span className="shrink-0 text-mode-draft">· Team {p.team}</span>}
+                <span className="shrink-0">
+                  ({p.pickedCharacterIds.length}/{session.state.teamSize})
+                </span>
               </p>
               <ul className="space-y-1 text-sm text-black/70 dark:text-white/60">
                 {p.pickedCharacterIds.map((id) => (
@@ -819,7 +906,9 @@ export function LiveDraftBoard() {
         <div className="grid gap-4 sm:grid-cols-2">
           {session.state.players.map((p) => (
             <Card key={p.id} variant="framed" accent="draft" className="p-3">
-              <p className="mb-2 font-semibold">{p.name}</p>
+              <p className="mb-2">
+                <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} />
+              </p>
               <ul className="space-y-1 text-sm">
                 {p.pickedCharacterIds.map((id) => (
                   <li key={id}>{characters.find((c) => c.id === id)?.name}</li>

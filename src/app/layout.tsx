@@ -45,6 +45,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#693c1b",
 };
 
 // The whole app renders behind AuthGate's client-side auth check, so no

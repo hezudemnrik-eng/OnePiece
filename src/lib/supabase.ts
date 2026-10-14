@@ -733,6 +733,31 @@ export async function fetchFriends(): Promise<Friend[]> {
   });
 }
 
+export type PublicProfileCosmetics = {
+  userId: string;
+  avatarCharacterId: string | null;
+  equippedFrame: string | null;
+  equippedTitle: string | null;
+  equippedColor: string | null;
+};
+
+/** Same equipped_* columns as fetchFriends(), but for an arbitrary set of user ids — used to show Live-Draft co-players' frame/title without requiring a friendship (same public RLS as the friends list). */
+export async function fetchPublicProfilesCosmetics(userIds: string[]): Promise<PublicProfileCosmetics[]> {
+  if (!supabase || userIds.length === 0) return [];
+  const uniqueIds = Array.from(new Set(userIds));
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, avatar_character_id, equipped_frame, equipped_title, equipped_color")
+    .in("id", uniqueIds);
+  return (data ?? []).map((p) => ({
+    userId: p.id as string,
+    avatarCharacterId: (p.avatar_character_id as string | null) ?? null,
+    equippedFrame: (p.equipped_frame as string | null) ?? null,
+    equippedTitle: (p.equipped_title as string | null) ?? null,
+    equippedColor: (p.equipped_color as string | null) ?? null,
+  }));
+}
+
 export type OpenLiveDraft = {
   id: string;
   inviteCode: string;
