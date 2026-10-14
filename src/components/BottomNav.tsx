@@ -9,10 +9,10 @@ function NavIcon({ icon }: { icon: string }) {
   const image = ICON_IMAGES[icon];
   if (image) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={image} alt="" aria-hidden className="h-7 w-7 object-contain" />;
+    return <img src={image} alt="" aria-hidden className="h-10 w-10 object-contain" />;
   }
   return (
-    <span className="text-lg" aria-hidden>
+    <span className="text-2xl" aria-hidden>
       {icon}
     </span>
   );
@@ -38,12 +38,12 @@ export function BottomNav() {
     >
       <Link
         href="/"
-        className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
+        title="Home"
+        className={`flex flex-1 items-center justify-center py-2.5 ${
           pathname === "/" ? "text-accent-ink" : "text-black/50 dark:text-white/40"
         }`}
       >
         <NavIcon icon="🏠" />
-        Home
       </Link>
       {MODE_GROUPS.map((g) => {
         const active = isGroupActive(pathname, g.href, g.id);
@@ -51,23 +51,23 @@ export function BottomNav() {
           <Link
             key={g.id}
             href={g.href}
-            className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
+            title={g.title}
+            className={`flex flex-1 items-center justify-center py-2.5 ${
               active ? "text-accent-ink" : "text-black/50 dark:text-white/40"
             }`}
           >
             <NavIcon icon={g.icon} />
-            {g.title}
           </Link>
         );
       })}
       <Link
         href={SHOP_TILE.href}
-        className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium ${
+        title={SHOP_TILE.title}
+        className={`flex flex-1 items-center justify-center py-2.5 ${
           pathname.startsWith(SHOP_TILE.href) ? "text-accent-ink" : "text-black/50 dark:text-white/40"
         }`}
       >
         <NavIcon icon={SHOP_TILE.icon} />
-        {SHOP_TILE.title}
       </Link>
     </nav>
   );
