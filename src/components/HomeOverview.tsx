@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { characters } from "@/lib/characters";
 import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
-import { getLevelProgress } from "@/lib/levels";
+import { COSMETIC_FRAMES, getLevelProgress } from "@/lib/levels";
+import { FRAME_IMAGES } from "@/lib/frameImages";
+import { BERRY_ICON, ICON_IMAGES } from "@/lib/iconImages";
 import { getLastPlayedHref } from "@/lib/lastPlayed";
 import { getTodaysChallenge, type DailyChallenge } from "@/lib/dailyChallenge";
-import { ICON_IMAGES } from "@/lib/iconImages";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
@@ -15,8 +16,10 @@ import {
   fetchFriends,
   fetchMyLevelInfo,
   fetchRelevantLiveDrafts,
+  fetchShopItems,
   getCurrentAuthUser,
   isSupabaseConfigured,
+  type AuthUser,
   type Friend,
   type MyLevelInfo,
   type OpenLiveDraft,
@@ -49,8 +52,12 @@ function greeting(hour: number): string {
  * the Profile page (Phase 4) instead of disappearing.
  */
 export function HomeOverview() {
-  const [username, setUsername] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [levelInfo, setLevelInfo] = useState<MyLevelInfo | null>(null);
+  const [frameImage, setFrameImage] = useState<string | null>(null);
+  const [frameClass, setFrameClass] = useState("");
+  const [colorClass, setColorClass] = useState("");
+  const [title, setTitle] = useState<{ label: string; className: string } | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [myLobby, setMyLobby] = useState<OpenLiveDraft | null>(null);
   const [lastHref, setLastHref] = useState<string | null>(null);
@@ -77,12 +84,22 @@ export function HomeOverview() {
     Promise.all([
       getCurrentAuthUser(),
       fetchMyLevelInfo(),
+      fetchShopItems(),
       fetchFriends(),
       fetchRelevantLiveDrafts(),
       fetchDailyQuestClaimedToday(),
-    ]).then(([user, level, friendList, drafts, questClaimedToday]) => {
-      setUsername(user?.username ?? null);
+    ]).then(([authUser, level, items, friendList, drafts, questClaimedToday]) => {
+      setUser(authUser);
       setLevelInfo(level);
+      setFrameClass(
+        COSMETIC_FRAMES.find((f) => f.id === level?.equippedFrame)?.className ??
+          items.find((i) => i.category === "frame" && i.id === level?.equippedFrame)?.className ??
+          ""
+      );
+      setFrameImage(level?.equippedFrame ? (FRAME_IMAGES[level.equippedFrame] ?? null) : null);
+      setColorClass(items.find((i) => i.category === "color" && i.id === level?.equippedColor)?.className ?? "");
+      const activeTitle = items.find((i) => i.category === "title" && i.id === level?.equippedTitle);
+      setTitle(activeTitle ? { label: activeTitle.label, className: activeTitle.className } : null);
       setFriends(friendList);
       setMyLobby(drafts.find((d) => d.isMine) ?? null);
       setQuestClaimed(questClaimedToday);
@@ -93,33 +110,79 @@ export function HomeOverview() {
   const progress = levelInfo ? getLevelProgress(levelInfo.xp) : null;
   const lastMode = lastHref ? MODES.find((m) => m.href === lastHref) : undefined;
   const onlineFriends = friends.filter((f) => f.online);
+  const avatar = avatarFor(user?.avatarCharacterId ?? null);
 
   return (
     <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-6 flex flex-col gap-4">
       <p className="truncate whitespace-nowrap text-sm text-black/60 dark:text-white/50">
         {greetingText ?? "Willkommen"}
-        {username ? `, ${username}` : ""}.
+        {user?.username ? `, ${user.username}` : ""}.
       </p>
 
       {isSupabaseConfigured() && !loaded && <LoadingSpinner />}
 
       {isSupabaseConfigured() && loaded && progress && (
-        <div
-          className="op-card bg-cover bg-center px-4 py-3"
-          style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')" }}
-        >
-          <div className="flex items-center justify-between gap-2 mb-1.5 text-sm">
-            <span className="flex min-w-0 items-center gap-1.5 truncate whitespace-nowrap font-semibold text-white">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/ship-wheel.webp" alt="" aria-hidden className="h-4 w-4 shrink-0 object-contain" />
-              Level {progress.level} · {progress.rankTitle}
+        <Link href="/profil">
+          <div
+            className="op-card op-framed flex items-center gap-4 bg-cover bg-center p-4"
+            style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')" }}
+          >
+            <span className="relative flex h-20 w-20 shrink-0 items-center justify-center">
+              {frameImage ? (
+                <>
+                  {avatar?.imageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={avatar.imageUrl}
+                      alt={avatar.name}
+                      referrerPolicy="no-referrer"
+                      className="h-14 w-14 rounded-full object-cover object-top"
+                    />
+                  )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+                </>
+              ) : (
+                avatar?.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatar.imageUrl}
+                    alt={avatar.name}
+                    referrerPolicy="no-referrer"
+                    className={`h-14 w-14 rounded-full object-cover object-top border-2 border-white ${frameClass}`}
+                  />
+                )
+              )}
+              <span className="absolute -bottom-1 -right-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-bold tabular-nums text-poster-ink">
+                {progress.level}
+              </span>
             </span>
-            <span className="shrink-0 whitespace-nowrap tabular-nums text-white/70 font-[family-name:var(--font-mono)]">
-              {progress.xp - progress.levelStartXp}/{progress.levelEndXp - progress.levelStartXp} XP
-            </span>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 items-center gap-2 text-base">
+                <span className={`truncate whitespace-nowrap font-semibold text-white ${colorClass}`}>{user?.username}</span>
+                {user?.isAdmin && <span className="shrink-0 text-xs text-accent-ink">(Admin)</span>}
+                {title && <span className={`shrink-0 text-xs opacity-80 ${title.className}`}>{title.label}</span>}
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-2 mb-1 text-sm">
+                <span className="flex min-w-0 items-center gap-1.5 truncate whitespace-nowrap font-semibold text-white">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/images/ship-wheel.webp" alt="" aria-hidden className="h-4 w-4 shrink-0 object-contain" />
+                  {progress.rankTitle}
+                </span>
+                <span className="shrink-0 whitespace-nowrap tabular-nums text-white/70 font-[family-name:var(--font-mono)]">
+                  {progress.xp - progress.levelStartXp}/{progress.levelEndXp - progress.levelStartXp} XP
+                </span>
+              </div>
+              <ProgressBar progress={progress.progress} size="md" />
+              <span className="mt-1.5 flex items-center gap-1 whitespace-nowrap font-display tabular-nums text-accent-ink">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={BERRY_ICON} alt="" aria-hidden className="h-4 w-4 object-contain drop-shadow-sm" />
+                {(levelInfo?.berries ?? 0).toLocaleString("de-DE")}
+              </span>
+            </div>
           </div>
-          <ProgressBar progress={progress.progress} size="md" />
-        </div>
+        </Link>
       )}
 
       {myLobby ? (
@@ -177,27 +240,6 @@ export function HomeOverview() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2">
-        {[...MODE_GROUPS, SHOP_TILE].map((g) => (
-          <Link key={g.href} href={g.href}>
-            <div
-              className="relative flex min-h-[110px] flex-col justify-end overflow-hidden rounded-xl border-[3px] bg-cover bg-center p-3 shadow-[5px_5px_0_0_var(--foreground)]"
-              style={{
-                borderColor: `var(--mode-${"id" in g ? (g.id === "kampf" ? "duell" : g.id === "raetsel-ranking" ? "quiz" : "crew") : "shop"})`,
-                backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.05)), url('${TILE_IMAGES[g.href] ?? ""}')`,
-              }}
-            >
-              <div className="flex items-center justify-between gap-1">
-                <span className="truncate whitespace-nowrap text-xs font-semibold leading-tight text-white">{g.title}</span>
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-white text-sm text-white" aria-hidden>
-                  →
-                </span>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-
       {challenge && (
         <Link href="/questbuch">
           <div
@@ -226,16 +268,37 @@ export function HomeOverview() {
         </Link>
       )}
 
+      <div className="grid grid-cols-2 gap-2">
+        {[...MODE_GROUPS, SHOP_TILE].map((g) => (
+          <Link key={g.href} href={g.href}>
+            <div
+              className="relative flex min-h-[110px] flex-col justify-end overflow-hidden rounded-xl border-[3px] bg-cover bg-center p-3 shadow-[5px_5px_0_0_var(--foreground)]"
+              style={{
+                borderColor: `var(--mode-${"id" in g ? (g.id === "kampf" ? "duell" : g.id === "raetsel-ranking" ? "quiz" : "crew") : "shop"})`,
+                backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.05)), url('${TILE_IMAGES[g.href] ?? ""}')`,
+              }}
+            >
+              <div className="flex items-center justify-between gap-1">
+                <span className="truncate whitespace-nowrap text-xs font-semibold leading-tight text-white">{g.title}</span>
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-white text-sm text-white" aria-hidden>
+                  →
+                </span>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+
       {isSupabaseConfigured() && loaded && onlineFriends.length > 0 && (
         <div className="flex items-center gap-2 whitespace-nowrap text-sm text-black/60 dark:text-white/50">
           <div className="flex -space-x-2">
             {onlineFriends.slice(0, 5).map((p) => {
-              const avatar = avatarFor(p.avatarCharacterId);
-              return avatar?.imageUrl ? (
+              const friendAvatar = avatarFor(p.avatarCharacterId);
+              return friendAvatar?.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   key={p.userId}
-                  src={avatar.imageUrl}
+                  src={friendAvatar.imageUrl}
                   alt={p.username}
                   referrerPolicy="no-referrer"
                   title={p.username}
