@@ -394,6 +394,35 @@ body {
   animation: op-bounty-number 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Live-Draft chat reactions (Boss's ask): a sent emote pops up on screen,
+   floats up slightly, then fades out and removes itself — see
+   LiveDraftBoard's renderFloatingEmotes, which unmounts each item once this
+   finishes (durations must match: 2.2s). */
+@keyframes op-emote-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.15);
+  }
+  25% {
+    transform: translate(-50%, 0) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -18px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -26px) scale(1);
+  }
+}
+.op-emote-pop {
+  animation: op-emote-pop 2.2s ease-out forwards;
+}
+
 /* Themed loading spinner (a slowly spinning ship's wheel) — see
    LoadingSpinner.tsx, which pairs this with the actual 🧭 glyph. */
 @keyframes op-spin {
@@ -418,7 +447,8 @@ body {
   .op-round-in,
   .op-spin,
   .op-bounty-reveal,
-  .op-bounty-number {
+  .op-bounty-number,
+  .op-emote-pop {
     animation: none !important;
   }
 }

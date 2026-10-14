@@ -57,6 +57,8 @@ export type DraftState = {
   rerollsUsed?: Record<string, number>;
   /** Preset emote reactions sent during the draft (Q108), newest last, capped at MAX_CHAT_LOG. */
   chatLog?: ChatMessage[];
+  /** Invite code of a fresh lobby someone started from this finished draft's result screen — lets every other participant jump straight into the rematch instead of being given a new code to type in by hand. Set once and never cleared, since a finished draft's state is never written again after this. */
+  rematchInviteCode?: string;
 };
 
 const OFFER_COUNT = 3;

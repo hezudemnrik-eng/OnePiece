@@ -7,7 +7,6 @@ import {
   allRolesConfirmed,
   assignRole,
   assignTeam,
-  autoPick,
   claimSeat,
   confirmRoles,
   createDraft,
@@ -34,6 +33,7 @@ import { LoadingSpinner } from "./LoadingSpinner";
 import {
   createLiveDraft,
   ensureSupabaseSession,
+  fetchFriends,
   fetchLiveDraftByCode,
   fetchLiveDraftById,
   fetchPublicProfilesCosmetics,
@@ -41,9 +41,11 @@ import {
   getCurrentAuthUser,
   incrementXp,
   recordMatchResult,
+  sendDraftInvite,
   subscribeLiveDraft,
   unlockAchievement,
   writeLiveDraft,
+  type Friend,
   type LiveDraftSession,
   type PublicProfileCosmetics,
   type ShopItem,
@@ -51,15 +53,12 @@ import {
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
 import { RollPanel } from "./RollPanel";
-import { TimerBar } from "./TimerBar";
 import { VictoryBanner } from "./VictoryBanner";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { Input } from "./ui/Input";
 import { Select } from "./ui/Select";
 
-const PICK_SECONDS = 30;
-const ROLES_SECONDS = 45;
 const NICKNAME_KEY = "op-nickname";
 const PRESENCE_INTERVAL_MS = 7000;
 const STALE_MS = 15000;
@@ -150,10 +149,20 @@ export function LiveDraftBoard() {
   const [cosmetics, setCosmetics] = useState<Record<string, PublicProfileCosmetics>>({});
   const loadedCosmeticsKeyRef = useRef("");
 
+  // Lobby-only: friends offered for an in-app invite (Boss's ask) instead of
+  // only sharing the invite code outside the app.
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [invitedFriendIds, setInvitedFriendIds] = useState<string[]>([]);
+  const [rematchStarting, setRematchStarting] = useState(false);
+
+  // Floating pop-up emotes (Boss's ask): a short-lived overlay item per new
+  // chat message, independent of the small text log, that animates in and
+  // fades out on its own via CSS (see op-emote-pop in globals.css).
+  const [floatingEmotes, setFloatingEmotes] = useState<{ key: string; emote: string; label: string; leftPct: number }[]>([]);
+  const lastChatAtRef = useRef<string>("");
+
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const autoPickFiredRef = useRef(false);
-  const autoConfirmRolesFiredRef = useRef(false);
   const matchRecordedRef = useRef(false);
   const achievementsCheckedRef = useRef(false);
   const lastHeartbeatRef = useRef(0);
@@ -213,6 +222,38 @@ export function LiveDraftBoard() {
     });
   }, [session]);
 
+  // Friends for the lobby's invite picker — fetched once per lobby visit,
+  // not on every realtime/poll tick.
+  useEffect(() => {
+    if (session?.phase !== "lobby" || isSpectator) return;
+    fetchFriends().then(setFriends);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.phase, session?.id]);
+
+  // Floating emote pop-ups: watches the shared chat log for entries newer
+  // than the last one we've already shown, and gives each its own
+  // short-lived overlay item that removes itself once its CSS animation
+  // (op-emote-pop) finishes.
+  useEffect(() => {
+    const log = session?.state.chatLog ?? [];
+    const fresh = log.filter((m) => m.at > lastChatAtRef.current);
+    if (fresh.length === 0) return;
+    lastChatAtRef.current = log[log.length - 1].at;
+    const items = fresh.map((m) => ({
+      key: `${m.at}-${m.playerId}`,
+      emote: m.emote,
+      label: chatLabel(m.playerId),
+      leftPct: 20 + Math.random() * 60,
+    }));
+    setFloatingEmotes((prev) => [...prev, ...items]);
+    for (const item of items) {
+      setTimeout(() => {
+        setFloatingEmotes((prev) => prev.filter((f) => f.key !== item.key));
+      }, 2200);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.state.chatLog]);
+
   // Lets the Übersicht's "weiterspielen" links (/draft/live?code=XXXX) jump
   // straight back into a lobby or in-progress draft without retyping the code.
   useEffect(() => {
@@ -232,11 +273,7 @@ export function LiveDraftBoard() {
   function attach(s: LiveDraftSession) {
     setSession(s);
     unsubscribeRef.current?.();
-    unsubscribeRef.current = subscribeLiveDraft(s.id, (updated) => {
-      setSession(updated);
-      autoPickFiredRef.current = false;
-      autoConfirmRolesFiredRef.current = false;
-    });
+    unsubscribeRef.current = subscribeLiveDraft(s.id, setSession);
 
     // Realtime push isn't guaranteed — the project's Realtime service can
     // be unhealthy independently of the database itself (seen in testing:
@@ -405,22 +442,6 @@ export function LiveDraftBoard() {
     return nowTick - new Date(lastSeenAt).getTime() > STALE_MS;
   }
 
-  // Only the current player's own browser fires the timeout auto-pick, so
-  // two tabs never race to both auto-pick the same turn.
-  useEffect(() => {
-    if (view !== "drafting" || !session || !myUserId || isSpectator) return;
-    const player = currentPlayer(session.state);
-    if (player.userId !== myUserId) return;
-    const elapsed = (nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000;
-    if (elapsed >= PICK_SECONDS && !autoPickFiredRef.current) {
-      autoPickFiredRef.current = true;
-      const next = autoPick(session.state);
-      writeLiveDraft(session.id, session.updated_at, { state: next }).then((result) => {
-        if (result.session) setSession(result.session);
-      });
-    }
-  }, [nowTick, view, session, myUserId, isSpectator]);
-
   // The host's browser moves the draft into the role-assignment phase once
   // it finishes, so exactly one client writes the transition instead of
   // every client racing to.
@@ -522,21 +543,6 @@ export function LiveDraftBoard() {
     }
   }
 
-  // Auto-confirms this viewer's roles (with whatever they've assigned so
-  // far, possibly nothing) if they sit on the role-assignment screen too
-  // long — mirrors the pick timer so a quiet player can't stall the match.
-  useEffect(() => {
-    if (effectiveView !== "roles" || !session || !myUserId || isSpectator) return;
-    const me = session.state.players.find((p) => p.userId === myUserId);
-    if (!me || me.rolesReady) return;
-    const elapsed = (nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000;
-    if (elapsed >= ROLES_SECONDS && !autoConfirmRolesFiredRef.current) {
-      autoConfirmRolesFiredRef.current = true;
-      handleConfirmRoles();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nowTick, effectiveView, session, myUserId, isSpectator]);
-
   // Every participant's own browser records its own win/loss once — not
   // just the host's — so the friend leaderboard reflects everyone.
   useEffect(() => {
@@ -569,7 +575,59 @@ export function LiveDraftBoard() {
     setNewAchievements([]);
     achievementsCheckedRef.current = false;
     matchRecordedRef.current = false;
+    setInvitedFriendIds([]);
+    setFloatingEmotes([]);
+    lastChatAtRef.current = "";
     setView("home");
+  }
+
+  async function handleInviteFriend(friendUserId: string) {
+    if (!session) return;
+    const result = await sendDraftInvite(friendUserId, session.invite_code);
+    if (result.ok) setInvitedFriendIds((prev) => [...prev, friendUserId]);
+  }
+
+  // Starts (or joins) a fresh lobby with the same settings once the current
+  // draft's result is in — every participant can trigger this, not just the
+  // host, since any of them might want to play again first. The new lobby's
+  // code is written onto the finished session's state so the others (still
+  // on this result screen) see a "rematch started" banner and can jump
+  // straight in via handleJoin, instead of a code shared outside the app.
+  async function handleRematch() {
+    if (!session || !myUserId) return;
+    if (session.state.rematchInviteCode) {
+      handleJoin(session.state.rematchInviteCode);
+      return;
+    }
+    setRematchStarting(true);
+    const ids = characters.map((c) => c.id);
+    const teamModeEnabled = Boolean(session.state.teamModeEnabled);
+    const placeholderNames = Array.from({ length: session.state.players.length }, () => "Offen");
+    let initial = createDraft(placeholderNames, ids, session.state.teamSize, { teamModeEnabled });
+    initial = claimSeat(initial, 0, myUserId, nickname || "Spieler");
+    const created = await createLiveDraft(initial, session.state.players.length);
+    if (!created) {
+      setRematchStarting(false);
+      setErrorMsg("Konnte kein Rematch starten.");
+      return;
+    }
+
+    const result = await writeLiveDraft(session.id, session.updated_at, {
+      state: { ...session.state, rematchInviteCode: created.invite_code },
+    });
+    if (!result.session) {
+      // Someone else's rematch write landed first — join theirs instead of
+      // leaving two lobbies around.
+      const refetched = await fetchLiveDraftById(session.id);
+      if (refetched?.state.rematchInviteCode) {
+        setRematchStarting(false);
+        handleJoin(refetched.state.rematchInviteCode);
+        return;
+      }
+    }
+    setIsSpectator(false);
+    attach(created);
+    setRematchStarting(false);
   }
 
   function chatLabel(playerId: string): string {
@@ -578,31 +636,45 @@ export function LiveDraftBoard() {
 
   // Chat is intentionally limited to a fixed set of preset reactions (Q108)
   // — no free text, so no moderation surface needed for a feature this small.
+  // The reactions themselves show up as the floating pop-up overlay
+  // (renderFloatingEmotes) rather than a text log.
   function renderChatBar() {
     if (!session || isSpectator) return null;
-    const recent = session.state.chatLog?.slice(-6) ?? [];
     return (
-      <div className="flex flex-col gap-2 rounded-lg border border-dashed border-black/15 dark:border-white/15 p-3">
-        <div className="flex flex-wrap gap-1.5">
-          {DRAFT_EMOTES.map((emote) => (
-            <button
-              key={emote}
-              onClick={() => handleSendEmote(emote)}
-              className="rounded-full border border-black/15 dark:border-white/15 px-2 py-1 text-base transition hover:border-mode-draft/50"
+      <div className="flex flex-wrap gap-1.5 rounded-lg border border-dashed border-black/15 dark:border-white/15 p-3">
+        {DRAFT_EMOTES.map((emote) => (
+          <button
+            key={emote}
+            onClick={() => handleSendEmote(emote)}
+            className="rounded-full border border-black/15 dark:border-white/15 px-2 py-1 text-base transition hover:border-mode-draft/50"
+          >
+            {emote}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  // Overlay of short-lived floating emotes (see the effect populating
+  // floatingEmotes) — pinned over the whole screen so a reaction is visible
+  // no matter where on the board the viewer is looking, then disappears on
+  // its own once op-emote-pop finishes.
+  function renderFloatingEmotes() {
+    if (floatingEmotes.length === 0) return null;
+    return (
+      <div className="pointer-events-none fixed inset-x-0 top-20 z-50 flex justify-center">
+        <div className="relative h-0 w-full max-w-md">
+          {floatingEmotes.map((f) => (
+            <span
+              key={f.key}
+              className="op-emote-pop absolute flex flex-col items-center gap-1"
+              style={{ left: `${f.leftPct}%` }}
             >
-              {emote}
-            </button>
+              <span className="text-4xl drop-shadow-md">{f.emote}</span>
+              <span className="whitespace-nowrap rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">{f.label}</span>
+            </span>
           ))}
         </div>
-        {recent.length > 0 && (
-          <ul className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-black/50 dark:text-white/40">
-            {recent.map((m, i) => (
-              <li key={i}>
-                {chatLabel(m.playerId)}: {m.emote}
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     );
   }
@@ -746,6 +818,30 @@ export function LiveDraftBoard() {
             </li>
           ))}
         </ul>
+        {!isSpectator && !full && friends.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm text-black/60 dark:text-white/50">Freund einladen</p>
+            <ul className="flex flex-col gap-1.5">
+              {friends.map((f) => {
+                const alreadyInLobby = session.state.players.some((p) => p.userId === f.userId);
+                const invited = invitedFriendIds.includes(f.userId);
+                return (
+                  <li key={f.userId} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="min-w-0 truncate">{f.username}</span>
+                    <Button
+                      variant="secondary"
+                      className="shrink-0 px-3 py-1 text-xs"
+                      disabled={alreadyInLobby || invited}
+                      onClick={() => handleInviteFriend(f.userId)}
+                    >
+                      {alreadyInLobby ? "schon da" : invited ? "eingeladen ✓" : "einladen"}
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
         {isSpectator && <p className="text-sm text-black/50 dark:text-white/40">Du schaust nur zu.</p>}
         {isHost && (
           <Button onClick={startDraft} disabled={!canStart}>
@@ -763,8 +859,6 @@ export function LiveDraftBoard() {
   if (effectiveView === "drafting" && session) {
     const player = currentPlayer(session.state);
     const myTurn = !isSpectator && player.userId === myUserId;
-    const elapsed = Math.floor((nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000);
-    const secondsLeft = Math.max(0, PICK_SECONDS - elapsed);
     const offered = session.state.rolledCharacterIds
       .map((id) => characters.find((c) => c.id === id))
       .filter((c): c is NonNullable<typeof c> => Boolean(c));
@@ -773,13 +867,13 @@ export function LiveDraftBoard() {
 
     return (
       <div className="grid gap-6 md:grid-cols-[1fr_280px]">
+        {renderFloatingEmotes()}
         <div>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4">
             <p key={player.id} className="op-turn-pulse text-sm">
               Am Zug: <span className="font-semibold">{player.name}</span>
               {myTurn && <span className="text-mode-draft"> (du!)</span>} · Runde {session.state.round}
             </p>
-            <TimerBar secondsLeft={secondsLeft} totalSeconds={PICK_SECONDS} />
           </div>
           {disconnected && (
             <p className="mb-3 text-sm text-danger">
@@ -825,8 +919,6 @@ export function LiveDraftBoard() {
   if (effectiveView === "roles" && session) {
     const me = session.state.players.find((p) => p.userId === myUserId);
     const roster = me ? getTeam(session.state, me.id, characters) : [];
-    const elapsed = Math.floor((nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000);
-    const secondsLeft = Math.max(0, ROLES_SECONDS - elapsed);
     const readyCount = session.state.players.filter((p) => p.rolesReady).length;
     const stalePlayers = session.state.players.filter(
       (p) => p.userId && p.userId !== myUserId && !p.rolesReady && isPlayerStale(p.lastSeenAt)
@@ -834,12 +926,10 @@ export function LiveDraftBoard() {
 
     return (
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-black/60 dark:text-white/50">
-            Bereit: {readyCount}/{session.state.players.length}
-          </p>
-          <TimerBar secondsLeft={secondsLeft} totalSeconds={ROLES_SECONDS} />
-        </div>
+        {renderFloatingEmotes()}
+        <p className="text-sm text-black/60 dark:text-white/50">
+          Bereit: {readyCount}/{session.state.players.length}
+        </p>
         {stalePlayers.length > 0 && (
           <p className="text-sm text-danger">
             ⚠️ {stalePlayers.map((p) => p.name).join(", ")} scheint die Verbindung verloren zu haben — es pausiert, bis die
@@ -923,7 +1013,24 @@ export function LiveDraftBoard() {
         ) : (
           <p className="text-sm text-black/50 dark:text-white/40">Kampfsimulation wird berechnet…</p>
         )}
-        <Button onClick={backToHome} className="self-start">
+        {!isSpectator && (
+          <div className="flex flex-col gap-2">
+            {session.state.rematchInviteCode && (
+              <p className="text-sm text-black/60 dark:text-white/50">
+                Rematch gestartet — Code <span className="font-mono">{session.state.rematchInviteCode}</span>
+              </p>
+            )}
+            {errorMsg && <p className="text-sm text-danger">{errorMsg}</p>}
+            <Button onClick={handleRematch} disabled={rematchStarting}>
+              {session.state.rematchInviteCode
+                ? "Rematch beitreten"
+                : rematchStarting
+                  ? "Starte Rematch…"
+                  : "Rematch starten"}
+            </Button>
+          </div>
+        )}
+        <Button variant="ghost" onClick={backToHome} className="self-start text-black/50 dark:text-white/40">
           Zur Startseite
         </Button>
       </div>
