@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { characters } from "@/lib/characters";
 import { getLevelProgress, type LevelProgress } from "@/lib/levels";
+import { FRAME_IMAGES } from "@/lib/frameImages";
 import { formatBerry } from "@/lib/fusionTraits";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
@@ -180,6 +181,10 @@ export function ShopBoard() {
                         referrerPolicy="no-referrer"
                         className="h-6 w-6 rounded-full object-cover object-top"
                       />
+                    )}
+                    {category === "frame" && FRAME_IMAGES[item.id] && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={FRAME_IMAGES[item.id]} alt="" aria-hidden className="h-8 w-8 object-contain" />
                     )}
                     {item.label}
                     {isLocked ? (
