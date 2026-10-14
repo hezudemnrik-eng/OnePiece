@@ -54,7 +54,10 @@ export const FUSION_ACHIEVEMENTS: FusionAchievement[] = [
     id: "fusion_bounty_max",
     label: "Maximal-Kopfgeld",
     description: "Praktisch das höchstmögliche Kopfgeld erreicht.",
-    check: (_picks, bounty) => bounty >= 4_900_000_000,
+    // The real achievable ceiling is exactly 6_000_000_000 (see computeBounty
+    // in fusionTraits.ts). The old threshold (4_900_000_000) sat above the
+    // old real max (4_579_000_000), so this achievement could never fire.
+    check: (_picks, bounty) => bounty >= 5_900_000_000,
   },
   {
     id: "fusion_haki_master",

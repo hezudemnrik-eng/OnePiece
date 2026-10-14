@@ -111,6 +111,33 @@ const WEAPON_STYLES: Record<string, string> = {
   perospero: "Bonbon-Zepter (Kampfstab)",
 };
 
+// Individual mastery score per curated weapon style — Mihawk sits clearly
+// on top as the holder of the world's strongest blade; everyone else is
+// ranked below him by canon combat weight. A curated style never scores
+// below the generic "Unbewaffnet / Nahkampf" baseline (55).
+const WEAPON_SCORE: Record<string, number> = {
+  mihawk: 95,
+  zoro: 88,
+  shanks: 85,
+  whitebeard: 82,
+  rayleigh: 80,
+  garp: 78,
+  law: 72,
+  sanji: 70,
+  killer: 68,
+  jinbe: 66,
+  smoker: 64,
+  franky: 64,
+  crocodile: 62,
+  marco: 60,
+  jozu: 60,
+  vista: 60,
+  brook: 58,
+  hawkins: 56,
+  tashigi: 56,
+  usopp: 55,
+};
+
 // Confidently non-human races only; everyone else defaults to "Mensch",
 // which is correct for the large majority of named One Piece characters.
 // Devil Fruit transformations (Zoan users like Dalton, Momonosuke, Yamato)
@@ -163,17 +190,35 @@ const RACES: Record<string, string> = {
 };
 
 const RACE_SCORE: Record<string, number> = {
-  Riese: 25,
-  Lunarianer: 20,
-  Fischmensch: 15,
-  Mink: 15,
+  // Lunarianer top the list now — in canon the rarest and individually
+  // strongest known race (King alone fights at Yonko-commander level),
+  // ahead of the previous top spot which went to the one-off "Elefant"
+  // flavor tag for Zunesha rather than an actual power-tier race.
+  Lunarianer: 35,
+  Riese: 28,
+  Elefant: 18,
+  Fischmensch: 16,
+  Mink: 16,
   Meermensch: 13,
   "Rentier (Mensch-Mensch-Frucht)": 12,
   Bukanier: 10,
   Zwerg: 8,
   Mensch: 5,
   Seestern: 3,
-  Elefant: 30,
+};
+
+// Standout fruits that clearly outclass their own class's flat baseline
+// (85 Logia / 70 Zoan / 60 Paramecia) — flavor tiering only, not a canon
+// power ranking. Everyone else keeps the plain class-based score.
+const DEVIL_FRUIT_SCORE_OVERRIDES: Record<string, number> = {
+  blackbeard: 100, // hält gleichzeitig Yami Yami und Gura Gura no Mi
+  whitebeard: 98, // Gura Gura no Mi — stärkste bekannte Paramecia
+  luffy: 96, // Hito Hito no Mi, Modell: Nika — Gear 5
+  kaido: 94, // Uo Uo no Mi — "stärkstes Geschöpf der Welt"
+  "big-mom": 90, // Soru Soru no Mi — Seelenmanipulation
+  akainu: 90, // Magu Magu no Mi — Magma schlägt Feuer
+  law: 85, // Ope Ope no Mi — laut Vegapunk "die ultimative Frucht"
+  marco: 82, // Tori Tori no Mi, Modell: Phönix — Regeneration
 };
 
 // Legendary mentor figures from canon — flavor only ("trained by a legend"),
@@ -198,7 +243,8 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
         .filter((c) => c.devilFruit)
         .map((c) => {
           const cls = classifyFruit(c.devilFruit);
-          const score = cls === "logia" ? 85 : cls === "zoan" ? 70 : 60;
+          const baseScore = cls === "logia" ? 85 : cls === "zoan" ? 70 : 60;
+          const score = DEVIL_FRUIT_SCORE_OVERRIDES[c.id] ?? baseScore;
           return {
             categoryId: "teufelsfrucht" as const,
             sourceCharacterId: c.id,
@@ -253,7 +299,7 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
           sourceName: c.name,
           sourceImageUrl: c.imageUrl,
           traitLabel: curated ?? "Unbewaffnet / Nahkampf",
-          score: curated ? 75 : 55,
+          score: curated ? (WEAPON_SCORE[c.id] ?? 75) : 55,
         };
       }),
   },
@@ -340,12 +386,20 @@ export function rollFusionOption(
   return pool[pool.length - 1];
 }
 
-/** Turns the 7 picked traits into a dramatic, One-Piece-style bounty — a flavor formula for the game, not a canon figure. */
+/**
+ * Turns the 7 picked traits into a dramatic, One-Piece-style bounty — a
+ * flavor formula for the game, not a canon figure. The ceiling is the exact
+ * sum of the best real score in each of the 7 categories (Blackbeard's dual
+ * fruit, Imu's haki, Kaido's body, Mihawk's blade, King's race, Mihawk as
+ * sensei, Aokiji's mind — 100+99+97+95+35+92.5+99), so the highest bounty
+ * actually achievable with real picks is exactly 6 billion Berry, not just
+ * a theoretical, unreachable cap.
+ */
 export function computeBounty(picks: FusionOption[]): number {
   const total = picks.reduce((sum, p) => sum + p.score, 0);
-  const maxPossible = 90 + 100 + 100 + 85 + 25 + 100 + 100; // rough ceiling across all 7 categories
+  const maxPossible = 100 + 99 + 97 + 95 + 35 + 92.5 + 99;
   const ratio = Math.min(1, total / maxPossible);
-  const bounty = Math.pow(ratio, 2.3) * 5_000_000_000;
+  const bounty = Math.pow(ratio, 2.3) * 6_000_000_000;
   return Math.max(3_000_000, Math.round(bounty / 1_000_000) * 1_000_000);
 }
 
