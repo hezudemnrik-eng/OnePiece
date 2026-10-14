@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { characters } from "@/lib/characters";
-import { COSMETIC_FRAMES } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
 import {
   fetchFriends,
@@ -41,9 +40,7 @@ function Avatar({
   const avatar = avatarFor(avatarCharacterId);
   const frameImage = equippedFrame ? (FRAME_IMAGES[equippedFrame] ?? null) : null;
   const frameClass = equippedFrame
-    ? (COSMETIC_FRAMES.find((f) => f.id === equippedFrame)?.className ??
-      shopItems?.find((i) => i.category === "frame" && i.id === equippedFrame)?.className ??
-      "")
+    ? (shopItems?.find((i) => i.category === "frame" && i.id === equippedFrame)?.className ?? "")
     : "";
   return (
     <span className="relative shrink-0" key={userId}>

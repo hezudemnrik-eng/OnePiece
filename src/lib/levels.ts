@@ -110,16 +110,29 @@ export type CosmeticFrame = {
   id: string;
   label: string;
   minLevel: number;
-  /** Tailwind border classes applied around an avatar. */
+  /** Tailwind border/shadow classes applied as a CSS fallback around the
+   *  square profile-hero card (see RANK_FRAME_IMAGES for the illustrated
+   *  artwork that replaces this once Boss has painted it). */
   className: string;
 };
 
+/**
+ * Rank frames, unlocked one per RANK_TIERS milestone (Boss, 2026-10-14:
+ * "mehr davon" — expanded from 5 to 8 tiers, one per account rank). These
+ * used to ring the round avatar; they now decorate the square profile-hero
+ * card instead (profiles.equipped_rank_frame, migration 0022) and are
+ * fully independent of the avatar frames bought in the shop
+ * (profiles.equipped_frame, src/lib/frameImages.ts), which are unchanged.
+ */
 export const COSMETIC_FRAMES: CosmeticFrame[] = [
   { id: "none", label: "Kein Rahmen", minLevel: 1, className: "" },
-  { id: "bronze", label: "Bronze-Rahmen", minLevel: 5, className: "ring-2 ring-amber-700" },
-  { id: "silver", label: "Silber-Rahmen", minLevel: 15, className: "ring-2 ring-slate-400" },
-  { id: "gold", label: "Gold-Rahmen", minLevel: 30, className: "ring-2 ring-amber-400" },
-  { id: "legendary", label: "Legendärer Rahmen", minLevel: 60, className: "ring-2 ring-amber-400 ring-offset-2 ring-offset-[var(--background)] op-s-tier-glow" },
+  { id: "eisen", label: "Eisen-Rahmen", minLevel: 5, className: "border-2 border-slate-500/70 shadow-[0_0_10px_rgba(100,116,139,0.35)]" },
+  { id: "bronze", label: "Bronze-Rahmen", minLevel: 10, className: "border-2 border-amber-700/80 shadow-[0_0_10px_rgba(180,83,9,0.35)]" },
+  { id: "silber", label: "Silber-Rahmen", minLevel: 15, className: "border-2 border-slate-300/80 shadow-[0_0_10px_rgba(203,213,225,0.4)]" },
+  { id: "gold", label: "Gold-Rahmen", minLevel: 20, className: "border-2 border-amber-400/90 shadow-[0_0_12px_rgba(251,191,36,0.4)]" },
+  { id: "platin", label: "Platin-Rahmen", minLevel: 30, className: "border-2 border-cyan-200/80 shadow-[0_0_12px_rgba(165,243,252,0.4)]" },
+  { id: "diamant", label: "Diamant-Rahmen", minLevel: 40, className: "border-2 border-sky-300/90 shadow-[0_0_14px_rgba(125,211,252,0.45)]" },
+  { id: "legendaer", label: "Legendärer Rahmen", minLevel: 60, className: "border-2 border-amber-400 op-s-tier-glow" },
 ];
 
 export function framesUnlockedAtLevel(level: number): CosmeticFrame[] {

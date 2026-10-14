@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { characters } from "@/lib/characters";
 import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
 import { COSMETIC_FRAMES, getLevelProgress } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
+import { RANK_FRAME_IMAGES } from "@/lib/rankFrameImages";
 import { BERRY_ICON, ICON_IMAGES } from "@/lib/iconImages";
 import { getLastPlayedHref } from "@/lib/lastPlayed";
 import { getTodaysChallenge, type DailyChallenge } from "@/lib/dailyChallenge";
@@ -56,6 +57,8 @@ export function HomeOverview() {
   const [levelInfo, setLevelInfo] = useState<MyLevelInfo | null>(null);
   const [frameImage, setFrameImage] = useState<string | null>(null);
   const [frameClass, setFrameClass] = useState("");
+  const [rankFrameImage, setRankFrameImage] = useState<string | null>(null);
+  const [rankFrameClass, setRankFrameClass] = useState("");
   const [colorClass, setColorClass] = useState("");
   const [title, setTitle] = useState<{ label: string; className: string } | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -91,12 +94,10 @@ export function HomeOverview() {
     ]).then(([authUser, level, items, friendList, drafts, questClaimedToday]) => {
       setUser(authUser);
       setLevelInfo(level);
-      setFrameClass(
-        COSMETIC_FRAMES.find((f) => f.id === level?.equippedFrame)?.className ??
-          items.find((i) => i.category === "frame" && i.id === level?.equippedFrame)?.className ??
-          ""
-      );
+      setFrameClass(items.find((i) => i.category === "frame" && i.id === level?.equippedFrame)?.className ?? "");
       setFrameImage(level?.equippedFrame ? (FRAME_IMAGES[level.equippedFrame] ?? null) : null);
+      setRankFrameClass(COSMETIC_FRAMES.find((f) => f.id === level?.equippedRankFrame)?.className ?? "");
+      setRankFrameImage(level?.equippedRankFrame ? (RANK_FRAME_IMAGES[level.equippedRankFrame] ?? null) : null);
       setColorClass(items.find((i) => i.category === "color" && i.id === level?.equippedColor)?.className ?? "");
       const activeTitle = items.find((i) => i.category === "title" && i.id === level?.equippedTitle);
       setTitle(activeTitle ? { label: activeTitle.label, className: activeTitle.className } : null);
@@ -124,8 +125,13 @@ export function HomeOverview() {
       {isSupabaseConfigured() && loaded && progress && (
         <Link href="/profil">
           <div
-            className="op-card op-framed flex items-center gap-4 bg-cover bg-center p-4"
-            style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')" }}
+            className={`op-card flex items-center gap-4 bg-cover bg-center p-4 ${rankFrameImage ? "op-rank-frame" : `op-framed ${rankFrameClass}`}`}
+            style={
+              {
+                backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')",
+                ...(rankFrameImage ? { "--op-rank-frame-src": `url(${rankFrameImage})` } : {}),
+              } as CSSProperties
+            }
           >
             <span className="relative flex h-20 w-20 shrink-0 items-center justify-center">
               {frameImage ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { characters } from "@/lib/characters";
 import { AVATAR_CHOICES } from "@/lib/avatarChoices";
@@ -11,6 +11,7 @@ import {
   type LevelProgress,
 } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
+import { RANK_FRAME_IMAGES } from "@/lib/rankFrameImages";
 import { BERRY_ICON } from "@/lib/iconImages";
 import { FUSION_ACHIEVEMENTS } from "@/lib/fusionAchievements";
 import { DUEL_ACHIEVEMENTS } from "@/lib/duelAchievements";
@@ -36,7 +37,7 @@ import {
   fetchShopItems,
   getCurrentAuthUser,
   setAvatarCharacterId,
-  setEquippedFrame,
+  setEquippedRankFrame,
   type AuthUser,
   type GlobalLeaderboardEntry,
   type LeaderboardEntry,
@@ -84,6 +85,7 @@ export function ProfileBoard() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [progress, setProgress] = useState<LevelProgress | null>(null);
   const [equippedFrame, setEquippedFrameState] = useState<string | null>(null);
+  const [equippedRankFrame, setEquippedRankFrameState] = useState<string | null>(null);
   const [equippedColor, setEquippedColorState] = useState<string | null>(null);
   const [equippedTitle, setEquippedTitleState] = useState<string | null>(null);
   const [berries, setBerries] = useState(0);
@@ -113,6 +115,7 @@ export function ProfileBoard() {
       setUser(authUser);
       setProgress(getLevelProgress(levelInfo?.xp ?? 0));
       setEquippedFrameState(levelInfo?.equippedFrame ?? null);
+      setEquippedRankFrameState(levelInfo?.equippedRankFrame ?? null);
       setEquippedColorState(levelInfo?.equippedColor ?? null);
       setEquippedTitleState(levelInfo?.equippedTitle ?? null);
       setBerries(levelInfo?.berries ?? 0);
@@ -143,21 +146,20 @@ export function ProfileBoard() {
   const shopFrames = shopItems.filter((i) => i.category === "frame");
   const shopColors = shopItems.filter((i) => i.category === "color");
   const shopTitles = shopItems.filter((i) => i.category === "title");
-  const activeFrameClass =
-    COSMETIC_FRAMES.find((f) => f.id === equippedFrame)?.className ??
-    shopFrames.find((f) => f.id === equippedFrame)?.className ??
-    "";
+  const activeFrameClass = shopFrames.find((f) => f.id === equippedFrame)?.className ?? "";
   const activeColorClass = shopColors.find((c) => c.id === equippedColor)?.className ?? "";
   const activeTitle = shopTitles.find((t) => t.id === equippedTitle);
   const activeFrameImage = equippedFrame ? (FRAME_IMAGES[equippedFrame] ?? null) : null;
+  const activeRankFrameClass = COSMETIC_FRAMES.find((f) => f.id === equippedRankFrame)?.className ?? "";
+  const activeRankFrameImage = equippedRankFrame ? (RANK_FRAME_IMAGES[equippedRankFrame] ?? null) : null;
   const myUserId = user.id;
   const myStats = leaderboard.find((e) => e.userId === myUserId);
   const filteredRecent = matchFilter === "alle" ? recent : recent.filter((m) => m.mode === matchFilter);
 
-  async function equipFrame(frameId: string) {
+  async function equipRankFrame(frameId: string) {
     const applied = frameId === "none" ? null : frameId;
-    setEquippedFrameState(applied);
-    await setEquippedFrame(applied);
+    setEquippedRankFrameState(applied);
+    await setEquippedRankFrame(applied);
   }
 
   async function changeAvatar(characterId: string) {
@@ -178,7 +180,12 @@ export function ProfileBoard() {
 
   return (
     <div className="flex flex-col gap-8 max-w-2xl">
-      <div className="op-wanted op-parchment flex items-center gap-4 rounded-xl p-5">
+      <div
+        className={`op-wanted op-parchment flex items-center gap-4 rounded-xl p-5 ${activeRankFrameImage ? "op-rank-frame" : activeRankFrameClass}`}
+        style={
+          activeRankFrameImage ? ({ "--op-rank-frame-src": `url(${activeRankFrameImage})` } as CSSProperties) : undefined
+        }
+      >
         {activeFrameImage ? (
           <span className="relative flex h-[8.5rem] w-[8.5rem] shrink-0 items-center justify-center">
             {avatar?.imageUrl ? (
@@ -443,16 +450,19 @@ export function ProfileBoard() {
 
       <div>
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
-          Profil-Rahmen
+          Rang-Rahmen
         </h2>
+        <p className="mb-2 text-xs text-black/50 dark:text-white/40">
+          Schmückt den viereckigen Profil-Block oben und im Hauptmenü — unabhängig vom Avatar-Rahmen aus dem Shop.
+        </p>
         <div className="flex flex-wrap gap-2">
           {COSMETIC_FRAMES.map((frame) => {
             const isUnlocked = unlockedFrames.some((f) => f.id === frame.id);
-            const isActive = (equippedFrame ?? "none") === frame.id;
+            const isActive = (equippedRankFrame ?? "none") === frame.id;
             return (
               <button
                 key={frame.id}
-                onClick={() => isUnlocked && equipFrame(frame.id)}
+                onClick={() => isUnlocked && equipRankFrame(frame.id)}
                 disabled={!isUnlocked}
                 className={`rounded-md border px-3 py-1.5 text-sm ${
                   isActive ? "border-accent bg-accent/10 font-semibold" : "border-black/15 dark:border-white/15"

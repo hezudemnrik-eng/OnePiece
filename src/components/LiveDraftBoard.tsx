@@ -27,7 +27,7 @@ import {
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { checkDraftAchievements, type DraftAchievement } from "@/lib/draftAchievements";
-import { COSMETIC_FRAMES, XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
+import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { LoadingSpinner } from "./LoadingSpinner";
@@ -90,9 +90,7 @@ function PlayerIdentity({
   const avatar = c?.avatarCharacterId ? characters.find((ch) => ch.id === c.avatarCharacterId) : null;
   const frameImage = c?.equippedFrame ? FRAME_IMAGES[c.equippedFrame] : undefined;
   const frameClass = c?.equippedFrame
-    ? COSMETIC_FRAMES.find((f) => f.id === c.equippedFrame)?.className ??
-      shopItems.find((i) => i.category === "frame" && i.id === c.equippedFrame)?.className ??
-      ""
+    ? (shopItems.find((i) => i.category === "frame" && i.id === c.equippedFrame)?.className ?? "")
     : "";
   const colorClass = c?.equippedColor
     ? shopItems.find((i) => i.category === "color" && i.id === c.equippedColor)?.className ?? ""
