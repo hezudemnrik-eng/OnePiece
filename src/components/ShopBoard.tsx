@@ -20,6 +20,7 @@ import {
 } from "@/lib/supabase";
 
 const CATEGORY_LABELS: Record<string, string> = {
+  boost: "Modus-Verbesserungen",
   frame: "Profil-Rahmen",
   color: "Namensfarbe",
   avatar: "Avatare",
@@ -27,7 +28,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   arena: "Duell-Arenen",
 };
 
-const CATEGORY_ORDER = ["frame", "color", "avatar", "title", "arena"];
+const CATEGORY_ORDER = ["boost", "frame", "color", "avatar", "title", "arena"];
 
 /**
  * The Berry shop, split out from ProfileBoard into its own page (the
@@ -95,6 +96,8 @@ export function ShopBoard() {
         }
         return;
       }
+      // Boosts are passive, always-on gameplay perks once owned — nothing to equip/unequip.
+      if (item.category === "boost") return;
       if (isEquipped) {
         if (item.category === "frame") {
           setEquippedFrameState(null);
@@ -149,11 +152,16 @@ export function ShopBoard() {
                 Rein kosmetisch — färbt den Hintergrund im Duell-Ergebnis ein.
               </p>
             )}
+            {category === "boost" && (
+              <p className="mb-2 text-xs text-black/50 dark:text-white/40">
+                Permanente Spielverbesserung für deinen Account — einmal gekauft, immer aktiv.
+              </p>
+            )}
             <div className="flex flex-wrap gap-2">
               {items.map((item) => {
                 const character = category === "avatar" ? characters.find((c) => c.id === item.id) : null;
                 const owned = ownedItems.has(item.id);
-                const isActive = currentlyEquipped[item.category] === item.id;
+                const isActive = category !== "boost" && currentlyEquipped[item.category] === item.id;
                 const isLocked = progress.level < item.minLevel;
                 return (
                   <button
@@ -178,7 +186,13 @@ export function ShopBoard() {
                       <span className="text-xs">(ab Lv. {item.minLevel})</span>
                     ) : (
                       <span className="text-xs">
-                        {owned ? (isActive ? "· ausgerüstet" : "· ausrüsten") : `· ${formatBerry(item.price)}`}
+                        {owned
+                          ? category === "boost"
+                            ? "· aktiv"
+                            : isActive
+                              ? "· ausgerüstet"
+                              : "· ausrüsten"
+                          : `· ${formatBerry(item.price)}`}
                       </span>
                     )}
                   </button>

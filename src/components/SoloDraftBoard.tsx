@@ -8,7 +8,7 @@ import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { generateAiTeam, generateImuBoss, type AiTeam, type Difficulty } from "@/lib/imu";
 import { checkDraftAchievements, type DraftAchievement } from "@/lib/draftAchievements";
 import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
-import { getCurrentAuthUser, incrementXp, recordMatchResult, unlockAchievement } from "@/lib/supabase";
+import { fetchMyShopPurchases, getCurrentAuthUser, incrementXp, recordMatchResult, unlockAchievement } from "@/lib/supabase";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
@@ -71,6 +71,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
   const [battle, setBattle] = useState<BattleResult | null>(null);
   const [runs, setRuns] = useState<RunRecord[]>(() => loadRuns(storageKey));
   const [newAchievements, setNewAchievements] = useState<DraftAchievement[]>([]);
+  const [hasExtraReroll, setHasExtraReroll] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const accent: ModeAccent = opponentName === "Imu" ? "imu" : "zufallsgegner";
@@ -79,6 +80,8 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     getCurrentAuthUser().then((u) => {
       if (u?.username) setPlayerName(u.username);
     });
+    // Shop-Boost "Extra-Würfelversuch" (migration 0019): +1 Reroll pro Zug, gilt pro Account.
+    fetchMyShopPurchases().then((owned) => setHasExtraReroll(owned.has("boost_extra_reroll")));
   }, []);
 
   const isBossFight = opponentName === "Imu";
@@ -90,7 +93,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
   function startDraft() {
     const pool = isBossFight ? characters.filter((c) => bossTierPool.includes(c.tier)) : characters;
     const ids = pool.map((c) => c.id);
-    setDraft(createDraft([playerName || "Du"], ids, teamSize));
+    setDraft(createDraft([playerName || "Du"], ids, teamSize, { skipsPerTurn: hasExtraReroll ? 2 : 1 }));
     setSecondsLeft(PICK_SECONDS);
     setPhase("drafting");
   }

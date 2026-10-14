@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getStrongestVersion, type Character } from "@/lib/characters";
 import { applyRoleFit } from "@/lib/crewRoles";
 import { CREW_ROLES, rollCandidate, rollOpposingCrew, summarizeCrew, type CrewPick } from "@/lib/crewBuilder";
@@ -8,7 +8,7 @@ import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { checkCrewAchievements, type CrewAchievement } from "@/lib/crewAchievements";
 import { XP_ACHIEVEMENT_BONUS, XP_CREW_COMPLETE } from "@/lib/levels";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
-import { incrementXp, recordCrewCompletion, unlockAchievement } from "@/lib/supabase";
+import { fetchMyShopPurchases, incrementXp, recordCrewCompletion, unlockAchievement } from "@/lib/supabase";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { VictoryBanner } from "./VictoryBanner";
 import { Badge } from "./ui/Badge";
@@ -59,12 +59,20 @@ export function CrewBuilderBoard() {
   const [candidate, setCandidate] = useState<Character | null>(null);
   const [picks, setPicks] = useState<CrewPick[]>([]);
   const [rerolls, setRerolls] = useState(0);
-  const [rerollUsedThisRound, setRerollUsedThisRound] = useState(false);
+  const [rerollsUsedThisRound, setRerollsUsedThisRound] = useState(0);
   const [history, setHistory] = useState<HistoryRecord[]>(() => loadHistory());
   const [newAchievements, setNewAchievements] = useState<CrewAchievement[]>([]);
   const [opponentPicks, setOpponentPicks] = useState<CrewPick[]>([]);
   const [battle, setBattle] = useState<BattleResult | null>(null);
+  const [hasExtraReroll, setHasExtraReroll] = useState(false);
 
+  // Shop-Boost "Extra-Würfelversuch" (migration 0019): ein zweiter Reroll pro Rolle statt nur einem.
+  useEffect(() => {
+    fetchMyShopPurchases().then((owned) => setHasExtraReroll(owned.has("boost_extra_reroll")));
+  }, []);
+
+  const rerollsPerRound = hasExtraReroll ? 2 : 1;
+  const rerollUsedThisRound = rerollsUsedThisRound >= rerollsPerRound;
   const currentRole = CREW_ROLES[roleIndex];
 
   async function finalizeCrew(finalPicks: CrewPick[], rerollCount: number) {
@@ -84,7 +92,7 @@ export function CrewBuilderBoard() {
     playSkip();
     vibrate(15);
     setRerolls((r) => r + 1);
-    setRerollUsedThisRound(true);
+    setRerollsUsedThisRound((r) => r + 1);
     setCandidate(
       rollCandidate(currentRole, [...picks.map((p) => p.character.id), ...(candidate ? [candidate.id] : [])])
     );
@@ -98,7 +106,7 @@ export function CrewBuilderBoard() {
     setPicks(next);
     if (roleIndex + 1 < CREW_ROLES.length) {
       setRoleIndex(roleIndex + 1);
-      setRerollUsedThisRound(false);
+      setRerollsUsedThisRound(0);
       setCandidate(rollCandidate(CREW_ROLES[roleIndex + 1], next.map((p) => p.character.id)));
     } else {
       const summary = summarizeCrew(next);
@@ -121,7 +129,7 @@ export function CrewBuilderBoard() {
     setRoleIndex(0);
     setPicks([]);
     setRerolls(0);
-    setRerollUsedThisRound(false);
+    setRerollsUsedThisRound(0);
     setNewAchievements([]);
     setCandidate(rollCandidate(CREW_ROLES[0], []));
   }
@@ -208,9 +216,9 @@ export function CrewBuilderBoard() {
             variant="secondary"
             onClick={reroll}
             disabled={rerollUsedThisRound}
-            title={rerollUsedThisRound ? "Nur ein Reroll pro Rolle erlaubt" : undefined}
+            title={rerollUsedThisRound ? `Nur ${rerollsPerRound} Reroll${rerollsPerRound > 1 ? "s" : ""} pro Rolle erlaubt` : undefined}
           >
-            🔄 {rerollUsedThisRound ? "Reroll verbraucht" : "Neu würfeln"}
+            🔄 {rerollUsedThisRound ? "Reroll verbraucht" : `Neu würfeln (${rerollsPerRound - rerollsUsedThisRound} übrig)`}
           </Button>
         </div>
         {picks.length > 0 && (
