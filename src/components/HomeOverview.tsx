@@ -7,6 +7,7 @@ import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
 import { getLevelProgress } from "@/lib/levels";
 import { getLastPlayedHref } from "@/lib/lastPlayed";
 import { getTodaysChallenge, type DailyChallenge } from "@/lib/dailyChallenge";
+import { ICON_IMAGES } from "@/lib/iconImages";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
@@ -143,9 +144,14 @@ export function HomeOverview() {
           >
             <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
               <span className="flex min-w-0 items-center gap-2 truncate whitespace-nowrap text-sm font-semibold text-white">
-                <span className="shrink-0 text-xl" aria-hidden>
-                  {lastMode.icon}
-                </span>
+                {ICON_IMAGES[lastMode.icon] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={ICON_IMAGES[lastMode.icon]} alt="" aria-hidden className="h-6 w-6 shrink-0 object-contain" />
+                ) : (
+                  <span className="shrink-0 text-xl" aria-hidden>
+                    {lastMode.icon}
+                  </span>
+                )}
                 <span className="truncate">Weiterspielen: {lastMode.title}</span>
               </span>
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white text-xl text-white" aria-hidden>
@@ -191,9 +197,14 @@ export function HomeOverview() {
             className="op-card flex items-center gap-3 bg-cover bg-center px-4 py-3"
             style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')" }}
           >
-            <span className="shrink-0 text-lg" aria-hidden>
-              {challenge.icon}
-            </span>
+            {ICON_IMAGES[challenge.icon] ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={ICON_IMAGES[challenge.icon]} alt="" aria-hidden className="h-5 w-5 shrink-0 object-contain" />
+            ) : (
+              <span className="shrink-0 text-lg" aria-hidden>
+                {challenge.icon}
+              </span>
+            )}
             <span className="min-w-0 truncate whitespace-nowrap text-sm text-white">
               <span className="font-semibold">Heute: </span>
               {challenge.text}

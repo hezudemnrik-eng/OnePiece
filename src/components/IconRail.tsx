@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MODE_GROUPS, MODES, SHOP_TILE } from "@/lib/modes";
+import { ICON_IMAGES } from "@/lib/iconImages";
 
 function isGroupActive(pathname: string, groupHref: string, groupId: string): boolean {
   if (pathname === groupHref) return true;
@@ -46,9 +47,14 @@ export function IconRail() {
                 active ? "bg-accent/10 text-accent-ink" : "text-black/60 dark:text-white/50 hover:bg-black/5 dark:hover:bg-white/5"
               }`}
             >
-              <span className="text-xl shrink-0" aria-hidden>
-                {item.icon}
-              </span>
+              {ICON_IMAGES[item.icon] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={ICON_IMAGES[item.icon]} alt="" aria-hidden className="h-6 w-6 shrink-0 object-contain" />
+              ) : (
+                <span className="text-xl shrink-0" aria-hidden>
+                  {item.icon}
+                </span>
+              )}
               {expanded && <span className="truncate">{item.title}</span>}
             </Link>
           );

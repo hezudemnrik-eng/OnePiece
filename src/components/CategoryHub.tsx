@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { MODES, type ModeGroupId } from "@/lib/modes";
+import { ICON_IMAGES } from "@/lib/iconImages";
 import { Card } from "@/components/ui/Card";
 import { setLastPlayedHref } from "@/lib/lastPlayed";
 
@@ -50,9 +51,14 @@ function ModeGrid({ modes }: { modes: typeof MODES }) {
               accent={m.accent}
               className="h-full flex flex-col gap-1 transition group-hover:-translate-y-0.5 group-hover:shadow-lg"
             >
-              <span className="text-2xl" aria-hidden>
-                {m.icon}
-              </span>
+              {ICON_IMAGES[m.icon] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={ICON_IMAGES[m.icon]} alt="" aria-hidden className="h-8 w-8 object-contain" />
+              ) : (
+                <span className="text-2xl" aria-hidden>
+                  {m.icon}
+                </span>
+              )}
               <span className="text-sm font-semibold leading-tight">{m.title}</span>
               <span className="text-xs text-black/60 dark:text-white/50 leading-snug">{m.desc}</span>
             </Card>
