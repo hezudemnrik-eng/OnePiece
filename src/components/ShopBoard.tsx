@@ -214,17 +214,18 @@ export function ShopBoard() {
             Spiel-Upgrades
           </h2>
           <p className="mb-3 text-xs text-black/50 dark:text-white/40">
-            Pro Spielmodus bis zu {MODE_UPGRADE_MAX_LEVEL} Stufen mehr XP &amp; Berry — jede weitere Stufe kostet mehr
-            und bringt weniger als die letzte.
+            Pro Spielmodus bis zu {MODE_UPGRADE_MAX_LEVEL} Stufen — jede weitere Stufe kostet mehr und bringt weniger
+            als die letzte.
           </p>
           <div className="flex flex-col gap-2">
-            {MODE_UPGRADE_CATALOG.map(({ mode, label }) => {
+            {MODE_UPGRADE_CATALOG.map(({ mode, label, effect }) => {
               const level = upgradeLevels[mode] ?? 0;
               const maxed = level >= MODE_UPGRADE_MAX_LEVEL;
               const cost = maxed ? null : modeUpgradeCost(level);
               const currentBonus = Math.round(modeUpgradeBonusPercent(level));
               const nextBonus = maxed ? null : Math.round(modeUpgradeBonusPercent(level + 1));
               const affordable = cost !== null && berries >= cost;
+              const effectLabel = effect === "fusion-tier" ? "bessere Chance auf S/A-Tier" : "XP & Berry";
               return (
                 <div
                   key={mode}
@@ -233,7 +234,7 @@ export function ShopBoard() {
                   <div>
                     <span className="font-semibold">{label}</span>{" "}
                     <span className="text-xs text-black/50 dark:text-white/40">
-                      Stufe {level}/{MODE_UPGRADE_MAX_LEVEL} · +{currentBonus}% XP &amp; Berry
+                      Stufe {level}/{MODE_UPGRADE_MAX_LEVEL} · +{currentBonus}% {effectLabel}
                     </span>
                   </div>
                   <button

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FUSION_CATEGORIES,
   computeBounty,
@@ -11,16 +11,20 @@ import {
 } from "@/lib/fusionTraits";
 import { checkFusionAchievements, type FusionAchievement } from "@/lib/fusionAchievements";
 import { fusionXpForBounty, XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
+import { modeUpgradeBonusPercent } from "@/lib/modeUpgrades";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
-import { incrementXp, recordFusionCompletion, unlockAchievement } from "@/lib/supabase";
+import { fetchMyModeUpgradeLevels, incrementXp, recordFusionCompletion, unlockAchievement } from "@/lib/supabase";
 import { Button } from "./ui/Button";
 
 type Phase = "setup" | "rolling" | "done";
 
-function rollCandidates(categoryIds: FusionCategoryId[]): Record<FusionCategoryId, FusionOption> {
+function rollCandidates(
+  categoryIds: FusionCategoryId[],
+  goodTierBonusPercent: number
+): Record<FusionCategoryId, FusionOption> {
   const result = {} as Record<FusionCategoryId, FusionOption>;
   for (const id of categoryIds) {
-    result[id] = rollFusionOption(id);
+    result[id] = rollFusionOption(id, Math.random, goodTierBonusPercent);
   }
   return result;
 }
@@ -96,6 +100,15 @@ export function FusionBuilderBoard() {
   );
   const [picks, setPicks] = useState<FusionOption[]>([]);
   const [newAchievements, setNewAchievements] = useState<FusionAchievement[]>([]);
+  // The Fusion mode-upgrade (migration 0023) no longer boosts XP/Berry —
+  // it only biases this roll toward S/A-tier characters (Boss, 2026-10-14).
+  const [goodTierBonusPercent, setGoodTierBonusPercent] = useState(0);
+
+  useEffect(() => {
+    fetchMyModeUpgradeLevels().then((levels) => {
+      setGoodTierBonusPercent(modeUpgradeBonusPercent(levels.fusion ?? 0));
+    });
+  }, []);
 
   const remainingCategories = FUSION_CATEGORIES.filter(
     (c) => !picks.some((p) => p.categoryId === c.id)
@@ -105,7 +118,7 @@ export function FusionBuilderBoard() {
     setPhase("rolling");
     setPicks([]);
     setNewAchievements([]);
-    setCandidates(rollCandidates(FUSION_CATEGORIES.map((c) => c.id)));
+    setCandidates(rollCandidates(FUSION_CATEGORIES.map((c) => c.id), goodTierBonusPercent));
   }
 
   async function finalizeFusion(finalPicks: FusionOption[]) {
@@ -139,7 +152,7 @@ export function FusionBuilderBoard() {
     playSkip();
     vibrate(15);
     const stillOpenIds = remainingCategories.filter((c) => c.id !== categoryId).map((c) => c.id);
-    setCandidates((prev) => ({ ...prev, ...rollCandidates(stillOpenIds) }));
+    setCandidates((prev) => ({ ...prev, ...rollCandidates(stillOpenIds, goodTierBonusPercent) }));
   }
 
   if (phase === "setup") {

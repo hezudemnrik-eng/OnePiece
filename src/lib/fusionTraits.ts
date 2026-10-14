@@ -309,10 +309,35 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
   },
 ];
 
-export function rollFusionOption(categoryId: FusionCategoryId, rng: () => number = Math.random): FusionOption {
+/**
+ * `goodTierBonusPercent` (the Fusions-Piraten mode-upgrade's bonus, see
+ * migration 0023) biases the roll toward S/A-tier characters — B-tier stays
+ * at its base weight, S/A get `1 + bonusPercent/100`×, so a higher upgrade
+ * level means a better (but never guaranteed) shot at the strong picks.
+ * 0 bonus reproduces the old uniform roll exactly.
+ */
+export function rollFusionOption(
+  categoryId: FusionCategoryId,
+  rng: () => number = Math.random,
+  goodTierBonusPercent = 0
+): FusionOption {
   const category = FUSION_CATEGORIES.find((c) => c.id === categoryId)!;
   const pool = category.pool();
-  return pool[Math.floor(rng() * pool.length)];
+  if (goodTierBonusPercent <= 0) {
+    return pool[Math.floor(rng() * pool.length)];
+  }
+
+  const weights = pool.map((opt) => {
+    const tier = characters.find((c) => c.id === opt.sourceCharacterId)?.tier;
+    return tier === "S" || tier === "A" ? 1 + goodTierBonusPercent / 100 : 1;
+  });
+  const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+  let roll = rng() * totalWeight;
+  for (let i = 0; i < pool.length; i++) {
+    roll -= weights[i];
+    if (roll <= 0) return pool[i];
+  }
+  return pool[pool.length - 1];
 }
 
 /** Turns the 7 picked traits into a dramatic, One-Piece-style bounty — a flavor formula for the game, not a canon figure. */

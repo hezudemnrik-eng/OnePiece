@@ -6,15 +6,21 @@
 
 export type GameMode = "imu" | "zufallsgegner" | "live-draft" | "quiz" | "crew" | "blind-ranking" | "fusion" | "duell";
 
-export const MODE_UPGRADE_CATALOG: { mode: GameMode; label: string }[] = [
-  { mode: "imu", label: "Imu-Duell" },
-  { mode: "zufallsgegner", label: "Zufallsgegner" },
-  { mode: "live-draft", label: "Live-Draft" },
-  { mode: "quiz", label: "Quiz" },
-  { mode: "crew", label: "Crew-Builder" },
-  { mode: "blind-ranking", label: "Blind Ranking" },
-  { mode: "fusion", label: "Fusions-Piraten" },
-  { mode: "duell", label: "Duell-Board" },
+// "xp-berry": raises XP & Berry earned in that mode (server-side, award_xp()).
+// "fusion-tier" (fusion only, migration 0023 — Boss, 2026-10-14: it should
+// NOT touch XP/Berry): raises the odds of rolling S/A-tier characters
+// instead, applied client-side in rollFusionOption() (src/lib/fusionTraits.ts).
+export type ModeUpgradeEffect = "xp-berry" | "fusion-tier";
+
+export const MODE_UPGRADE_CATALOG: { mode: GameMode; label: string; effect: ModeUpgradeEffect }[] = [
+  { mode: "imu", label: "Imu-Duell", effect: "xp-berry" },
+  { mode: "zufallsgegner", label: "Zufallsgegner", effect: "xp-berry" },
+  { mode: "live-draft", label: "Live-Draft", effect: "xp-berry" },
+  { mode: "quiz", label: "Quiz", effect: "xp-berry" },
+  { mode: "crew", label: "Crew-Builder", effect: "xp-berry" },
+  { mode: "blind-ranking", label: "Blind Ranking", effect: "xp-berry" },
+  { mode: "fusion", label: "Fusions-Piraten", effect: "fusion-tier" },
+  { mode: "duell", label: "Duell-Board", effect: "xp-berry" },
 ];
 
 export const MODE_UPGRADE_MAX_LEVEL = 5;
