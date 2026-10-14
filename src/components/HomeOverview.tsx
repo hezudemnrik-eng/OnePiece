@@ -125,72 +125,80 @@ export function HomeOverview() {
       {isSupabaseConfigured() && loaded && progress && (
         <Link href="/profil">
           <div
-            className={`op-card flex items-center gap-4 bg-cover bg-center p-4 ${
-              rankFrameImage ? "op-rank-frame" : rankFrameClass ? rankFrameClass : "op-framed"
-            }`}
-            style={
-              {
-                backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')",
-                ...(rankFrameImage ? { "--op-rank-frame-src": `url(${rankFrameImage})` } : {}),
-              } as CSSProperties
-            }
+            className={`op-card flex flex-col gap-3 p-4 ${rankFrameImage ? "op-rank-frame" : rankFrameClass ? rankFrameClass : "op-framed"}`}
+            style={rankFrameImage ? ({ "--op-rank-frame-src": `url(${rankFrameImage})` } as CSSProperties) : undefined}
           >
-            <span className="relative flex h-20 w-20 shrink-0 items-center justify-center">
-              {frameImage ? (
-                <>
-                  {avatar?.imageUrl && (
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-16 w-16 shrink-0 items-center justify-center">
+                {frameImage ? (
+                  <>
+                    {avatar?.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={avatar.imageUrl}
+                        alt={avatar.name}
+                        referrerPolicy="no-referrer"
+                        className="h-12 w-12 rounded-full object-cover object-top"
+                      />
+                    )}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+                  </>
+                ) : (
+                  avatar?.imageUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={avatar.imageUrl}
                       alt={avatar.name}
                       referrerPolicy="no-referrer"
-                      className="h-14 w-14 rounded-full object-cover object-top"
+                      className={`h-12 w-12 rounded-full object-cover object-top border-2 border-white ${frameClass}`}
                     />
-                  )}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
-                </>
-              ) : (
-                avatar?.imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={avatar.imageUrl}
-                    alt={avatar.name}
-                    referrerPolicy="no-referrer"
-                    className={`h-14 w-14 rounded-full object-cover object-top border-2 border-white ${frameClass}`}
-                  />
-                )
-              )}
-              <span
-                className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center bg-contain bg-center bg-no-repeat text-xs font-bold tabular-nums text-poster-ink"
-                style={{ backgroundImage: "url('/images/ui/level-badge.png')" }}
-              >
-                {progress.level}
+                  )
+                )}
+                <span
+                  className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center bg-contain bg-center bg-no-repeat text-[11px] font-bold tabular-nums text-poster-ink"
+                  style={{ backgroundImage: "url('/images/ui/level-badge.png')" }}
+                >
+                  {progress.level}
+                </span>
               </span>
-            </span>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 items-center gap-2 text-base">
-                <span className={`truncate whitespace-nowrap font-semibold text-white ${colorClass}`}>{user?.username}</span>
-                {user?.isAdmin && <span className="shrink-0 text-xs text-accent-ink">(Admin)</span>}
-                {title && <span className={`shrink-0 text-xs opacity-80 ${title.className}`}>{title.label}</span>}
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <span className={`truncate font-[family-name:var(--font-display)] text-lg leading-tight text-white ${colorClass}`}>
+                    {user?.username}
+                  </span>
+                  {user?.isAdmin && (
+                    <span className="shrink-0 rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold text-accent-ink">Admin</span>
+                  )}
+                </div>
+                <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-white/55">
+                  <span className="truncate">{progress.rankTitle}</span>
+                  {title && (
+                    <span className={`shrink-0 rounded-full bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold ${title.className}`}>
+                      {title.label}
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="mt-1 flex items-center justify-between gap-2 mb-1 text-sm">
-                <span className="flex min-w-0 items-center gap-1.5 truncate whitespace-nowrap font-semibold text-white">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/ship-wheel.webp" alt="" aria-hidden className="h-4 w-4 shrink-0 object-contain" />
-                  {progress.rankTitle}
-                </span>
-                <span className="shrink-0 whitespace-nowrap tabular-nums text-white/70 font-[family-name:var(--font-mono)]">
-                  {progress.xp - progress.levelStartXp}/{progress.levelEndXp - progress.levelStartXp} XP
-                </span>
-              </div>
-              <ProgressBar progress={progress.progress} size="md" />
-              <span className="mt-1.5 flex items-center gap-1 whitespace-nowrap font-display tabular-nums text-accent-ink">
+
+              <span className="flex shrink-0 items-center gap-1 whitespace-nowrap font-[family-name:var(--font-display)] text-sm tabular-nums text-accent-ink">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={BERRY_ICON} alt="" aria-hidden className="h-4 w-4 object-contain drop-shadow-sm" />
                 {(levelInfo?.berries ?? 0).toLocaleString("de-DE")}
               </span>
+            </div>
+
+            <div>
+              <ProgressBar progress={progress.progress} size="md" />
+              <div className="mt-1 flex items-center justify-between text-[11px] text-white/45 font-[family-name:var(--font-mono)] tabular-nums">
+                <span>
+                  {progress.xp - progress.levelStartXp}/{progress.levelEndXp - progress.levelStartXp} XP
+                </span>
+                <span>
+                  Level {progress.level + 1} in {progress.levelEndXp - progress.xp} XP
+                </span>
+              </div>
             </div>
           </div>
         </Link>
