@@ -87,6 +87,12 @@ export const XP_CREW_COMPLETE = 18;
 export const XP_BLIND_RANKING_COMPLETE = 18;
 export const XP_FUSION_BASE = 15;
 export const XP_ACHIEVEMENT_BONUS = 20;
+// Duell-Board previously awarded no mode XP at all (migration 0021).
+export const XP_DUEL_COMPLETE = 20;
+
+// Kept in sync with berry_per_mode_run() in migration 0021 — the actual
+// award (and its mode-upgrade multiplier) happens server-side in award_xp().
+export const BERRY_PER_MODE_RUN = 15;
 
 // Kept in sync with daily_quest_xp_bonus()/daily_quest_berry_bonus() in
 // migration 0020 — the actual award happens server-side via claim_daily_quest().
