@@ -93,23 +93,27 @@ function FusionPickCard({
     <button
       type="button"
       onClick={onClick}
-      className="op-wanted op-parchment flex flex-col items-center gap-1.5 rounded-xl p-2 text-center transition hover:brightness-95 active:brightness-90"
+      className="op-wanted relative aspect-[3/4] w-full overflow-hidden rounded-xl p-0 text-center transition hover:brightness-95 active:brightness-90"
     >
-      <span className="text-xs font-semibold uppercase tracking-wider opacity-70">{categoryLabel}</span>
+      <span className="absolute left-1.5 top-1.5 z-10 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+        {categoryLabel}
+      </span>
       {option.sourceImageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={option.sourceImageUrl}
           alt={option.sourceName}
           referrerPolicy="no-referrer"
-          className="h-20 w-20 rounded-full border-2 border-poster-ink object-cover object-top"
+          className="absolute inset-0 h-full w-full object-cover object-top"
         />
       ) : (
-        <span className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-poster-ink bg-mode-fusion/15 text-xl font-bold">
+        <span className="absolute inset-0 flex items-center justify-center bg-mode-fusion/15 text-3xl font-bold">
           {option.sourceName.slice(0, 2).toUpperCase()}
         </span>
       )}
-      <span className="font-[family-name:var(--font-display)] text-sm leading-tight">{option.sourceName}</span>
+      <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-1.5 pb-1.5 pt-6 font-[family-name:var(--font-display)] text-sm leading-tight text-white">
+        {option.sourceName}
+      </span>
     </button>
   );
 }
@@ -227,9 +231,11 @@ export function FusionBuilderBoard() {
       <h2 className="op-ink-text font-[family-name:var(--font-display)] text-2xl text-mode-fusion">
         Dein Fusions-Pirat ist bereit!
       </h2>
-      <div className="op-wanted op-parchment rounded-xl p-6 text-center">
-        <p className="text-xs uppercase tracking-[0.3em] opacity-70">Gesucht — Kopfgeld</p>
-        <p className="font-[family-name:var(--font-display)] text-3xl">{formatBerry(bounty)}</p>
+      <div className="op-wanted op-parchment op-legendary-glow op-bounty-reveal rounded-xl p-8 text-center">
+        <p className="op-slide-in text-sm uppercase tracking-[0.4em] opacity-70">Gesucht — Kopfgeld</p>
+        <p className="op-bounty-number font-[family-name:var(--font-display)] text-5xl sm:text-6xl">
+          {formatBerry(bounty)}
+        </p>
       </div>
       {newAchievements.length > 0 && (
         <div className="op-pop-in rounded-xl border border-mode-fusion bg-mode-fusion/10 p-3">

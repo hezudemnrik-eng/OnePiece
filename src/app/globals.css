@@ -379,6 +379,51 @@ body {
   animation: op-round-in 0.25s ease-out;
 }
 
+/* Fusion Pirates bounty reveal: a bigger, more dramatic suspense pop than
+   the generic op-pop-in — a hard overshoot swing instead of a gentle
+   settle, paired with op-legendary-glow for a sustained shimmer once it
+   lands. */
+@keyframes op-bounty-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-6deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.18) rotate(3deg);
+  }
+  75% {
+    transform: scale(0.96) rotate(-1deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+.op-bounty-reveal {
+  animation: op-bounty-reveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* The berry amount itself pops in slightly after the card/label, as its
+   own beat, so the number reads as "the reveal" rather than arriving with
+   everything else at once. */
+@keyframes op-bounty-number {
+  0%,
+  35% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.op-bounty-number {
+  animation: op-bounty-number 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 /* Themed loading spinner (a slowly spinning ship's wheel) — see
    LoadingSpinner.tsx, which pairs this with the actual 🧭 glyph. */
 @keyframes op-spin {
@@ -401,7 +446,9 @@ body {
   .op-turn-pulse,
   .op-banner-in,
   .op-round-in,
-  .op-spin {
+  .op-spin,
+  .op-bounty-reveal,
+  .op-bounty-number {
     animation: none !important;
   }
 }
