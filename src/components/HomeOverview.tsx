@@ -161,7 +161,10 @@ export function HomeOverview() {
                   />
                 )
               )}
-              <span className="absolute -bottom-1 -right-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-bold tabular-nums text-poster-ink">
+              <span
+                className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center bg-contain bg-center bg-no-repeat text-xs font-bold tabular-nums text-poster-ink"
+                style={{ backgroundImage: "url('/images/ui/level-badge.png')" }}
+              >
                 {progress.level}
               </span>
             </span>
@@ -208,9 +211,8 @@ export function HomeOverview() {
                   {myLobby.phase === "lobby" ? "wartet auf Spieler" : "läuft gerade"}
                 </span>
               </span>
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white text-xl text-white" aria-hidden>
-                →
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain" />
             </div>
           </div>
         </Link>
@@ -232,9 +234,8 @@ export function HomeOverview() {
                 )}
                 <span className="truncate">Weiterspielen: {lastMode.title}</span>
               </span>
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white text-xl text-white" aria-hidden>
-                →
-              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain" />
             </div>
           </div>
         </Link>
@@ -288,9 +289,8 @@ export function HomeOverview() {
             >
               <div className="flex items-center justify-between gap-1">
                 <span className="truncate whitespace-nowrap text-xs font-semibold leading-tight text-white">{g.title}</span>
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/70 text-sm text-white" aria-hidden>
-                  →
-                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-7 w-7 shrink-0 object-contain" />
               </div>
             </div>
           </Link>

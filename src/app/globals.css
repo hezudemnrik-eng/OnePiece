@@ -133,19 +133,16 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-/* Decorative wood/rope frame: a thin amber "plank" border plus a dashed
-   inner "rope" ring. Opt-in on top of .op-card for spots that should feel
-   extra treasure-map-y (profile, fusion board) rather than everywhere. The
-   soft outer shadow is folded in here too (combined box-shadow value),
-   since this class's declarations would otherwise fully override .op-card's
-   own shadow rather than add to it. */
+/* Decorative wood/rope frame: Boss's painted ChatGPT frame artwork as a
+   scalable 9-slice border-image, replacing the earlier CSS-approximated
+   plank+rope rings. Opt-in on top of .op-card for spots that should feel
+   extra treasure-map-y (profile, fusion board, draft rosters) rather than
+   everywhere. "round" (not "stretch") repeats the rope-knot motif evenly
+   along each edge instead of smearing a single stretched copy. */
 .op-framed {
-  border-width: 1px;
-  border-color: color-mix(in srgb, #92400e 55%, var(--foreground) 10%);
-  box-shadow:
-    inset 0 0 0 3px var(--background),
-    inset 0 0 0 4px color-mix(in srgb, #92400e 40%, transparent),
-    0 2px 6px rgba(0, 0, 0, 0.15);
+  border-width: 14px;
+  border-image: url("/images/ui/card-frame.png") 90 round;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 /* Illustrated rank-frame border for the square profile-hero card (Boss,
