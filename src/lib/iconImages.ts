@@ -5,4 +5,7 @@ export const ICON_IMAGES: Record<string, string> = {
   "🏠": "/images/icons/icon-home.png",
   "⚔️": "/images/icons/icon-kampf.png",
   "❓": "/images/icons/icon-raetsel.png",
+  "🙈": "/images/icons/icon-blind-ranking.png",
+  "🧭": "/images/icons/icon-crew.png",
+  "🌐": "/images/icons/icon-live-draft.png",
 };
