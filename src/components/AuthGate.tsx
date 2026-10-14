@@ -83,8 +83,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         <IconRail />
         <div className="md:pl-16">
           <header
-            className="sticky top-0 z-20 relative flex items-center justify-end bg-cover bg-center px-3 py-2 shadow-[0_2px_4px_rgba(0,0,0,0.35)] sm:px-4"
-            style={{ backgroundImage: "url('/images/bar-header.png')" }}
+            className="sticky top-0 z-20 relative flex items-center justify-end bg-cover bg-center px-3 pt-[calc(env(safe-area-inset-top)+0.5rem)] pb-2 shadow-[0_2px_4px_rgba(0,0,0,0.35)] sm:px-4"
+            style={{ backgroundImage: "url('/images/bar-header.png')", backgroundColor: "#693c1b" }}
           >
             <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
               {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -122,7 +122,7 @@ export function AccountPanel({ onSignedOut }: Props) {
       >
         <span className="sm:hidden" aria-hidden>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={LOGOUT_ICON} alt="" className="h-6 w-6 object-contain drop-shadow-sm" />
+          <img src={LOGOUT_ICON} alt="" className="h-10 w-10 object-contain drop-shadow-md" />
         </span>
         <span className="hidden sm:inline">Abmelden</span>
       </button>
