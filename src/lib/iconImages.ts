@@ -9,3 +9,6 @@ export const ICON_IMAGES: Record<string, string> = {
   "🧭": "/images/icons/icon-crew.png",
   "🌐": "/images/icons/icon-live-draft.png",
 };
+
+/** Berry-Münze (Boss's ChatGPT asset) — ersetzt das 🪙-Platzhalter-Emoji vor jeder Berry-Anzeige. */
+export const BERRY_ICON = "/images/icons/icon-berry.png";

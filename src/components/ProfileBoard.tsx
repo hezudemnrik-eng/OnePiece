@@ -11,6 +11,7 @@ import {
   type LevelProgress,
 } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
+import { BERRY_ICON } from "@/lib/iconImages";
 import { FUSION_ACHIEVEMENTS } from "@/lib/fusionAchievements";
 import { DUEL_ACHIEVEMENTS } from "@/lib/duelAchievements";
 import { QUIZ_ACHIEVEMENTS } from "@/lib/quizAchievements";
@@ -218,7 +219,8 @@ export function ProfileBoard() {
             {progress.rankTitle} · Level {progress.level}
           </p>
           <p className="flex items-center gap-1 text-sm opacity-70">
-            <span className="text-base drop-shadow-sm" aria-hidden>🪙</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={BERRY_ICON} alt="" aria-hidden className="h-4 w-4 object-contain drop-shadow-sm" />
             {formatBerry(berries)}
           </p>
         </div>
@@ -473,7 +475,8 @@ export function ProfileBoard() {
             <span className="text-sm font-semibold">
               Rahmen, Farben, Avatare, Titel & Arenen kaufen
               <span className="flex items-center gap-1 font-normal text-black/60 dark:text-white/50">
-                <span className="text-sm drop-shadow-sm" aria-hidden>🪙</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={BERRY_ICON} alt="" aria-hidden className="h-4 w-4 object-contain drop-shadow-sm" />
                 {formatBerry(berries)} verfügbar
               </span>
             </span>

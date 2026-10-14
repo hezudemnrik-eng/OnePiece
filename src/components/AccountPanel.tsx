@@ -14,6 +14,7 @@ import {
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 import { COSMETIC_FRAMES, getLevelProgress } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
+import { BERRY_ICON } from "@/lib/iconImages";
 import { formatBerry } from "@/lib/fusionTraits";
 
 type Props = {
@@ -107,7 +108,8 @@ export function AccountPanel({ onSignedOut }: Props) {
         {title && <span className={`ml-1.5 text-xs opacity-70 ${title.className}`}>{title.label}</span>}
       </span>
       <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-black/50 dark:text-white/40">
-        <span className="text-base drop-shadow-sm" aria-hidden>🪙</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={BERRY_ICON} alt="" aria-hidden className="h-4 w-4 object-contain drop-shadow-sm" />
         {formatBerry(berries)}
       </span>
       <Link href="/profil" className="hidden shrink-0 text-black/50 dark:text-white/40 hover:underline sm:inline">

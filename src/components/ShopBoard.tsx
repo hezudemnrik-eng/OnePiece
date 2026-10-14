@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { characters } from "@/lib/characters";
 import { getLevelProgress, type LevelProgress } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
+import { BERRY_ICON } from "@/lib/iconImages";
 import { formatBerry } from "@/lib/fusionTraits";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
@@ -137,7 +138,8 @@ export function ShopBoard() {
           Dein Guthaben
         </span>
         <p className="flex items-center gap-1.5 font-[family-name:var(--font-display)] text-xl whitespace-nowrap text-accent-ink">
-          <span className="text-2xl drop-shadow-md" aria-hidden>🪙</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={BERRY_ICON} alt="" aria-hidden className="h-7 w-7 object-contain drop-shadow-md" />
           {formatBerry(berries)}
         </p>
       </div>
