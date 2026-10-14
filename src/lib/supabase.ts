@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { DraftState } from "./draft";
 import type { BattleResult } from "./battle-sim";
-import { XP_MATCH_LOSS, XP_MATCH_WIN, XP_QUIZ_BASE, XP_QUIZ_PER_CORRECT } from "./levels";
+import { XP_DUEL_COMPLETE, XP_MATCH_LOSS, XP_MATCH_WIN, XP_QUIZ_BASE, XP_QUIZ_PER_CORRECT } from "./levels";
 import { getTodaysChallenge, type DailyQuestId } from "./dailyChallenge";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -520,11 +520,12 @@ export async function fetchDailyQuestClaimedToday(): Promise<boolean> {
   return Boolean(data);
 }
 
-/** Records a completed duel (any result) toward the Daily Quest — the Duell-Board awards no mode XP of its own. */
+/** Records a completed duel (any result) toward the Daily Quest, plus the Duell-Board's own mode XP/Berry (migration 0021 — it previously awarded neither). */
 export async function recordDuelCompletion(): Promise<void> {
   if (!supabase) return;
   const userId = await ensureSupabaseSession();
   if (!userId) return;
+  await awardModeXp("duell", XP_DUEL_COMPLETE);
   await claimDailyQuestFor("duell");
 }
 
@@ -1186,5 +1187,25 @@ export async function equipShopItem(itemId: string): Promise<boolean> {
   const userId = await ensureSupabaseSession();
   if (!userId) return false;
   const { data } = await supabase.rpc("equip_shop_item", { p_item_id: itemId });
+  return Boolean(data);
+}
+
+/** The signed-in user's current upgrade level per game mode (migration 0021), e.g. `{ quiz: 2 }`. Modes with no row owned are left out (level 0). */
+export async function fetchMyModeUpgradeLevels(): Promise<Record<string, number>> {
+  if (!supabase) return {};
+  const userId = await ensureSupabaseSession();
+  if (!userId) return {};
+  const { data } = await supabase.from("mode_upgrade_levels").select("mode, level").eq("user_id", userId);
+  const levels: Record<string, number> = {};
+  for (const row of data ?? []) levels[row.mode as string] = row.level as number;
+  return levels;
+}
+
+/** Buys the next level of a per-mode upgrade (cost/cap checks happen server-side). Returns false if maxed out or unaffordable. */
+export async function purchaseModeUpgrade(mode: string): Promise<boolean> {
+  if (!supabase) return false;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return false;
+  const { data } = await supabase.rpc("purchase_mode_upgrade", { p_mode: mode });
   return Boolean(data);
 }

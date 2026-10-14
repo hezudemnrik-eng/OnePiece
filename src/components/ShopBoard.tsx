@@ -6,13 +6,16 @@ import { getLevelProgress, type LevelProgress } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
 import { BERRY_ICON } from "@/lib/iconImages";
 import { formatBerry } from "@/lib/fusionTraits";
+import { MODE_UPGRADE_CATALOG, MODE_UPGRADE_MAX_LEVEL, modeUpgradeBonusPercent, modeUpgradeCost } from "@/lib/modeUpgrades";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
   equipShopItem,
   fetchMyLevelInfo,
+  fetchMyModeUpgradeLevels,
   fetchMyShopPurchases,
   fetchShopItems,
   getCurrentAuthUser,
+  purchaseModeUpgrade,
   purchaseShopItem,
   setEquippedArena,
   setEquippedColor,
@@ -30,7 +33,22 @@ const CATEGORY_LABELS: Record<string, string> = {
   arena: "Duell-Arenen",
 };
 
-const CATEGORY_ORDER = ["boost", "frame", "color", "avatar", "title", "arena"];
+// Shop structure (Boss, 2026-10-14: "Shopstrukturen ein bisschen
+// verbessern"): categories are grouped into a few tabs instead of one long
+// stacked page, so the catalog can keep growing without endless scrolling.
+// "upgrades" is a virtual category handled separately from shopItems (see
+// below) — it's not a shop_items row, it's the per-mode level system.
+type ShopTab = { id: string; label: string; categories: string[] };
+
+const SHOP_TABS: ShopTab[] = [
+  { id: "upgrades", label: "Spiel-Upgrades", categories: ["upgrades"] },
+  { id: "boosts", label: "Boosts", categories: ["boost"] },
+  { id: "cosmetics", label: "Rahmen & Titel", categories: ["frame", "title", "color"] },
+  { id: "avatars", label: "Avatare", categories: ["avatar"] },
+  { id: "arenas", label: "Arenen", categories: ["arena"] },
+];
+
+const CATEGORY_ORDER = ["frame", "color", "avatar", "title", "arena"];
 
 /**
  * The Berry shop, split out from ProfileBoard into its own page (the
@@ -49,24 +67,31 @@ export function ShopBoard() {
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [ownedItems, setOwnedItems] = useState<Set<string>>(new Set());
+  const [upgradeLevels, setUpgradeLevels] = useState<Record<string, number>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [activeTab, setActiveTab] = useState(SHOP_TABS[0].id);
 
   useEffect(() => {
-    Promise.all([getCurrentAuthUser(), fetchMyLevelInfo(), fetchShopItems(), fetchMyShopPurchases()]).then(
-      ([authUser, levelInfo, items, purchases]) => {
-        setProgress(getLevelProgress(levelInfo?.xp ?? 0));
-        setBerries(levelInfo?.berries ?? 0);
-        setEquippedFrameState(levelInfo?.equippedFrame ?? null);
-        setEquippedColorState(levelInfo?.equippedColor ?? null);
-        setEquippedTitleState(levelInfo?.equippedTitle ?? null);
-        setEquippedArenaState(levelInfo?.equippedArena ?? null);
-        setAvatarId(authUser?.avatarCharacterId ?? null);
-        setShopItems(items);
-        setOwnedItems(purchases);
-        setLoaded(true);
-      }
-    );
+    Promise.all([
+      getCurrentAuthUser(),
+      fetchMyLevelInfo(),
+      fetchShopItems(),
+      fetchMyShopPurchases(),
+      fetchMyModeUpgradeLevels(),
+    ]).then(([authUser, levelInfo, items, purchases, upgrades]) => {
+      setProgress(getLevelProgress(levelInfo?.xp ?? 0));
+      setBerries(levelInfo?.berries ?? 0);
+      setEquippedFrameState(levelInfo?.equippedFrame ?? null);
+      setEquippedColorState(levelInfo?.equippedColor ?? null);
+      setEquippedTitleState(levelInfo?.equippedTitle ?? null);
+      setEquippedArenaState(levelInfo?.equippedArena ?? null);
+      setAvatarId(authUser?.avatarCharacterId ?? null);
+      setShopItems(items);
+      setOwnedItems(purchases);
+      setUpgradeLevels(upgrades);
+      setLoaded(true);
+    });
   }, []);
 
   if (!loaded || !progress) {
@@ -129,7 +154,30 @@ export function ShopBoard() {
     }
   }
 
-  const categories = CATEGORY_ORDER.filter((cat) => shopItems.some((i) => i.category === cat));
+  async function handleUpgradePurchase(mode: string) {
+    if (busyId) return;
+    const level = upgradeLevels[mode] ?? 0;
+    if (level >= MODE_UPGRADE_MAX_LEVEL) return;
+    const cost = modeUpgradeCost(level);
+    if (berries < cost) return;
+    setBusyId(`upgrade:${mode}`);
+    try {
+      const ok = await purchaseModeUpgrade(mode);
+      if (ok) {
+        setUpgradeLevels((prev) => ({ ...prev, [mode]: level + 1 }));
+        setBerries((b) => b - cost);
+      }
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  const tabsWithItems = SHOP_TABS.filter(
+    (tab) => tab.id === "upgrades" || tab.categories.some((cat) => shopItems.some((i) => i.category === cat))
+  );
+  const activeCategories = (tabsWithItems.find((t) => t.id === activeTab) ?? tabsWithItems[0])?.categories ?? [];
+  const categories = CATEGORY_ORDER.filter((cat) => activeCategories.includes(cat) && shopItems.some((i) => i.category === cat));
+  const boostItems = activeCategories.includes("boost") ? shopItems.filter((i) => i.category === "boost") : [];
 
   return (
     <div className="flex flex-col gap-8">
@@ -144,6 +192,104 @@ export function ShopBoard() {
         </p>
       </div>
 
+      <div className="flex flex-wrap gap-1.5 border-b border-black/10 pb-3 dark:border-white/10">
+        {tabsWithItems.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
+              activeTab === tab.id
+                ? "bg-accent text-white"
+                : "bg-black/5 text-black/60 hover:bg-black/10 dark:bg-white/10 dark:text-white/60 dark:hover:bg-white/15"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "upgrades" && (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
+            Spiel-Upgrades
+          </h2>
+          <p className="mb-3 text-xs text-black/50 dark:text-white/40">
+            Pro Spielmodus bis zu {MODE_UPGRADE_MAX_LEVEL} Stufen mehr XP &amp; Berry — jede weitere Stufe kostet mehr
+            und bringt weniger als die letzte.
+          </p>
+          <div className="flex flex-col gap-2">
+            {MODE_UPGRADE_CATALOG.map(({ mode, label }) => {
+              const level = upgradeLevels[mode] ?? 0;
+              const maxed = level >= MODE_UPGRADE_MAX_LEVEL;
+              const cost = maxed ? null : modeUpgradeCost(level);
+              const currentBonus = Math.round(modeUpgradeBonusPercent(level));
+              const nextBonus = maxed ? null : Math.round(modeUpgradeBonusPercent(level + 1));
+              const affordable = cost !== null && berries >= cost;
+              return (
+                <div
+                  key={mode}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-black/15 px-3 py-2 text-sm dark:border-white/15"
+                >
+                  <div>
+                    <span className="font-semibold">{label}</span>{" "}
+                    <span className="text-xs text-black/50 dark:text-white/40">
+                      Stufe {level}/{MODE_UPGRADE_MAX_LEVEL} · +{currentBonus}% XP &amp; Berry
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handleUpgradePurchase(mode)}
+                    disabled={maxed || !affordable || busyId === `upgrade:${mode}`}
+                    className={`rounded-md border px-3 py-1 text-xs font-medium ${
+                      maxed
+                        ? "cursor-not-allowed border-black/15 opacity-40 dark:border-white/15"
+                        : affordable
+                          ? "border-accent hover:bg-accent/10"
+                          : "cursor-not-allowed border-black/15 opacity-40 dark:border-white/15"
+                    }`}
+                  >
+                    {maxed ? "Maximale Stufe" : `Stufe ${level + 1} (+${nextBonus}%) · ${formatBerry(cost ?? 0)}`}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {boostItems.length > 0 && (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
+            {CATEGORY_LABELS.boost}
+          </h2>
+          <p className="mb-2 text-xs text-black/50 dark:text-white/40">
+            Permanente Spielverbesserung für deinen Account — einmal gekauft, immer aktiv.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {boostItems.map((item) => {
+              const owned = ownedItems.has(item.id);
+              const isLocked = progress.level < item.minLevel;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => !isLocked && handleShopAction(item)}
+                  disabled={isLocked || busyId === item.id}
+                  className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm border-black/15 dark:border-white/15 ${
+                    isLocked ? "opacity-40 cursor-not-allowed" : "hover:border-accent"
+                  }`}
+                >
+                  {item.label}
+                  {isLocked ? (
+                    <span className="text-xs">(ab Lv. {item.minLevel})</span>
+                  ) : (
+                    <span className="text-xs">{owned ? "· aktiv" : `· ${formatBerry(item.price)}`}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {categories.map((category) => {
         const items = shopItems.filter((i) => i.category === category);
         return (
@@ -156,16 +302,11 @@ export function ShopBoard() {
                 Rein kosmetisch — färbt den Hintergrund im Duell-Ergebnis ein.
               </p>
             )}
-            {category === "boost" && (
-              <p className="mb-2 text-xs text-black/50 dark:text-white/40">
-                Permanente Spielverbesserung für deinen Account — einmal gekauft, immer aktiv.
-              </p>
-            )}
             <div className="flex flex-wrap gap-2">
               {items.map((item) => {
                 const character = category === "avatar" ? characters.find((c) => c.id === item.id) : null;
                 const owned = ownedItems.has(item.id);
-                const isActive = category !== "boost" && currentlyEquipped[item.category] === item.id;
+                const isActive = currentlyEquipped[item.category] === item.id;
                 const isLocked = progress.level < item.minLevel;
                 return (
                   <button
@@ -194,13 +335,7 @@ export function ShopBoard() {
                       <span className="text-xs">(ab Lv. {item.minLevel})</span>
                     ) : (
                       <span className="text-xs">
-                        {owned
-                          ? category === "boost"
-                            ? "· aktiv"
-                            : isActive
-                              ? "· ausgerüstet"
-                              : "· ausrüsten"
-                          : `· ${formatBerry(item.price)}`}
+                        {owned ? (isActive ? "· ausgerüstet" : "· ausrüsten") : `· ${formatBerry(item.price)}`}
                       </span>
                     )}
                   </button>
