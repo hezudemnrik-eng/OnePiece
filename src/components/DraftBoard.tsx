@@ -17,7 +17,7 @@ import {
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
-import { getCurrentAuthUser } from "@/lib/supabase";
+import { fetchMyShopPurchases, getCurrentAuthUser } from "@/lib/supabase";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
 import { RollPanel } from "./RollPanel";
@@ -49,6 +49,7 @@ export function DraftBoard() {
   const [roleStepIndex, setRoleStepIndex] = useState(0);
   const [roleConflictsResolved, setRoleConflictsResolved] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [hasExtraReroll, setHasExtraReroll] = useState(false);
 
   // Hotseat mode is shared-device, but whoever's logged in on this device
   // is presumably Player 1 — prefill their name instead of a placeholder.
@@ -56,6 +57,8 @@ export function DraftBoard() {
     getCurrentAuthUser().then((u) => {
       if (u?.username) setNames((prev) => [u.username as string, ...prev.slice(1)]);
     });
+    // Shop-Boost "Extra-Würfelversuch" (migration 0019): +1 Reroll pro Zug, gilt für das ganze Hotseat-Gerät.
+    fetchMyShopPurchases().then((owned) => setHasExtraReroll(owned.has("boost_extra_reroll")));
   }, []);
 
   function startDraft() {
@@ -66,7 +69,13 @@ export function DraftBoard() {
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    setDraft(createDraft(names.slice(0, playerCount), ids, teamSize, { teams, spectators }));
+    setDraft(
+      createDraft(names.slice(0, playerCount), ids, teamSize, {
+        teams,
+        spectators,
+        skipsPerTurn: hasExtraReroll ? 2 : 1,
+      })
+    );
     setSecondsLeft(PICK_SECONDS);
     setRoleConflictsResolved(false);
     setPhase("drafting");
