@@ -48,15 +48,15 @@ function FusionGridCard({
       type="button"
       onClick={onClick}
       disabled={!onClick}
-      className={`op-wanted relative aspect-[3/4] w-full overflow-hidden rounded-lg p-0 text-center transition disabled:cursor-default ${
+      className={`op-wanted relative aspect-[2/3] w-full overflow-hidden rounded-lg p-0 text-center transition disabled:cursor-default ${
         onClick ? "hover:brightness-95 active:brightness-90" : "opacity-75"
       } ${locked ? "op-pop-in" : ""}`}
     >
-      <span className="absolute left-1 top-1 z-10 rounded bg-black/55 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white">
+      <span className="absolute left-1 top-1 z-10 rounded bg-black/55 px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
         {categoryLabel}
       </span>
       {locked && (
-        <span className="absolute right-1 top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-mode-fusion text-[10px] font-bold text-white">
+        <span className="absolute right-1 top-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-mode-fusion text-xs font-bold text-white">
           ✓
         </span>
       )}
@@ -69,11 +69,11 @@ function FusionGridCard({
           className="absolute inset-0 h-full w-full object-cover object-top"
         />
       ) : (
-        <span className="absolute inset-0 flex items-center justify-center bg-mode-fusion/15 text-2xl font-bold">
+        <span className="absolute inset-0 flex items-center justify-center bg-mode-fusion/15 text-3xl font-bold">
           {option.sourceName.slice(0, 2).toUpperCase()}
         </span>
       )}
-      <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/45 to-transparent px-1 pb-1 pt-4 font-[family-name:var(--font-display)] text-[11px] leading-tight text-white">
+      <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/45 to-transparent px-1.5 pb-1.5 pt-5 font-[family-name:var(--font-display)] text-xs leading-tight text-white">
         {option.sourceName}
       </span>
     </button>
