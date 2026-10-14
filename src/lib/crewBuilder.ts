@@ -16,11 +16,20 @@ export const CREW_ROLES: Role[] = [
   "Steuermann",
 ];
 
-/** Rolls a random character for a crew slot, excluding characters already locked into other slots. */
-export function rollCandidate(excludeIds: string[], rng: () => number = Math.random): Character | null {
-  const pool = characters.filter((c) => !excludeIds.includes(c.id));
-  if (pool.length === 0) return null;
-  return pool[Math.floor(rng() * pool.length)];
+/**
+ * Rolls a random character for a crew slot, excluding characters already
+ * locked into other slots. Restricted to characters whose canonical role
+ * matches the slot being filled (Q141, Boss) — a Koch slot only ever offers
+ * canon cooks, no more cross-role "mismatch" candidates. Falls back to the
+ * full remaining pool only if no canon fit is left (e.g. the sole Navigator
+ * or Musiker was already picked for another slot).
+ */
+export function rollCandidate(role: Role, excludeIds: string[], rng: () => number = Math.random): Character | null {
+  const remaining = characters.filter((c) => !excludeIds.includes(c.id));
+  const pool = remaining.filter((c) => c.role === role);
+  const finalPool = pool.length > 0 ? pool : remaining;
+  if (finalPool.length === 0) return null;
+  return finalPool[Math.floor(rng() * finalPool.length)];
 }
 
 export type CrewPick = { role: Role; character: Character };
@@ -75,7 +84,7 @@ export function summarizeCrew(picks: CrewPick[]): CrewSummary {
 export function rollOpposingCrew(rng: () => number = Math.random): CrewPick[] {
   const picks: CrewPick[] = [];
   for (const role of CREW_ROLES) {
-    const candidate = rollCandidate(picks.map((p) => p.character.id), rng);
+    const candidate = rollCandidate(role, picks.map((p) => p.character.id), rng);
     if (candidate) picks.push({ role, character: candidate });
   }
   return picks;
