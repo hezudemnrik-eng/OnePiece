@@ -808,6 +808,28 @@ export async function dismissDraftInvite(id: string): Promise<void> {
   await supabase.from("draft_invites").delete().eq("id", id);
 }
 
+/**
+ * Pushes new incoming invites the moment they're sent (Boss's ask: a
+ * pop-up anywhere in the app, not just a banner you'd only see on the home
+ * screen you happen to be on). The payload only carries the raw row, not
+ * the sender's username, so the callback re-fetches via
+ * fetchIncomingDraftInvites() rather than trying to assemble it here.
+ */
+export function subscribeDraftInvites(userId: string, onInsert: () => void): () => void {
+  if (!supabase) return () => {};
+  const channel = supabase
+    .channel(`draft_invites_${userId}`)
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "draft_invites", filter: `to_user_id=eq.${userId}` },
+      () => onInsert()
+    )
+    .subscribe();
+  return () => {
+    supabase!.removeChannel(channel);
+  };
+}
+
 export type OpenLiveDraft = {
   id: string;
   inviteCode: string;
