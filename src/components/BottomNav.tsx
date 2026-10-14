@@ -33,8 +33,8 @@ export function BottomNav() {
 
   return (
     <nav
-      className="md:hidden fixed inset-x-0 bottom-0 z-20 flex items-stretch justify-around border-t border-black/10 dark:border-white/10 bg-[var(--background)]/95 backdrop-blur"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      className="md:hidden fixed inset-x-0 bottom-0 z-20 flex items-stretch justify-around border-t border-black/10 dark:border-white/10 bg-cover bg-center"
+      style={{ backgroundImage: "url('/images/bar-bottomnav.png')", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       <Link
         href="/"
