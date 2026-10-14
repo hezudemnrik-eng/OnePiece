@@ -49,7 +49,7 @@ export function IconRail() {
             >
               {ICON_IMAGES[item.icon] ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={ICON_IMAGES[item.icon]} alt="" aria-hidden className="h-6 w-6 shrink-0 object-contain" />
+                <img src={ICON_IMAGES[item.icon]} alt="" aria-hidden className="h-8 w-8 shrink-0 object-contain" />
               ) : (
                 <span className="text-xl shrink-0" aria-hidden>
                   {item.icon}
