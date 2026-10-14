@@ -145,6 +145,26 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
+/* Illustrated rank-frame border for the square profile-hero card (Boss,
+   2026-10-14: Rang-Rahmen wandern vom runden Avatar auf den viereckigen
+   Profil-Block im Hauptmenü). 9-slice technique via border-image so one
+   painted PNG (see RANK_FRAME_IMAGES, Boss's ChatGPT artwork) scales to any
+   card size without stretching the corners. The --op-rank-frame-src custom
+   property is set inline per card; a tier with no illustrated frame yet
+   falls back to CosmeticFrame.className instead (no .op-rank-frame class).
+   Slice is a percentage (not px) since the 7 source images are different
+   native sizes; "round" tiles each edge's motif instead of smearing a
+   single stretched copy. 56px on-screen width keeps it readable without
+   swallowing too much of the card on mobile. */
+.op-rank-frame {
+  border-style: solid;
+  border-width: 56px;
+  border-image-source: var(--op-rank-frame-src);
+  border-image-slice: 18%;
+  border-image-width: 56px;
+  border-image-repeat: round;
+}
+
 /* --- Dezente Rand/Schatten-Bausteine ---
    Wiederverwendbare Bausteine für einen dünnen, zurückhaltenden Rand +
    weichen Schatten statt der früheren dicken Tinten-Outlines mit hartem

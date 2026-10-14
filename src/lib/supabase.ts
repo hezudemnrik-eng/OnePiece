@@ -1096,6 +1096,10 @@ export async function unlockAchievement(achievementId: string): Promise<boolean>
 export type MyLevelInfo = {
   xp: number;
   equippedFrame: string | null;
+  /** Rank frame (Bronze/Silber/Gold/…, see COSMETIC_FRAMES) decorating the
+   *  square profile-hero card — independent of equippedFrame above, which
+   *  is the round avatar frame bought in the shop. */
+  equippedRankFrame: string | null;
   berries: number;
   equippedColor: string | null;
   equippedTitle: string | null;
@@ -1108,13 +1112,14 @@ export async function fetchMyLevelInfo(): Promise<MyLevelInfo | null> {
   if (!userId) return null;
   const { data } = await supabase
     .from("profiles")
-    .select("xp, equipped_frame, berries, equipped_color, equipped_title, equipped_arena")
+    .select("xp, equipped_frame, equipped_rank_frame, berries, equipped_color, equipped_title, equipped_arena")
     .eq("id", userId)
     .maybeSingle();
   if (!data) return null;
   return {
     xp: (data.xp as number) ?? 0,
     equippedFrame: (data.equipped_frame as string | null) ?? null,
+    equippedRankFrame: (data.equipped_rank_frame as string | null) ?? null,
     berries: (data.berries as number) ?? 0,
     equippedTitle: (data.equipped_title as string | null) ?? null,
     equippedArena: (data.equipped_arena as string | null) ?? null,
@@ -1127,6 +1132,13 @@ export async function setEquippedFrame(frameId: string | null): Promise<void> {
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await supabase.from("profiles").update({ equipped_frame: frameId }).eq("id", userId);
+}
+
+export async function setEquippedRankFrame(frameId: string | null): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await supabase.from("profiles").update({ equipped_rank_frame: frameId }).eq("id", userId);
 }
 
 /** Lets a user change their avatar after signup (previously only ever set once, at registration). */
