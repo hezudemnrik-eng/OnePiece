@@ -6,6 +6,7 @@ import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { checkDuelAchievements, type DuelAchievement } from "@/lib/duelAchievements";
 import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
 import { fetchMyLevelInfo, fetchShopItems, incrementXp, unlockAchievement } from "@/lib/supabase";
+import { ARENA_IMAGES } from "@/lib/arenaImages";
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { VictoryBanner } from "./VictoryBanner";
 import { playAccept, vibrate } from "@/lib/sfx";
@@ -120,6 +121,7 @@ export function DuelBoard() {
   // user's equipped shop item, same className-driven pattern ProfileBoard
   // already uses for frames/colors/titles.
   const [arenaClassName, setArenaClassName] = useState("");
+  const [arenaImage, setArenaImage] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,11 +129,20 @@ export function DuelBoard() {
       if (cancelled || !info?.equippedArena) return;
       const arena = items.find((i) => i.category === "arena" && i.id === info.equippedArena);
       if (arena) setArenaClassName(arena.className);
+      setArenaImage(ARENA_IMAGES[info.equippedArena] ?? null);
     });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  const arenaStyle = arenaImage
+    ? {
+        backgroundImage: `linear-gradient(var(--op-map-overlay), var(--op-map-overlay)), url('${arenaImage}')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }
+    : undefined;
 
   async function finalizeDuel(winner: Character, loser: Character, result: BattleResult) {
     const earned = checkDuelAchievements(winner, loser, result);
@@ -299,7 +310,10 @@ export function DuelBoard() {
       const statsA = getStrongestVersion(fighterA).stats;
       const statsB = getStrongestVersion(fighterB).stats;
       return (
-        <div className={`flex flex-col gap-6 max-w-xl rounded-xl ${arenaClassName} ${arenaClassName ? "p-4" : ""}`}>
+        <div
+          className={`flex flex-col gap-6 max-w-xl rounded-xl ${arenaImage ? "" : arenaClassName} ${arenaClassName || arenaImage ? "p-4" : ""}`}
+          style={arenaStyle}
+        >
           <VictoryBanner won />
           <h2 className="text-xl font-semibold">{winner.name} gewinnt das Duell!</h2>
           {newAchievements.length > 0 && (
@@ -363,7 +377,10 @@ export function DuelBoard() {
 
     const winnerNames = (aWon ? fightersA : fightersB).map((c) => c.name).join(" & ");
     return (
-      <div className={`flex flex-col gap-6 max-w-xl rounded-xl ${arenaClassName} ${arenaClassName ? "p-4" : ""}`}>
+      <div
+        className={`flex flex-col gap-6 max-w-xl rounded-xl ${arenaImage ? "" : arenaClassName} ${arenaClassName || arenaImage ? "p-4" : ""}`}
+        style={arenaStyle}
+      >
         <VictoryBanner won={null} label={`Team ${battle.winnerTeam} gewinnt!`} />
         <h2 className="text-xl font-semibold">{winnerNames} gewinnt das Team-Duell!</h2>
         <div className="grid grid-cols-2 gap-4">
