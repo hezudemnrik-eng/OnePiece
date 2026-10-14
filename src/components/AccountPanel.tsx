@@ -24,6 +24,7 @@ export function AccountPanel({ onSignedOut }: Props) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [frameClass, setFrameClass] = useState("");
   const [colorClass, setColorClass] = useState("");
+  const [title, setTitle] = useState<{ label: string; className: string } | null>(null);
   const [berries, setBerries] = useState(0);
   const [level, setLevel] = useState(1);
   const [loaded, setLoaded] = useState(false);
@@ -38,6 +39,8 @@ export function AccountPanel({ onSignedOut }: Props) {
           ""
       );
       setColorClass(items.find((i) => i.category === "color" && i.id === levelInfo?.equippedColor)?.className ?? "");
+      const activeTitle = items.find((i) => i.category === "title" && i.id === levelInfo?.equippedTitle);
+      setTitle(activeTitle ? { label: activeTitle.label, className: activeTitle.className } : null);
       setBerries(levelInfo?.berries ?? 0);
       setLevel(getLevelProgress(levelInfo?.xp ?? 0).level);
       setLoaded(true);
@@ -82,6 +85,7 @@ export function AccountPanel({ onSignedOut }: Props) {
       <span className="hidden min-w-0 truncate whitespace-nowrap sm:inline">
         <span className={`font-semibold ${colorClass}`}>{user.username}</span>
         {user.isAdmin && <span className="ml-1 text-xs text-accent-ink">(Admin)</span>}
+        {title && <span className={`ml-1.5 text-xs opacity-70 ${title.className}`}>{title.label}</span>}
       </span>
       <span className="shrink-0 whitespace-nowrap text-black/50 dark:text-white/40">{formatBerry(berries)}</span>
       <Link href="/profil" className="hidden shrink-0 text-black/50 dark:text-white/40 hover:underline sm:inline">
