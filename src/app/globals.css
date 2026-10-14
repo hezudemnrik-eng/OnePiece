@@ -1,38 +1,30 @@
 @import "tailwindcss";
 
-/* Only one display mode (Q164, Boss) — the app no longer reacts to OS/
-   browser dark-mode preference. Neutralizing the `dark:` variant here (a
-   selector that never matches) is simpler and safer than stripping `dark:`
-   utility classes from every component that still uses them. */
-@custom-variant dark (&:where(.op-never-matches));
+/* Only one display mode (Q164/Q165, Boss) — and that one mode is Dark.
+   `dark:` utility classes should now always apply (there is no other mode
+   to gate them against), so the variant is redefined to match
+   unconditionally instead of reacting to OS preference or a toggle. */
+@custom-variant dark (&);
 
 :root {
-  --background: #faf6ec;
-  /* Warm ink-brown instead of the earlier cool navy — reads like ink on
-     parchment/carved wood rather than a nautical-chart blue, matching the
-     Holz-Gold illustrated assets (bars, icons, frames, Berry coin). Drives
-     body text AND the comic-ink card borders/shadows below (both use
-     --foreground), so this one change re-tints both at once. */
-  --foreground: #2b1a10;
-  --surface: #fff8e6;
+  --background: #0c1626;
+  --foreground: #ede6d6;
+  --surface: #121f33;
   /* One-Piece wanted-poster palette (Phase 12, from reference mockups) —
-     the same hex values are used in light AND dark mode (see the dark
-     overrides below): only the page chrome around them goes dark, not the
-     brand colors themselves. */
+     the same brand hex is used for --accent regardless of theme: only the
+     page chrome around it is dark, not the brand colors themselves. */
   --accent: #f4c542;
-  /* Separate "readable" variant for plain accent-colored TEXT (nav active
-     state, achievement-banner headings, …) — the vivid fill color above is
-     far too light to read against the light page background, even though
-     it's exactly right as a button/badge fill. Same value as --accent in
-     dark mode, where the fill color already reads perfectly as text too. */
-  --accent-ink: #b45309;
+  /* The vivid fill color already reads perfectly as plain text against this
+     dark navy background (unlike on the light parchment background this
+     app no longer uses), so --accent-ink just aliases --accent here. */
+  --accent-ink: var(--accent);
   /* Success now rides the brand gold instead of a separate green (Q23) —
      aliased rather than hardcoded so it always tracks --accent. */
   --success: var(--accent);
-  --danger: #b22222;
+  --danger: #ef4444;
   --navy: #0d3b66;
   /* Always-paper surface for "wanted poster" character cards — stays
-     parchment-cream regardless of light/dark theme, since the poster is an
+     parchment-cream regardless of page chrome, since the poster is an
      in-universe object, not reactive UI chrome (see .op-wanted below). */
   --poster-paper: #f6e5c3;
   --poster-ink: #1a1a1a;
@@ -45,26 +37,25 @@
   --mode-draft: var(--accent);
   --mode-duell: var(--accent);
   --mode-zufallsgegner: var(--accent);
-  --mode-imu: #7f1d1d;
-  --mode-quiz: #2563eb;
-  --mode-tierlisten: #7c3aed;
-  --mode-blind-ranking: #4f46e5;
-  --mode-crew: #0d9488;
-  --mode-fusion: #c026d3;
-  --mode-shop: #15803d;
+  --mode-imu: #dc2626;
+  --mode-quiz: #60a5fa;
+  --mode-tierlisten: #a78bfa;
+  --mode-blind-ranking: #818cf8;
+  --mode-crew: #2dd4bf;
+  --mode-fusion: #e879f9;
+  --mode-shop: #4ade80;
 
   /* Rarity tiers for character/cosmetic highlighting (Q27). Gold reuses the
      brand accent; legendary additionally gets the .op-legendary-glow
      animation below. */
   --rarity-bronze: #92400e;
-  --rarity-silver: #9ca3af;
+  --rarity-silver: #d1d5db;
   --rarity-gold: var(--accent);
-  --rarity-legendary: #c026d3;
+  --rarity-legendary: #e879f9;
 
   /* Tint over the signed-in app shell's map-background.jpg (Boss's ChatGPT
-     artwork) so body text/cards on top stay legible — lighter in light
-     mode (the map itself is dark/navy), much darker in dark mode. */
-  --op-map-overlay: rgba(250, 246, 236, 0.72);
+     artwork) so body text/cards on top stay legible. */
+  --op-map-overlay: rgba(6, 10, 18, 0.6);
 }
 
 @theme inline {
