@@ -184,12 +184,17 @@ function charById(id: string): Character | undefined {
   return characters.find((c) => c.id === id);
 }
 
+// Fusion-Piraten soll nur aus kräftigeren Charakteren würfeln (keine
+// C/D-Tier-Hintergrundfiguren) — gilt für jede Kategorie, auch beim
+// Reroll, da alle Pools unten von dieser gefilterten Liste ausgehen.
+const fusionEligibleCharacters = characters.filter((c) => c.tier === "S" || c.tier === "A" || c.tier === "B");
+
 export const FUSION_CATEGORIES: FusionCategory[] = [
   {
     id: "teufelsfrucht",
     label: "Teufelsfrucht",
     pool: () =>
-      characters
+      fusionEligibleCharacters
         .filter((c) => c.devilFruit)
         .map((c) => {
           const cls = classifyFruit(c.devilFruit);
@@ -208,7 +213,7 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
     id: "haki",
     label: "Haki",
     pool: () =>
-      characters.map((c) => {
+      fusionEligibleCharacters.map((c) => {
         const haki = getStrongestVersion(c).stats.haki;
         return {
           categoryId: "haki" as const,
@@ -224,7 +229,7 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
     id: "body",
     label: "Body",
     pool: () =>
-      characters.map((c) => {
+      fusionEligibleCharacters.map((c) => {
         const { staerke, durabilitaet } = getStrongestVersion(c).stats;
         return {
           categoryId: "body" as const,
@@ -240,7 +245,7 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
     id: "weapon",
     label: "Weapon",
     pool: () =>
-      characters.map((c) => {
+      fusionEligibleCharacters.map((c) => {
         const curated = WEAPON_STYLES[c.id];
         return {
           categoryId: "weapon" as const,
@@ -256,7 +261,7 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
     id: "race",
     label: "Race",
     pool: () =>
-      characters.map((c) => {
+      fusionEligibleCharacters.map((c) => {
         const race = RACES[c.id] ?? "Mensch";
         return {
           categoryId: "race" as const,
@@ -273,7 +278,7 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
     label: "Sensei",
     pool: () =>
       SENSEI_IDS.map(charById)
-        .filter((c): c is Character => Boolean(c))
+        .filter((c): c is Character => Boolean(c) && (c.tier === "S" || c.tier === "A" || c.tier === "B"))
         .map((c) => {
           const { haki, intelligenz } = getStrongestVersion(c).stats;
           return {
@@ -290,7 +295,7 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
     id: "mind",
     label: "Mind",
     pool: () =>
-      characters.map((c) => {
+      fusionEligibleCharacters.map((c) => {
         const intelligenz = getStrongestVersion(c).stats.intelligenz;
         return {
           categoryId: "mind" as const,
