@@ -13,6 +13,7 @@ import {
 } from "@/lib/supabase";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 import { COSMETIC_FRAMES, getLevelProgress } from "@/lib/levels";
+import { FRAME_IMAGES } from "@/lib/frameImages";
 import { formatBerry } from "@/lib/fusionTraits";
 
 type Props = {
@@ -23,6 +24,7 @@ type Props = {
 export function AccountPanel({ onSignedOut }: Props) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [frameClass, setFrameClass] = useState("");
+  const [frameImage, setFrameImage] = useState<string | null>(null);
   const [colorClass, setColorClass] = useState("");
   const [title, setTitle] = useState<{ label: string; className: string } | null>(null);
   const [berries, setBerries] = useState(0);
@@ -38,6 +40,7 @@ export function AccountPanel({ onSignedOut }: Props) {
           items.find((i) => i.category === "frame" && i.id === levelInfo?.equippedFrame)?.className ??
           ""
       );
+      setFrameImage(levelInfo?.equippedFrame ? (FRAME_IMAGES[levelInfo.equippedFrame] ?? null) : null);
       setColorClass(items.find((i) => i.category === "color" && i.id === levelInfo?.equippedColor)?.className ?? "");
       const activeTitle = items.find((i) => i.category === "title" && i.id === levelInfo?.equippedTitle);
       setTitle(activeTitle ? { label: activeTitle.label, className: activeTitle.className } : null);
@@ -67,14 +70,30 @@ export function AccountPanel({ onSignedOut }: Props) {
         {animationsEnabled ? "✨" : "🔇"}
       </button>
       <Link href="/profil" className="relative shrink-0">
-        {avatar?.imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={avatar.imageUrl}
-            alt={avatar.name}
-            referrerPolicy="no-referrer"
-            className={`h-9 w-9 rounded-full object-cover object-top border-2 border-foreground ${frameClass}`}
-          />
+        {frameImage ? (
+          <span className="relative flex h-[3.25rem] w-[3.25rem] items-center justify-center">
+            {avatar?.imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatar.imageUrl}
+                alt={avatar.name}
+                referrerPolicy="no-referrer"
+                className="h-9 w-9 rounded-full object-cover object-top"
+              />
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+          </span>
+        ) : (
+          avatar?.imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatar.imageUrl}
+              alt={avatar.name}
+              referrerPolicy="no-referrer"
+              className={`h-9 w-9 rounded-full object-cover object-top border-2 border-foreground ${frameClass}`}
+            />
+          )
         )}
         <span className="absolute -bottom-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold tabular-nums text-poster-ink">
           {level}
