@@ -125,7 +125,9 @@ export function HomeOverview() {
       {isSupabaseConfigured() && loaded && progress && (
         <Link href="/profil">
           <div
-            className={`op-card flex items-center gap-4 bg-cover bg-center p-4 ${rankFrameImage ? "op-rank-frame" : `op-framed ${rankFrameClass}`}`}
+            className={`op-card flex items-center gap-4 bg-cover bg-center p-4 ${
+              rankFrameImage ? "op-rank-frame" : rankFrameClass ? rankFrameClass : "op-framed"
+            }`}
             style={
               {
                 backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')",
