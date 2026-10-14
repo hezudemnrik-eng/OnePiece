@@ -13,17 +13,14 @@ import { getTodaysChallenge, type DailyChallenge } from "@/lib/dailyChallenge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
-  dismissDraftInvite,
   fetchDailyQuestClaimedToday,
   fetchFriends,
-  fetchIncomingDraftInvites,
   fetchMyLevelInfo,
   fetchRelevantLiveDrafts,
   fetchShopItems,
   getCurrentAuthUser,
   isSupabaseConfigured,
   type AuthUser,
-  type DraftInvite,
   type Friend,
   type MyLevelInfo,
   type OpenLiveDraft,
@@ -66,7 +63,6 @@ export function HomeOverview() {
   const [title, setTitle] = useState<{ label: string; className: string } | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [myLobby, setMyLobby] = useState<OpenLiveDraft | null>(null);
-  const [draftInvites, setDraftInvites] = useState<DraftInvite[]>([]);
   const [lastHref, setLastHref] = useState<string | null>(null);
   // new Date() is a "dynamic" API under Next's Cache Components prerendering
   // (same class of thing as Date.now()/Math.random()), so both the greeting
@@ -95,8 +91,7 @@ export function HomeOverview() {
       fetchFriends(),
       fetchRelevantLiveDrafts(),
       fetchDailyQuestClaimedToday(),
-      fetchIncomingDraftInvites(),
-    ]).then(([authUser, level, items, friendList, drafts, questClaimedToday, invites]) => {
+    ]).then(([authUser, level, items, friendList, drafts, questClaimedToday]) => {
       setUser(authUser);
       setLevelInfo(level);
       setFrameClass(items.find((i) => i.category === "frame" && i.id === level?.equippedFrame)?.className ?? "");
@@ -109,15 +104,9 @@ export function HomeOverview() {
       setFriends(friendList);
       setMyLobby(drafts.find((d) => d.isMine) ?? null);
       setQuestClaimed(questClaimedToday);
-      setDraftInvites(invites);
       setLoaded(true);
     });
   }, []);
-
-  function dismissInvite(id: string) {
-    setDraftInvites((prev) => prev.filter((i) => i.id !== id));
-    dismissDraftInvite(id);
-  }
 
   const progress = levelInfo ? getLevelProgress(levelInfo.xp) : null;
   const lastMode = lastHref ? MODES.find((m) => m.href === lastHref) : undefined;
@@ -130,25 +119,6 @@ export function HomeOverview() {
         {greetingText ?? "Willkommen"}
         {user?.username ? `, ${user.username}` : ""}.
       </p>
-
-      {draftInvites.map((invite) => (
-        <div key={invite.id} className="op-card flex items-center justify-between gap-3 bg-mode-draft/10 px-4 py-3">
-          <span className="min-w-0 truncate whitespace-nowrap text-sm">
-            <span className="font-semibold">{invite.fromUsername}</span> lädt dich zu einem Live-Draft ein
-          </span>
-          <div className="flex shrink-0 gap-2">
-            <Link href={`/draft/live?code=${invite.inviteCode}`} onClick={() => dismissInvite(invite.id)}>
-              <span className="rounded-md bg-mode-draft px-3 py-1 text-xs font-semibold text-poster-ink">Beitreten</span>
-            </Link>
-            <button
-              onClick={() => dismissInvite(invite.id)}
-              className="rounded-md border border-black/15 px-3 py-1 text-xs text-black/60 dark:border-white/15 dark:text-white/50"
-            >
-              Ablehnen
-            </button>
-          </div>
-        </div>
-      ))}
 
       {isSupabaseConfigured() && !loaded && <LoadingSpinner />}
 

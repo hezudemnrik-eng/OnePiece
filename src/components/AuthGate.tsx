@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AVATAR_CHOICES } from "@/lib/avatarChoices";
 import { AccountPanel } from "./AccountPanel";
 import { BottomNav } from "./BottomNav";
+import { DraftInviteOverlay } from "./DraftInviteOverlay";
 import { IconRail } from "./IconRail";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { Button } from "./ui/Button";
@@ -80,6 +81,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
         style={{ backgroundImage: "linear-gradient(var(--op-map-overlay), var(--op-map-overlay)), url('/images/map-background.jpg')" }}
       >
+        <DraftInviteOverlay />
         <IconRail />
         <div className="md:pl-16">
           <header
