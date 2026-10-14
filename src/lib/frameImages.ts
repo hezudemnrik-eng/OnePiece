@@ -11,4 +11,7 @@ export const FRAME_IMAGES: Record<string, string> = {
   frame_four_emperors: "/images/frames/frame_four_emperors.png",
   frame_impel_down: "/images/frames/frame_impel_down.png",
   frame_revolutionary: "/images/frames/frame_revolutionary.png",
+  frame_marine: "/images/frames/frame_marine.png",
+  frame_cipher_pol: "/images/frames/frame_cipher_pol.png",
+  frame_grand_fleet: "/images/frames/frame_grand_fleet.png",
 };
