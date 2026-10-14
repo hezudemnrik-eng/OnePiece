@@ -121,73 +121,74 @@ body {
 }
 
 /* Base card: the one corner-radius + surface treatment every card-like
-   block in the app should share. Deutliche Tusche-Optik (Phase 11): ein
-   durchgängiger Tinten-Rand + harter Versatz-Schatten statt des früheren
-   1px-Rahmens ohne Schatten — "--foreground" dient als Tinte, die sich
+   block in the app should share. Dezenter Rand + weicher Schatten (Boss,
+   2026-10-14: die vorherige dicke Tusche-Optik mit hartem Versatz-Schatten
+   wirkte zu comichaft) — "--foreground" dient als Tinte, die sich
    automatisch an Light/Dark anpasst (dunkle Tinte auf hellem, helle Kontur
    auf dunklem Grund) statt einen festen Schwarzwert zu erzwingen. */
 .op-card {
   border-radius: var(--radius-card);
   background-color: color-mix(in srgb, var(--surface) 88%, transparent);
-  border: 2px solid var(--foreground);
-  box-shadow: 3px 3px 0 0 var(--foreground);
+  border: 1px solid color-mix(in srgb, var(--foreground) 28%, transparent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-/* Decorative wood/rope frame: a thick amber "plank" border plus a dashed
+/* Decorative wood/rope frame: a thin amber "plank" border plus a dashed
    inner "rope" ring. Opt-in on top of .op-card for spots that should feel
    extra treasure-map-y (profile, fusion board) rather than everywhere. The
-   outer hard ink shadow is folded in here too (combined box-shadow value),
+   soft outer shadow is folded in here too (combined box-shadow value),
    since this class's declarations would otherwise fully override .op-card's
    own shadow rather than add to it. */
 .op-framed {
-  border-width: 3px;
-  border-color: color-mix(in srgb, #92400e 70%, var(--foreground) 10%);
+  border-width: 1px;
+  border-color: color-mix(in srgb, #92400e 55%, var(--foreground) 10%);
   box-shadow:
-    inset 0 0 0 4px var(--background),
-    inset 0 0 0 6px color-mix(in srgb, #92400e 55%, transparent),
-    5px 5px 0 0 var(--foreground);
+    inset 0 0 0 3px var(--background),
+    inset 0 0 0 4px color-mix(in srgb, #92400e 40%, transparent),
+    0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-/* --- Phase 11: deutliche Tusche-Optik (Comic-Stil-Pass) ---
-   Ein paar wiederverwendbare Bausteine für dicke Tinten-Outlines + harte
-   Versatz-Schatten statt weicher Blur-Schatten, zusätzlich zu dem oben
-   bereits verstärkten .op-card. */
+/* --- Dezente Rand/Schatten-Bausteine ---
+   Wiederverwendbare Bausteine für einen dünnen, zurückhaltenden Rand +
+   weichen Schatten statt der früheren dicken Tinten-Outlines mit hartem
+   Versatz-Schatten (Comic-Stil-Pass, zurückgenommen 2026-10-14). */
 
-/* Bolder tier, for the one or two "hero" panels per screen (Card
-   variant="spotlight", featured results) rather than dense repeated chips. */
+/* For the one or two "hero" panels per screen (Card variant="spotlight",
+   featured results) rather than dense repeated chips — still a touch more
+   present than .op-card, but no longer a hard offset shadow. */
 .op-ink {
-  border-width: 3px;
-  border-color: var(--foreground);
-  box-shadow: 5px 5px 0 0 var(--foreground);
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--foreground) 40%, transparent);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-/* Button-specific: same bold outline/shadow, plus a "pressed" state that
-   flattens the shadow and nudges the button toward it — a classic
-   comic/game-UI press affordance instead of a soft brightness-only hover. */
+/* Button-specific: thin outline + soft shadow, plus a "pressed" state that
+   flattens the shadow and nudges the button slightly toward it. */
 .op-ink-btn {
-  border-width: 3px;
-  border-color: var(--foreground);
-  box-shadow: 4px 4px 0 0 var(--foreground);
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--foreground) 35%, transparent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   transition:
     box-shadow 0.1s ease-out,
     transform 0.1s ease-out,
     filter 0.15s ease-out;
 }
 .op-ink-btn:active:not(:disabled) {
-  box-shadow: 1px 1px 0 0 var(--foreground);
-  transform: translate(3px, 3px);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
+  transform: translate(1px, 1px);
 }
 
 /* "Wanted poster" treatment for hero character reveals (Draft offer cards,
    Duell fighter cards) — Phase 12. Always parchment-paper + ink-black,
    regardless of light/dark theme: the poster is an in-universe object, not
    reactive UI chrome, matching the reference mockups (same card look in
-   both theme panels, only the page behind it goes dark). */
+   both theme panels, only the page behind it goes dark). Border/shadow
+   toned down alongside the rest of the app (2026-10-14).  */
 .op-wanted {
   background-color: var(--poster-paper);
   color: var(--poster-ink);
-  border: 3px solid var(--poster-ink);
-  box-shadow: 5px 5px 0 0 var(--poster-ink);
+  border: 1.5px solid color-mix(in srgb, var(--poster-ink) 55%, transparent);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 /* Form fields (Input/Select/textarea) default to a dark-mode-reactive fill

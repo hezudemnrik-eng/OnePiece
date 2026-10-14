@@ -272,15 +272,15 @@ export function HomeOverview() {
         {[...MODE_GROUPS, SHOP_TILE].map((g) => (
           <Link key={g.href} href={g.href}>
             <div
-              className="relative flex min-h-[110px] flex-col justify-end overflow-hidden rounded-xl border-[3px] bg-cover bg-center p-3 shadow-[5px_5px_0_0_var(--foreground)]"
+              className="relative flex min-h-[110px] flex-col justify-end overflow-hidden rounded-xl border bg-cover bg-center p-3 shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
               style={{
-                borderColor: `var(--mode-${"id" in g ? (g.id === "kampf" ? "duell" : g.id === "raetsel-ranking" ? "quiz" : "crew") : "shop"})`,
+                borderColor: `color-mix(in srgb, var(--mode-${"id" in g ? (g.id === "kampf" ? "duell" : g.id === "raetsel-ranking" ? "quiz" : "crew") : "shop"}) 55%, transparent)`,
                 backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.05)), url('${TILE_IMAGES[g.href] ?? ""}')`,
               }}
             >
               <div className="flex items-center justify-between gap-1">
                 <span className="truncate whitespace-nowrap text-xs font-semibold leading-tight text-white">{g.title}</span>
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-white text-sm text-white" aria-hidden>
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/70 text-sm text-white" aria-hidden>
                   →
                 </span>
               </div>

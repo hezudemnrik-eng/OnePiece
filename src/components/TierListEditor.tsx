@@ -394,7 +394,7 @@ export function TierListEditor() {
               onChange={(e) => setCustomItemsText(e.target.value)}
               rows={5}
               placeholder={"Gomu Gomu no Mi\nMera Mera no Mi\nHie Hie no Mi"}
-              className="rounded-md border-2 border-foreground bg-white/70 dark:bg-white/5 px-3 py-1.5 font-mono text-xs outline-none focus:border-accent"
+              className="rounded-md border border-foreground/35 bg-white/70 dark:bg-white/5 px-3 py-1.5 font-mono text-xs outline-none focus:border-accent"
             />
           </label>
           <div className="flex gap-3">
