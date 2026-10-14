@@ -7,6 +7,7 @@ export default function FusionPage() {
       title="Fusions-Pirat"
       subtitle="Wähle pro Runde eine von 7 Kategorien — am Ende dein Kopfgeld."
       accent="fusion"
+      compact
     >
       <FusionBuilderBoard />
     </PageShell>

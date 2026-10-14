@@ -48,7 +48,7 @@ function FusionGridCard({
       type="button"
       onClick={onClick}
       disabled={!onClick}
-      className={`op-wanted relative aspect-[2/3] w-full overflow-hidden rounded-lg p-0 text-center transition disabled:cursor-default ${
+      className={`op-wanted relative aspect-[1/2] w-full overflow-hidden rounded-lg p-0 text-center transition disabled:cursor-default ${
         onClick ? "hover:brightness-95 active:brightness-90" : "opacity-75"
       } ${locked ? "op-pop-in" : ""}`}
     >
@@ -159,11 +159,11 @@ export function FusionBuilderBoard() {
 
   if (phase === "rolling") {
     return (
-      <div className="flex flex-col gap-2 max-w-2xl">
-        <div className="text-xs text-black/50 dark:text-white/40">
+      <div className="flex flex-col gap-1 max-w-2xl">
+        <div className="text-[11px] text-black/50 dark:text-white/40">
           Noch {remainingCategories.length} von {FUSION_CATEGORIES.length} offen — antippen zum Wählen
         </div>
-        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-1.5">
+        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-1">
           {FUSION_CATEGORIES.map((category) => {
             const pick = picks.find((p) => p.categoryId === category.id);
             if (pick) {
@@ -187,11 +187,11 @@ export function FusionBuilderBoard() {
 
   const bounty = computeBounty(picks);
   return (
-    <div className="flex flex-col gap-3 max-w-2xl">
-      <h2 className="op-ink-text font-[family-name:var(--font-display)] text-xl text-mode-fusion">
+    <div className="flex flex-col gap-2 max-w-2xl">
+      <h2 className="op-ink-text font-[family-name:var(--font-display)] text-lg text-mode-fusion">
         Dein Fusions-Pirat ist bereit!
       </h2>
-      <div className="op-wanted op-parchment op-legendary-glow op-bounty-reveal rounded-xl p-5 text-center">
+      <div className="op-wanted op-parchment op-legendary-glow op-bounty-reveal rounded-xl p-4 text-center">
         <p className="op-slide-in text-xs uppercase tracking-[0.4em] opacity-70">Gesucht — Kopfgeld</p>
         <p className="op-bounty-number font-[family-name:var(--font-display)] text-4xl sm:text-5xl">
           {formatBerry(bounty)}
@@ -209,7 +209,7 @@ export function FusionBuilderBoard() {
           </ul>
         </div>
       )}
-      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-1.5">
+      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 gap-1">
         {FUSION_CATEGORIES.map((category) => {
           const pick = picks.find((p) => p.categoryId === category.id);
           if (!pick) return null;
