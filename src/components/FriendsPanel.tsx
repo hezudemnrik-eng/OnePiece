@@ -2,14 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { characters } from "@/lib/characters";
+import { COSMETIC_FRAMES } from "@/lib/levels";
+import { FRAME_IMAGES } from "@/lib/frameImages";
 import {
   fetchFriends,
   fetchIncomingFriendRequests,
+  fetchShopItems,
   removeFriendship,
   respondToFriendRequest,
   sendFriendRequestByShareCode,
   type Friend,
   type FriendRequest,
+  type ShopItem,
 } from "@/lib/supabase";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
@@ -19,23 +23,49 @@ function avatarFor(id: string | null) {
   return id ? characters.find((c) => c.id === id) : null;
 }
 
-function Avatar({ userId, username, avatarCharacterId, online }: { userId: string; username: string; avatarCharacterId: string | null; online?: boolean }) {
+function Avatar({
+  userId,
+  username,
+  avatarCharacterId,
+  online,
+  equippedFrame,
+  shopItems,
+}: {
+  userId: string;
+  username: string;
+  avatarCharacterId: string | null;
+  online?: boolean;
+  equippedFrame?: string | null;
+  shopItems?: ShopItem[];
+}) {
   const avatar = avatarFor(avatarCharacterId);
+  const frameImage = equippedFrame ? (FRAME_IMAGES[equippedFrame] ?? null) : null;
+  const frameClass = equippedFrame
+    ? (COSMETIC_FRAMES.find((f) => f.id === equippedFrame)?.className ??
+      shopItems?.find((i) => i.category === "frame" && i.id === equippedFrame)?.className ??
+      "")
+    : "";
   return (
     <span className="relative shrink-0" key={userId}>
-      {avatar?.imageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={avatar.imageUrl}
-          alt={username}
-          referrerPolicy="no-referrer"
-          className="h-8 w-8 rounded-full object-cover object-top"
-        />
-      ) : (
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent-ink">
-          {username.slice(0, 2).toUpperCase()}
-        </span>
-      )}
+      <span className="relative flex h-9 w-9 items-center justify-center">
+        {avatar?.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatar.imageUrl}
+            alt={username}
+            referrerPolicy="no-referrer"
+            className={`h-8 w-8 rounded-full object-cover object-top ${frameImage ? "" : frameClass}`}
+          />
+        ) : (
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/15 text-xs font-bold text-accent-ink">
+            {username.slice(0, 2).toUpperCase()}
+          </span>
+        )}
+        {frameImage && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+        )}
+      </span>
       {online !== undefined && (
         <span
           className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[var(--background)] ${
@@ -51,15 +81,17 @@ function Avatar({ userId, username, avatarCharacterId, online }: { userId: strin
 export function FriendsPanel() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [requests, setRequests] = useState<FriendRequest[]>([]);
+  const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [codeInput, setCodeInput] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   function reload() {
-    return Promise.all([fetchFriends(), fetchIncomingFriendRequests()]).then(([f, r]) => {
+    return Promise.all([fetchFriends(), fetchIncomingFriendRequests(), fetchShopItems()]).then(([f, r, items]) => {
       setFriends(f);
       setRequests(r);
+      setShopItems(items);
       setLoaded(true);
     });
   }
@@ -130,11 +162,24 @@ export function FriendsPanel() {
         <p className="text-sm text-black/40 dark:text-white/30">Noch keine Freunde — teile deinen Code oben.</p>
       ) : (
         <ul className="flex flex-col gap-1.5">
-          {friends.map((f) => (
+          {friends.map((f) => {
+            const friendTitle = shopItems.find((i) => i.category === "title" && i.id === f.equippedTitle);
+            const colorClass = shopItems.find((i) => i.category === "color" && i.id === f.equippedColor)?.className ?? "";
+            return (
             <li key={f.friendshipId}>
               <Card variant="plain" className="flex items-center gap-2 px-3 py-2 text-sm">
-                <Avatar userId={f.userId} username={f.username} avatarCharacterId={f.avatarCharacterId} online={f.online} />
-                <span className="flex-1">{f.username}</span>
+                <Avatar
+                  userId={f.userId}
+                  username={f.username}
+                  avatarCharacterId={f.avatarCharacterId}
+                  online={f.online}
+                  equippedFrame={f.equippedFrame}
+                  shopItems={shopItems}
+                />
+                <span className="min-w-0 flex-1 truncate whitespace-nowrap">
+                  <span className={`font-semibold ${colorClass}`}>{f.username}</span>
+                  {friendTitle && <span className={`ml-1.5 text-xs opacity-70 ${friendTitle.className}`}>{friendTitle.label}</span>}
+                </span>
                 <button
                   onClick={() => handleRemove(f.friendshipId)}
                   className="text-xs text-black/40 dark:text-white/30 hover:text-danger hover:underline"
@@ -143,7 +188,8 @@ export function FriendsPanel() {
                 </button>
               </Card>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </div>

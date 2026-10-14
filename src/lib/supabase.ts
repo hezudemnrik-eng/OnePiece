@@ -621,6 +621,9 @@ export type Friend = {
   username: string;
   avatarCharacterId: string | null;
   online: boolean;
+  equippedFrame: string | null;
+  equippedTitle: string | null;
+  equippedColor: string | null;
 };
 
 /**
@@ -710,7 +713,7 @@ export async function fetchFriends(): Promise<Friend[]> {
   const twoMinAgo = new Date(Date.now() - 2 * 60_000).toISOString();
   const { data: profiles } = await supabase
     .from("profiles")
-    .select("id, username, avatar_character_id, last_seen")
+    .select("id, username, avatar_character_id, last_seen, equipped_frame, equipped_title, equipped_color")
     .in("id", friendIds);
 
   return rows.map((r) => {
@@ -722,6 +725,9 @@ export async function fetchFriends(): Promise<Friend[]> {
       username: p?.username ?? "?",
       avatarCharacterId: p?.avatar_character_id ?? null,
       online: !!p?.last_seen && p.last_seen >= twoMinAgo,
+      equippedFrame: (p?.equipped_frame as string | null) ?? null,
+      equippedTitle: (p?.equipped_title as string | null) ?? null,
+      equippedColor: (p?.equipped_color as string | null) ?? null,
     };
   });
 }
