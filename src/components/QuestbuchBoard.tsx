@@ -68,7 +68,7 @@ export function QuestbuchBoard() {
           ) : (
             <Link
               href={challenge.href}
-              className="op-s-tier-glow inline-block rounded-lg border-[3px] border-[var(--foreground)] bg-accent px-4 py-2 text-center text-sm font-semibold text-accent-ink shadow-[4px_4px_0_0_var(--foreground)]"
+              className="op-s-tier-glow inline-block rounded-lg border border-[color-mix(in_srgb,var(--foreground)_35%,transparent)] bg-accent px-4 py-2 text-center text-sm font-semibold text-accent-ink shadow-[0_2px_6px_rgba(0,0,0,0.2)]"
             >
               Jetzt spielen
             </Link>

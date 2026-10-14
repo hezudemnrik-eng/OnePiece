@@ -6,7 +6,7 @@ type Props = SelectHTMLAttributes<HTMLSelectElement>;
 export function Select({ className = "", ...rest }: Props) {
   return (
     <select
-      className={`rounded-md border-2 border-foreground bg-white/70 dark:bg-white/5 px-3 py-1.5 outline-none focus:border-accent ${className}`}
+      className={`rounded-md border border-foreground/35 bg-white/70 dark:bg-white/5 px-3 py-1.5 outline-none focus:border-accent ${className}`}
       {...rest}
     />
   );

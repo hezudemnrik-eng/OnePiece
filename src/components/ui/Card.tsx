@@ -19,12 +19,11 @@ export function Card({ variant = "plain", accent = "accent", className = "", chi
   const a = MODE_ACCENT_CLASSES[accent];
 
   if (variant === "spotlight") {
-    // Flat mode-tinted fill + bold mode-colored border + hard ink shadow
-    // (Phase 11) instead of the earlier soft fade-to-transparent gradient
-    // with a faint 1px border.
+    // Flat mode-tinted fill + a subtle mode-colored border + soft shadow
+    // (toned down from the earlier hard ink shadow, 2026-10-14).
     return (
       <div
-        className={`op-parchment rounded-xl border-[3px] ${a.border} ${a.bgSoft} shadow-[5px_5px_0_0_var(--foreground)] p-6 ${className}`}
+        className={`op-parchment rounded-xl border ${a.borderSoft} ${a.bgSoft} shadow-[0_2px_8px_rgba(0,0,0,0.15)] p-6 ${className}`}
         {...rest}
       >
         {children}

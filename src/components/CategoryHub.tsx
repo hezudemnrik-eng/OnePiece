@@ -35,9 +35,9 @@ function ModeGrid({ modes }: { modes: typeof MODES }) {
           return (
             <Link key={m.href} href={m.href} className="group" onClick={() => setLastPlayedHref(m.href)}>
               <div
-                className="relative flex h-full min-h-[130px] flex-col justify-end overflow-hidden rounded-xl border-[3px] bg-cover bg-center p-3 shadow-[5px_5px_0_0_var(--foreground)] transition group-hover:-translate-y-0.5 group-hover:shadow-lg"
+                className="relative flex h-full min-h-[130px] flex-col justify-end overflow-hidden rounded-xl border bg-cover bg-center p-3 shadow-[0_2px_8px_rgba(0,0,0,0.25)] transition group-hover:-translate-y-0.5 group-hover:shadow-lg"
                 style={{
-                  borderColor: `var(--mode-${m.accent})`,
+                  borderColor: `color-mix(in srgb, var(--mode-${m.accent}) 55%, transparent)`,
                   backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('${image}')`,
                 }}
               >
