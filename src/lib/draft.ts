@@ -16,6 +16,8 @@ export type DraftPlayer = {
   roleAssignments?: Record<string, Role>;
   /** Whether this player has confirmed their role assignments (or chosen to skip them) and is ready for battle. */
   rolesReady?: boolean;
+  /** Whether this player has voted for a rematch on the result screen (see voteRematch) — the rematch lobby is only created once every seated player has. */
+  rematchReady?: boolean;
   /** ISO timestamp of this player's last heartbeat in a live draft — lets other clients tell a quiet turn apart from a genuinely closed tab (see touchPresence). Unused in hotseat/solo modes. */
   lastSeenAt?: string;
 };
@@ -57,7 +59,7 @@ export type DraftState = {
   rerollsUsed?: Record<string, number>;
   /** Preset emote reactions sent during the draft (Q108), newest last, capped at MAX_CHAT_LOG. */
   chatLog?: ChatMessage[];
-  /** Invite code of a fresh lobby someone started from this finished draft's result screen — lets every other participant jump straight into the rematch instead of being given a new code to type in by hand. Set once and never cleared, since a finished draft's state is never written again after this. */
+  /** Invite code of a fresh lobby created once every seated player has voted ready for a rematch (see voteRematch/allRematchReady) — lets every participant jump straight into the same new lobby together instead of one starting alone and the rest having to be given a code. Set once and never cleared, since a finished draft's state is never written again after this. */
   rematchInviteCode?: string;
 };
 
@@ -250,6 +252,17 @@ export function confirmRoles(state: DraftState, playerId: string): DraftState {
 /** True once every seated (claimed) player has confirmed their roles — the live draft's battle computation waits for this before running. */
 export function allRolesConfirmed(state: DraftState): boolean {
   return state.players.filter((p) => p.userId || p.pickedCharacterIds.length > 0).every((p) => p.rolesReady);
+}
+
+/** Votes this player ready for a rematch on the result screen (see allRematchReady). */
+export function voteRematch(state: DraftState, playerId: string): DraftState {
+  const players = state.players.map((p) => (p.id === playerId ? { ...p, rematchReady: true } : p));
+  return { ...state, players };
+}
+
+/** True once every seated player has voted for a rematch — only then is the fresh lobby created, so nobody starts one alone while waiting for the others. */
+export function allRematchReady(state: DraftState): boolean {
+  return state.players.filter((p) => p.userId).every((p) => p.rematchReady);
 }
 
 /** Heartbeat for a live draft (Q109): each client periodically touches its own player's lastSeenAt so the others can tell a disconnected tab apart from a teammate who's just thinking — see LiveDraftBoard's presence effect and staleness check. */
