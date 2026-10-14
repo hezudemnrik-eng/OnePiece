@@ -481,19 +481,22 @@ export function ProfileBoard() {
           Shop
         </h2>
         <Link href="/shop">
-          <Card variant="spotlight" accent="shop" className="flex items-center justify-between">
-            <span className="text-sm font-semibold">
+          <div
+            className="op-card relative flex items-center justify-between gap-3 overflow-hidden bg-cover bg-center px-5 py-5"
+            style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)), url('/images/profile-shop-tile.jpg')" }}
+          >
+            <span className="text-sm font-semibold text-white">
               Rahmen, Farben, Avatare, Titel & Arenen kaufen
-              <span className="flex items-center gap-1 font-normal text-black/60 dark:text-white/50">
+              <span className="flex items-center gap-1 font-normal text-white/70">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={BERRY_ICON} alt="" aria-hidden className="h-4 w-4 object-contain drop-shadow-sm" />
                 {formatBerry(berries)} verfügbar
               </span>
             </span>
-            <span className="text-accent-ink text-xl" aria-hidden>
+            <span className="text-white text-xl" aria-hidden>
               →
             </span>
-          </Card>
+          </div>
         </Link>
       </div>
 
