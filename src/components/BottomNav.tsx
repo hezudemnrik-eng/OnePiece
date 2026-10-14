@@ -9,10 +9,10 @@ function NavIcon({ icon }: { icon: string }) {
   const image = ICON_IMAGES[icon];
   if (image) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={image} alt="" aria-hidden className="h-10 w-10 object-contain" />;
+    return <img src={image} alt="" aria-hidden className="h-12 w-12 object-contain drop-shadow-md" />;
   }
   return (
-    <span className="text-2xl" aria-hidden>
+    <span className="text-3xl drop-shadow-md" aria-hidden>
       {icon}
     </span>
   );

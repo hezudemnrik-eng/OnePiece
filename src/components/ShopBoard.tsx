@@ -136,7 +136,8 @@ export function ShopBoard() {
         <span className="text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">
           Dein Guthaben
         </span>
-        <p className="font-[family-name:var(--font-display)] text-xl whitespace-nowrap text-accent-ink">
+        <p className="flex items-center gap-1.5 font-[family-name:var(--font-display)] text-xl whitespace-nowrap text-accent-ink">
+          <span className="text-2xl drop-shadow-md" aria-hidden>🪙</span>
           {formatBerry(berries)}
         </p>
       </div>

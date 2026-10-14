@@ -106,7 +106,10 @@ export function AccountPanel({ onSignedOut }: Props) {
         {user.isAdmin && <span className="ml-1 text-xs text-accent-ink">(Admin)</span>}
         {title && <span className={`ml-1.5 text-xs opacity-70 ${title.className}`}>{title.label}</span>}
       </span>
-      <span className="shrink-0 whitespace-nowrap text-black/50 dark:text-white/40">{formatBerry(berries)}</span>
+      <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-black/50 dark:text-white/40">
+        <span className="text-base drop-shadow-sm" aria-hidden>🪙</span>
+        {formatBerry(berries)}
+      </span>
       <Link href="/profil" className="hidden shrink-0 text-black/50 dark:text-white/40 hover:underline sm:inline">
         Profil
       </Link>

@@ -53,9 +53,9 @@ function ModeGrid({ modes }: { modes: typeof MODES }) {
             >
               {ICON_IMAGES[m.icon] ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={ICON_IMAGES[m.icon]} alt="" aria-hidden className="h-11 w-11 object-contain" />
+                <img src={ICON_IMAGES[m.icon]} alt="" aria-hidden className="h-14 w-14 object-contain drop-shadow-md" />
               ) : (
-                <span className="text-2xl" aria-hidden>
+                <span className="text-3xl drop-shadow-md" aria-hidden>
                   {m.icon}
                 </span>
               )}
