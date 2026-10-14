@@ -7,7 +7,6 @@ import { AccountPanel } from "./AccountPanel";
 import { BottomNav } from "./BottomNav";
 import { IconRail } from "./IconRail";
 import { LoadingSpinner } from "./LoadingSpinner";
-import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
 import {
@@ -84,19 +83,18 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         <IconRail />
         <div className="md:pl-16">
           <header
-            className="sticky top-0 z-20 flex items-center justify-between gap-2 bg-cover bg-center px-3 py-2 shadow-[0_2px_4px_rgba(0,0,0,0.35)] sm:px-4"
+            className="sticky top-0 z-20 relative flex items-center justify-end bg-cover bg-center px-3 py-2 shadow-[0_2px_4px_rgba(0,0,0,0.35)] sm:px-4"
             style={{ backgroundImage: "url('/images/bar-header.png')" }}
           >
-            <Link href="/" className="flex min-w-0 shrink-0 items-center">
+            <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/images/logo.webp"
                 alt="One Piece Draft"
-                className="h-12 w-auto shrink-0 object-contain sm:h-14"
+                className="h-16 w-auto object-contain sm:h-20"
               />
             </Link>
             <div className="flex min-w-0 items-center gap-3">
-              <ThemeToggle />
               <AccountPanel onSignedOut={refreshUser} />
             </div>
           </header>

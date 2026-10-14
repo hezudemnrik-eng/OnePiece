@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Only one display mode (Q164, Boss) — the app no longer reacts to OS/
+   browser dark-mode preference. Neutralizing the `dark:` variant here (a
+   selector that never matches) is simpler and safer than stripping `dark:`
+   utility classes from every component that still uses them. */
+@custom-variant dark (&:where(.op-never-matches));
+
 :root {
   --background: #faf6ec;
   /* Warm ink-brown instead of the earlier cool navy — reads like ink on
@@ -93,56 +99,6 @@
      the Imu intro) rather than being the everyday display font. */
   --font-display: var(--font-anton);
   --font-mystery: var(--font-pirata);
-}
-
-/* System dark mode applies unless the user picked "light" explicitly via
-   the manual toggle (useThemePreference / ThemeScript in layout.tsx). */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --background: #0c1626;
-    --foreground: #ede6d6;
-    --surface: #121f33;
-    /* --accent stays the same hex as light mode (Phase 12 palette reference
-       uses identical yellow in both panels) — it actually reads very well
-       as text on this dark navy background. --danger needs its own
-       brighter dark-mode shade though: the reference's deep firebrick red
-       has poor contrast against a near-black background when used as plain
-       warning/error text (as opposed to white-on-red button fills, where
-       the original tone is fine). */
-    --danger: #ef4444;
-    /* The vivid fill color already reads perfectly as text here, unlike in
-       light mode (see --accent-ink above). */
-    --accent-ink: var(--accent);
-    --mode-imu: #dc2626;
-    --mode-quiz: #60a5fa;
-    --mode-tierlisten: #a78bfa;
-    --mode-blind-ranking: #818cf8;
-    --mode-crew: #2dd4bf;
-    --mode-fusion: #e879f9;
-    --mode-shop: #4ade80;
-    --rarity-silver: #d1d5db;
-    --rarity-legendary: #e879f9;
-    --op-map-overlay: rgba(6, 10, 18, 0.6);
-  }
-}
-
-/* Manual override: forces dark regardless of system preference. */
-:root[data-theme="dark"] {
-  --background: #0c1626;
-  --foreground: #ede6d6;
-  --surface: #121f33;
-  --danger: #ef4444;
-  --accent-ink: var(--accent);
-  --mode-imu: #dc2626;
-  --mode-quiz: #60a5fa;
-  --mode-tierlisten: #a78bfa;
-  --mode-blind-ranking: #818cf8;
-  --mode-crew: #2dd4bf;
-  --mode-fusion: #e879f9;
-  --mode-shop: #4ade80;
-  --rarity-silver: #d1d5db;
-  --rarity-legendary: #e879f9;
-  --op-map-overlay: rgba(6, 10, 18, 0.6);
 }
 
 body {

@@ -15,7 +15,6 @@ import { useAnimationsEnabled } from "@/lib/animPrefs";
 import { COSMETIC_FRAMES, getLevelProgress } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
 import { BERRY_ICON } from "@/lib/iconImages";
-import { formatBerry } from "@/lib/fusionTraits";
 
 type Props = {
   /** Called after a successful logout so the parent (AuthGate) can re-check auth state. */
@@ -72,14 +71,14 @@ export function AccountPanel({ onSignedOut }: Props) {
       </button>
       <Link href="/profil" className="relative shrink-0">
         {frameImage ? (
-          <span className="relative flex h-[3.25rem] w-[3.25rem] items-center justify-center">
+          <span className="relative flex h-16 w-16 items-center justify-center">
             {avatar?.imageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={avatar.imageUrl}
                 alt={avatar.name}
                 referrerPolicy="no-referrer"
-                className="h-9 w-9 rounded-full object-cover object-top"
+                className="h-11 w-11 rounded-full object-cover object-top"
               />
             )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -92,7 +91,7 @@ export function AccountPanel({ onSignedOut }: Props) {
               src={avatar.imageUrl}
               alt={avatar.name}
               referrerPolicy="no-referrer"
-              className={`h-9 w-9 rounded-full object-cover object-top border-2 border-foreground ${frameClass}`}
+              className={`h-11 w-11 rounded-full object-cover object-top border-2 border-foreground ${frameClass}`}
             />
           )
         )}
@@ -107,10 +106,10 @@ export function AccountPanel({ onSignedOut }: Props) {
         {user.isAdmin && <span className="ml-1 text-xs text-accent-ink">(Admin)</span>}
         {title && <span className={`ml-1.5 text-xs opacity-70 ${title.className}`}>{title.label}</span>}
       </span>
-      <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-black/50 dark:text-white/40">
+      <span className="flex shrink-0 items-center gap-1 whitespace-nowrap font-display tabular-nums text-accent-ink">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={BERRY_ICON} alt="" aria-hidden className="h-4 w-4 object-contain drop-shadow-sm" />
-        {formatBerry(berries)}
+        {berries.toLocaleString("de-DE")}
       </span>
       <Link href="/profil" className="hidden shrink-0 text-black/50 dark:text-white/40 hover:underline sm:inline">
         Profil
