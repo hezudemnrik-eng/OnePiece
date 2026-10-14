@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { DraftState } from "./draft";
 import type { BattleResult } from "./battle-sim";
 import { XP_MATCH_LOSS, XP_MATCH_WIN, XP_QUIZ_BASE, XP_QUIZ_PER_CORRECT } from "./levels";
+import { getTodaysChallenge, type DailyQuestId } from "./dailyChallenge";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -267,6 +268,7 @@ export async function saveTierListRemote(
       { owner_id: userId, name, category, assignments, is_public: isPublic, updated_at: new Date().toISOString() },
       { onConflict: "owner_id,name,category" }
     );
+  if (!error) await claimDailyQuestFor("tierliste");
   return error ? { error: error.message } : {};
 }
 
@@ -313,7 +315,10 @@ export async function createLiveDraft(
       })
       .select()
       .single();
-    if (!error && data) return data as LiveDraftSession;
+    if (!error && data) {
+      await claimDailyQuestFor("live-draft");
+      return data as LiveDraftSession;
+    }
     if (error && error.code !== "23505") break; // not an invite-code collision — stop retrying
   }
   return null;
@@ -483,6 +488,46 @@ export async function awardModeXp(mode: string, baseXp: number): Promise<void> {
   await supabase.rpc("award_xp", { p_mode: mode, p_base_xp: baseXp });
 }
 
+/**
+ * Claims the Daily-Quest bonus (migration 0020) if `questId` matches
+ * today's challenge (src/lib/dailyChallenge.ts) and it hasn't been claimed
+ * yet today — no-ops (and makes no network call) otherwise, so call sites
+ * can call this unconditionally for the mode they just completed. Several
+ * CHALLENGE_POOL entries share an id, so completing *any* run of that mode
+ * counts — see the comment on DailyQuestId for why.
+ */
+async function claimDailyQuestFor(questId: DailyQuestId): Promise<boolean> {
+  if (!supabase) return false;
+  if (getTodaysChallenge().id !== questId) return false;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return false;
+  const { data } = await supabase.rpc("claim_daily_quest", { p_quest_id: questId });
+  return Boolean(data);
+}
+
+/** Whether the signed-in user has already claimed today's Daily Quest. */
+export async function fetchDailyQuestClaimedToday(): Promise<boolean> {
+  if (!supabase) return false;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return false;
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const { data } = await supabase
+    .from("daily_quest_claims")
+    .select("claim_date")
+    .eq("user_id", userId)
+    .eq("claim_date", todayIso)
+    .maybeSingle();
+  return Boolean(data);
+}
+
+/** Records a completed duel (any result) toward the Daily Quest — the Duell-Board awards no mode XP of its own. */
+export async function recordDuelCompletion(): Promise<void> {
+  if (!supabase) return;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return;
+  await claimDailyQuestFor("duell");
+}
+
 export type MatchMode = "imu" | "zufallsgegner" | "live-draft";
 
 /** Appends one match result for the signed-in user (solo-vs-AI and live-draft only — see migration 0007). */
@@ -496,6 +541,7 @@ export async function recordMatchResult(
   if (!userId) return;
   await supabase.from("match_results").insert({ user_id: userId, mode, opponent_label: opponentLabel, result });
   await awardModeXp(mode, result === "win" ? XP_MATCH_WIN : XP_MATCH_LOSS);
+  if (result === "win" && (mode === "imu" || mode === "zufallsgegner")) await claimDailyQuestFor(mode);
 }
 
 export type LeaderboardEntry = {
@@ -743,6 +789,8 @@ export async function recordQuizResult(
   if (!userId) return;
   await supabase.from("quiz_results").insert({ user_id: userId, score, total, category, difficulty });
   await awardModeXp("quiz", XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
+  if (score >= 1) await claimDailyQuestFor("quiz-1");
+  if (score >= 5) await claimDailyQuestFor("quiz-5");
 }
 
 export type QuizLeaderboardEntry = {
@@ -955,6 +1003,8 @@ export async function finalizeQuizParticipant(sessionId: string): Promise<void> 
     .eq("session_id", sessionId)
     .eq("user_id", userId);
   await awardModeXp("quiz", XP_QUIZ_BASE + score * XP_QUIZ_PER_CORRECT);
+  if (score >= 1) await claimDailyQuestFor("quiz-1");
+  if (score >= 5) await claimDailyQuestFor("quiz-5");
 }
 
 // --- Account-wide XP for modes that otherwise only keep local history ---
@@ -966,6 +1016,7 @@ export async function recordCrewCompletion(xp: number): Promise<void> {
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await awardModeXp("crew", xp);
+  await claimDailyQuestFor("crew");
 }
 
 export async function recordBlindRankingCompletion(xp: number): Promise<void> {
@@ -973,13 +1024,16 @@ export async function recordBlindRankingCompletion(xp: number): Promise<void> {
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await awardModeXp("blind-ranking", xp);
+  await claimDailyQuestFor("blind-ranking");
 }
 
-export async function recordFusionCompletion(xp: number): Promise<void> {
+/** `bounty` is the Fusions-Piraten's raw Berry bounty (not XP) — needed to check the ">1 Mrd." Daily Quest. */
+export async function recordFusionCompletion(xp: number, bounty: number): Promise<void> {
   if (!supabase) return;
   const userId = await ensureSupabaseSession();
   if (!userId) return;
   await awardModeXp("fusion", xp);
+  if (bounty >= 1_000_000_000) await claimDailyQuestFor("fusion-1b");
 }
 
 // --- Achievements (currently Fusions-Pirat badges, see fusionAchievements.ts) ---

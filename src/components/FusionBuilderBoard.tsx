@@ -101,7 +101,7 @@ export function FusionBuilderBoard() {
 
   async function finalizeFusion(finalPicks: FusionOption[]) {
     const bounty = computeBounty(finalPicks);
-    recordFusionCompletion(fusionXpForBounty(bounty));
+    recordFusionCompletion(fusionXpForBounty(bounty), bounty);
     const earned = checkFusionAchievements(finalPicks, bounty);
     if (earned.length === 0) return;
     const results = await Promise.all(earned.map(async (a) => ({ a, isNew: await unlockAchievement(a.id) })));
