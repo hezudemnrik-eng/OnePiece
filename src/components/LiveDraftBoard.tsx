@@ -7,7 +7,6 @@ import {
   allRolesConfirmed,
   assignRole,
   assignTeam,
-  autoPick,
   claimSeat,
   confirmRoles,
   createDraft,
@@ -54,15 +53,12 @@ import {
 import { AnimatedBattleLog } from "./AnimatedBattleLog";
 import { RoleAssignmentPanel } from "./RoleAssignmentPanel";
 import { RollPanel } from "./RollPanel";
-import { TimerBar } from "./TimerBar";
 import { VictoryBanner } from "./VictoryBanner";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 import { Input } from "./ui/Input";
 import { Select } from "./ui/Select";
 
-const PICK_SECONDS = 30;
-const ROLES_SECONDS = 45;
 const NICKNAME_KEY = "op-nickname";
 const PRESENCE_INTERVAL_MS = 7000;
 const STALE_MS = 15000;
@@ -167,8 +163,6 @@ export function LiveDraftBoard() {
 
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const autoPickFiredRef = useRef(false);
-  const autoConfirmRolesFiredRef = useRef(false);
   const matchRecordedRef = useRef(false);
   const achievementsCheckedRef = useRef(false);
   const lastHeartbeatRef = useRef(0);
@@ -279,11 +273,7 @@ export function LiveDraftBoard() {
   function attach(s: LiveDraftSession) {
     setSession(s);
     unsubscribeRef.current?.();
-    unsubscribeRef.current = subscribeLiveDraft(s.id, (updated) => {
-      setSession(updated);
-      autoPickFiredRef.current = false;
-      autoConfirmRolesFiredRef.current = false;
-    });
+    unsubscribeRef.current = subscribeLiveDraft(s.id, setSession);
 
     // Realtime push isn't guaranteed — the project's Realtime service can
     // be unhealthy independently of the database itself (seen in testing:
@@ -452,22 +442,6 @@ export function LiveDraftBoard() {
     return nowTick - new Date(lastSeenAt).getTime() > STALE_MS;
   }
 
-  // Only the current player's own browser fires the timeout auto-pick, so
-  // two tabs never race to both auto-pick the same turn.
-  useEffect(() => {
-    if (view !== "drafting" || !session || !myUserId || isSpectator) return;
-    const player = currentPlayer(session.state);
-    if (player.userId !== myUserId) return;
-    const elapsed = (nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000;
-    if (elapsed >= PICK_SECONDS && !autoPickFiredRef.current) {
-      autoPickFiredRef.current = true;
-      const next = autoPick(session.state);
-      writeLiveDraft(session.id, session.updated_at, { state: next }).then((result) => {
-        if (result.session) setSession(result.session);
-      });
-    }
-  }, [nowTick, view, session, myUserId, isSpectator]);
-
   // The host's browser moves the draft into the role-assignment phase once
   // it finishes, so exactly one client writes the transition instead of
   // every client racing to.
@@ -568,21 +542,6 @@ export function LiveDraftBoard() {
       if (refetched) setSession(refetched);
     }
   }
-
-  // Auto-confirms this viewer's roles (with whatever they've assigned so
-  // far, possibly nothing) if they sit on the role-assignment screen too
-  // long — mirrors the pick timer so a quiet player can't stall the match.
-  useEffect(() => {
-    if (effectiveView !== "roles" || !session || !myUserId || isSpectator) return;
-    const me = session.state.players.find((p) => p.userId === myUserId);
-    if (!me || me.rolesReady) return;
-    const elapsed = (nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000;
-    if (elapsed >= ROLES_SECONDS && !autoConfirmRolesFiredRef.current) {
-      autoConfirmRolesFiredRef.current = true;
-      handleConfirmRoles();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nowTick, effectiveView, session, myUserId, isSpectator]);
 
   // Every participant's own browser records its own win/loss once — not
   // just the host's — so the friend leaderboard reflects everyone.
@@ -900,8 +859,6 @@ export function LiveDraftBoard() {
   if (effectiveView === "drafting" && session) {
     const player = currentPlayer(session.state);
     const myTurn = !isSpectator && player.userId === myUserId;
-    const elapsed = Math.floor((nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000);
-    const secondsLeft = Math.max(0, PICK_SECONDS - elapsed);
     const offered = session.state.rolledCharacterIds
       .map((id) => characters.find((c) => c.id === id))
       .filter((c): c is NonNullable<typeof c> => Boolean(c));
@@ -912,12 +869,11 @@ export function LiveDraftBoard() {
       <div className="grid gap-6 md:grid-cols-[1fr_280px]">
         {renderFloatingEmotes()}
         <div>
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4">
             <p key={player.id} className="op-turn-pulse text-sm">
               Am Zug: <span className="font-semibold">{player.name}</span>
               {myTurn && <span className="text-mode-draft"> (du!)</span>} · Runde {session.state.round}
             </p>
-            <TimerBar secondsLeft={secondsLeft} totalSeconds={PICK_SECONDS} />
           </div>
           {disconnected && (
             <p className="mb-3 text-sm text-danger">
@@ -963,8 +919,6 @@ export function LiveDraftBoard() {
   if (effectiveView === "roles" && session) {
     const me = session.state.players.find((p) => p.userId === myUserId);
     const roster = me ? getTeam(session.state, me.id, characters) : [];
-    const elapsed = Math.floor((nowTick - new Date(session.state.turnStartedAt).getTime()) / 1000);
-    const secondsLeft = Math.max(0, ROLES_SECONDS - elapsed);
     const readyCount = session.state.players.filter((p) => p.rolesReady).length;
     const stalePlayers = session.state.players.filter(
       (p) => p.userId && p.userId !== myUserId && !p.rolesReady && isPlayerStale(p.lastSeenAt)
@@ -973,12 +927,9 @@ export function LiveDraftBoard() {
     return (
       <div className="flex flex-col gap-4">
         {renderFloatingEmotes()}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-black/60 dark:text-white/50">
-            Bereit: {readyCount}/{session.state.players.length}
-          </p>
-          <TimerBar secondsLeft={secondsLeft} totalSeconds={ROLES_SECONDS} />
-        </div>
+        <p className="text-sm text-black/60 dark:text-white/50">
+          Bereit: {readyCount}/{session.state.players.length}
+        </p>
         {stalePlayers.length > 0 && (
           <p className="text-sm text-danger">
             ⚠️ {stalePlayers.map((p) => p.name).join(", ")} scheint die Verbindung verloren zu haben — es pausiert, bis die
