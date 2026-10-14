@@ -49,13 +49,12 @@ export function IconRail() {
             >
               {ICON_IMAGES[item.icon] ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={ICON_IMAGES[item.icon]} alt="" aria-hidden className="h-8 w-8 shrink-0 object-contain" />
+                <img src={ICON_IMAGES[item.icon]} alt="" aria-hidden className="h-11 w-11 shrink-0 object-contain" />
               ) : (
-                <span className="text-xl shrink-0" aria-hidden>
+                <span className="text-2xl shrink-0" aria-hidden>
                   {item.icon}
                 </span>
               )}
-              {expanded && <span className="truncate">{item.title}</span>}
             </Link>
           );
         })}
