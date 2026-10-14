@@ -217,7 +217,10 @@ export function ProfileBoard() {
           <p className="font-[family-name:var(--font-display)] text-lg text-accent-ink">
             {progress.rankTitle} · Level {progress.level}
           </p>
-          <p className="text-sm opacity-70">{formatBerry(berries)}</p>
+          <p className="flex items-center gap-1 text-sm opacity-70">
+            <span className="text-base drop-shadow-sm" aria-hidden>🪙</span>
+            {formatBerry(berries)}
+          </p>
         </div>
       </div>
 
@@ -469,7 +472,10 @@ export function ProfileBoard() {
           <Card variant="spotlight" accent="shop" className="flex items-center justify-between">
             <span className="text-sm font-semibold">
               Rahmen, Farben, Avatare, Titel & Arenen kaufen
-              <span className="block font-normal text-black/60 dark:text-white/50">{formatBerry(berries)} verfügbar</span>
+              <span className="flex items-center gap-1 font-normal text-black/60 dark:text-white/50">
+                <span className="text-sm drop-shadow-sm" aria-hidden>🪙</span>
+                {formatBerry(berries)} verfügbar
+              </span>
             </span>
             <span className="text-accent-ink text-xl" aria-hidden>
               →

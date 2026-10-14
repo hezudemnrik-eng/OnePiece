@@ -146,9 +146,9 @@ export function HomeOverview() {
               <span className="flex min-w-0 items-center gap-2 truncate whitespace-nowrap text-sm font-semibold text-white">
                 {ICON_IMAGES[lastMode.icon] ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={ICON_IMAGES[lastMode.icon]} alt="" aria-hidden className="h-8 w-8 shrink-0 object-contain" />
+                  <img src={ICON_IMAGES[lastMode.icon]} alt="" aria-hidden className="h-10 w-10 shrink-0 object-contain drop-shadow-md" />
                 ) : (
-                  <span className="shrink-0 text-xl" aria-hidden>
+                  <span className="shrink-0 text-2xl drop-shadow-md" aria-hidden>
                     {lastMode.icon}
                   </span>
                 )}
@@ -199,9 +199,9 @@ export function HomeOverview() {
           >
             {ICON_IMAGES[challenge.icon] ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={ICON_IMAGES[challenge.icon]} alt="" aria-hidden className="h-7 w-7 shrink-0 object-contain" />
+              <img src={ICON_IMAGES[challenge.icon]} alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain drop-shadow-md" />
             ) : (
-              <span className="shrink-0 text-lg" aria-hidden>
+              <span className="shrink-0 text-xl drop-shadow-md" aria-hidden>
                 {challenge.icon}
               </span>
             )}
