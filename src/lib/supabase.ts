@@ -758,6 +758,56 @@ export async function fetchPublicProfilesCosmetics(userIds: string[]): Promise<P
   }));
 }
 
+export type DraftInvite = {
+  id: string;
+  fromUserId: string;
+  fromUsername: string;
+  inviteCode: string;
+  createdAt: string;
+};
+
+/** Sends a Live-Draft invite to a friend (migration 0024) — the RLS policy only lets this succeed for an accepted friendship. */
+export async function sendDraftInvite(toUserId: string, inviteCode: string): Promise<{ ok: boolean; error?: string }> {
+  if (!supabase) return { ok: false, error: "Nicht verbunden." };
+  const myUserId = await ensureSupabaseSession();
+  if (!myUserId) return { ok: false, error: "Nicht angemeldet." };
+  const { error } = await supabase
+    .from("draft_invites")
+    .insert({ from_user_id: myUserId, to_user_id: toUserId, invite_code: inviteCode.trim().toUpperCase() });
+  if (error) return { ok: false, error: "Einladung konnte nicht gesendet werden." };
+  return { ok: true };
+}
+
+/** Invites addressed to me, newest first — shown as a banner on the home overview. */
+export async function fetchIncomingDraftInvites(): Promise<DraftInvite[]> {
+  if (!supabase) return [];
+  const myUserId = await ensureSupabaseSession();
+  if (!myUserId) return [];
+  const { data: rows } = await supabase
+    .from("draft_invites")
+    .select("id, from_user_id, invite_code, created_at")
+    .eq("to_user_id", myUserId)
+    .order("created_at", { ascending: false });
+  if (!rows || rows.length === 0) return [];
+
+  const fromIds = Array.from(new Set(rows.map((r) => r.from_user_id)));
+  const { data: profiles } = await supabase.from("profiles").select("id, username").in("id", fromIds);
+
+  return rows.map((r) => ({
+    id: r.id,
+    fromUserId: r.from_user_id,
+    fromUsername: profiles?.find((p) => p.id === r.from_user_id)?.username ?? "?",
+    inviteCode: r.invite_code,
+    createdAt: r.created_at,
+  }));
+}
+
+/** Clears an invite once it's been accepted or dismissed. */
+export async function dismissDraftInvite(id: string): Promise<void> {
+  if (!supabase) return;
+  await supabase.from("draft_invites").delete().eq("id", id);
+}
+
 export type OpenLiveDraft = {
   id: string;
   inviteCode: string;
