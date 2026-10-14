@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { characters, type Role } from "@/lib/characters";
 import {
+  allRematchReady,
   allRolesConfirmed,
   assignRole,
   assignTeam,
@@ -20,6 +21,7 @@ import {
   sendEmote,
   skipRoll,
   touchPresence,
+  voteRematch,
   type DraftEmote,
   type DraftTeam,
 } from "@/lib/draft";
@@ -153,7 +155,6 @@ export function LiveDraftBoard() {
   // only sharing the invite code outside the app.
   const [friends, setFriends] = useState<Friend[]>([]);
   const [invitedFriendIds, setInvitedFriendIds] = useState<string[]>([]);
-  const [rematchStarting, setRematchStarting] = useState(false);
 
   // Floating pop-up emotes (Boss's ask): a short-lived overlay item per new
   // chat message, independent of the small text log, that animates in and
@@ -165,6 +166,8 @@ export function LiveDraftBoard() {
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const matchRecordedRef = useRef(false);
   const achievementsCheckedRef = useRef(false);
+  const rematchCreateFiredRef = useRef(false);
+  const rematchJoinFiredRef = useRef(false);
   const lastHeartbeatRef = useRef(0);
 
   function detachPolling() {
@@ -557,6 +560,65 @@ export function LiveDraftBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.state.finished, session?.phase, myUserId]);
 
+  // Once every seated player has voted ready (handleVoteRematch), the
+  // host's browser alone creates the fresh lobby — exactly one writer, like
+  // the other host-only transitions above — pre-seating every player into
+  // it (not just itself) so nobody has to separately "join" afterwards.
+  useEffect(() => {
+    if (!session || session.phase !== "result" || isSpectator) return;
+    if (session.host_id !== myUserId) return;
+    if (session.state.rematchInviteCode || !allRematchReady(session.state)) return;
+    if (rematchCreateFiredRef.current) return;
+    rematchCreateFiredRef.current = true;
+
+    (async () => {
+      const ids = characters.map((c) => c.id);
+      const teamModeEnabled = Boolean(session.state.teamModeEnabled);
+      const placeholderNames = session.state.players.map(() => "Offen");
+      let initial = createDraft(placeholderNames, ids, session.state.teamSize, { teamModeEnabled });
+      session.state.players.forEach((p, i) => {
+        if (!p.userId) return;
+        initial = claimSeat(initial, i, p.userId, p.name);
+        if (p.team) initial = assignTeam(initial, i, p.team);
+      });
+      const created = await createLiveDraft(initial, session.state.players.length);
+      if (!created) {
+        rematchCreateFiredRef.current = false;
+        setErrorMsg("Konnte kein Rematch starten.");
+        return;
+      }
+      // Retries against whoever's vote landed last, same optimistic-concurrency
+      // pattern as every other write here — only the host writes this field,
+      // but a vote from another player can still land in between.
+      let current = session;
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const result = await writeLiveDraft(current.id, current.updated_at, {
+          state: { ...current.state, rematchInviteCode: created.invite_code },
+        });
+        if (result.session) break;
+        const refetched = await fetchLiveDraftById(session.id);
+        if (!refetched) break;
+        current = refetched;
+      }
+      setIsSpectator(false);
+      attach(created);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.state.players, session?.phase, myUserId, isSpectator]);
+
+  // Everyone else just watches the finished session for the invite code the
+  // host wrote above and jumps straight in — they're already seated in the
+  // new lobby (pre-filled by claimSeat/assignTeam just above), so this is a
+  // plain attach, not a seat-claiming join.
+  useEffect(() => {
+    if (!session || session.phase !== "result" || isSpectator) return;
+    if (session.host_id === myUserId || !session.state.rematchInviteCode) return;
+    if (rematchJoinFiredRef.current) return;
+    rematchJoinFiredRef.current = true;
+    handleJoin(session.state.rematchInviteCode);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.state.rematchInviteCode, session?.phase, myUserId, isSpectator]);
+
   async function handleSendEmote(emote: DraftEmote) {
     if (!session || !myUserId) return;
     const me = session.state.players.find((p) => p.userId === myUserId);
@@ -575,6 +637,8 @@ export function LiveDraftBoard() {
     setNewAchievements([]);
     achievementsCheckedRef.current = false;
     matchRecordedRef.current = false;
+    rematchCreateFiredRef.current = false;
+    rematchJoinFiredRef.current = false;
     setInvitedFriendIds([]);
     setFloatingEmotes([]);
     lastChatAtRef.current = "";
@@ -587,47 +651,22 @@ export function LiveDraftBoard() {
     if (result.ok) setInvitedFriendIds((prev) => [...prev, friendUserId]);
   }
 
-  // Starts (or joins) a fresh lobby with the same settings once the current
-  // draft's result is in — every participant can trigger this, not just the
-  // host, since any of them might want to play again first. The new lobby's
-  // code is written onto the finished session's state so the others (still
-  // on this result screen) see a "rematch started" banner and can jump
-  // straight in via handleJoin, instead of a code shared outside the app.
-  async function handleRematch() {
+  // Votes this browser's own player ready for a rematch — Boss's ask was
+  // that nobody starts a new lobby alone: everyone has to press the button
+  // first, and only then do they all land in the same fresh lobby together
+  // (see the two effects below, which do the actual creating/joining once
+  // every seated player has voted).
+  async function handleVoteRematch() {
     if (!session || !myUserId) return;
-    if (session.state.rematchInviteCode) {
-      handleJoin(session.state.rematchInviteCode);
-      return;
-    }
-    setRematchStarting(true);
-    const ids = characters.map((c) => c.id);
-    const teamModeEnabled = Boolean(session.state.teamModeEnabled);
-    const placeholderNames = Array.from({ length: session.state.players.length }, () => "Offen");
-    let initial = createDraft(placeholderNames, ids, session.state.teamSize, { teamModeEnabled });
-    initial = claimSeat(initial, 0, myUserId, nickname || "Spieler");
-    const created = await createLiveDraft(initial, session.state.players.length);
-    if (!created) {
-      setRematchStarting(false);
-      setErrorMsg("Konnte kein Rematch starten.");
-      return;
-    }
-
-    const result = await writeLiveDraft(session.id, session.updated_at, {
-      state: { ...session.state, rematchInviteCode: created.invite_code },
-    });
-    if (!result.session) {
-      // Someone else's rematch write landed first — join theirs instead of
-      // leaving two lobbies around.
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    if (!me) return;
+    const next = voteRematch(session.state, me.id);
+    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
+    if (result.session) setSession(result.session);
+    else if (result.conflict) {
       const refetched = await fetchLiveDraftById(session.id);
-      if (refetched?.state.rematchInviteCode) {
-        setRematchStarting(false);
-        handleJoin(refetched.state.rematchInviteCode);
-        return;
-      }
+      if (refetched) setSession(refetched);
     }
-    setIsSpectator(false);
-    attach(created);
-    setRematchStarting(false);
   }
 
   function chatLabel(playerId: string): string {
@@ -1013,20 +1052,13 @@ export function LiveDraftBoard() {
         ) : (
           <p className="text-sm text-black/50 dark:text-white/40">Kampfsimulation wird berechnet…</p>
         )}
-        {!isSpectator && (
+        {!isSpectator && me && (
           <div className="flex flex-col gap-2">
-            {session.state.rematchInviteCode && (
-              <p className="text-sm text-black/60 dark:text-white/50">
-                Rematch gestartet — Code <span className="font-mono">{session.state.rematchInviteCode}</span>
-              </p>
-            )}
             {errorMsg && <p className="text-sm text-danger">{errorMsg}</p>}
-            <Button onClick={handleRematch} disabled={rematchStarting}>
-              {session.state.rematchInviteCode
-                ? "Rematch beitreten"
-                : rematchStarting
-                  ? "Starte Rematch…"
-                  : "Rematch starten"}
+            <Button onClick={handleVoteRematch} disabled={me.rematchReady}>
+              {me.rematchReady
+                ? `Warte auf die anderen… (${session.state.players.filter((p) => p.rematchReady).length}/${session.state.players.filter((p) => p.userId).length} bereit)`
+                : "Rematch"}
             </Button>
           </div>
         )}
