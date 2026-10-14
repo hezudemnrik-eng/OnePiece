@@ -60,22 +60,31 @@ function FusionGridCard({
           ✓
         </span>
       )}
-      {option.sourceImageUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={option.sourceImageUrl}
-          alt={option.sourceName}
-          referrerPolicy="no-referrer"
-          className="absolute inset-0 h-full w-full object-cover object-top"
-        />
-      ) : (
-        <span className="absolute inset-0 flex items-center justify-center bg-mode-fusion/15 text-3xl font-bold">
-          {option.sourceName.slice(0, 2).toUpperCase()}
+      {/* Keyed by the rolled character so a reroll (new candidate while the
+          category is still open) remounts this wrapper and replays the
+          op-pop-in flip — the card visibly "spins" to the new face instead
+          of just swapping the image in place. */}
+      <div
+        key={`${option.sourceCharacterId}-${option.traitLabel}`}
+        className={`absolute inset-0 ${onClick ? "op-pop-in" : ""}`}
+      >
+        {option.sourceImageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={option.sourceImageUrl}
+            alt={option.sourceName}
+            referrerPolicy="no-referrer"
+            className="absolute inset-0 h-full w-full object-cover object-top"
+          />
+        ) : (
+          <span className="absolute inset-0 flex items-center justify-center bg-mode-fusion/15 text-3xl font-bold">
+            {option.sourceName.slice(0, 2).toUpperCase()}
+          </span>
+        )}
+        <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/45 to-transparent px-1.5 pb-1.5 pt-5 font-[family-name:var(--font-display)] text-xs leading-tight text-white">
+          {option.sourceName}
         </span>
-      )}
-      <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/45 to-transparent px-1.5 pb-1.5 pt-5 font-[family-name:var(--font-display)] text-xs leading-tight text-white">
-        {option.sourceName}
-      </span>
+      </div>
     </button>
   );
 }
