@@ -21,6 +21,9 @@ const MODE_IMAGES: Record<string, string> = {
   "/quiz": "/images/mode-quiz.jpg",
   "/blind-ranking": "/images/mode-blind-ranking.jpg",
   "/tierlisten": "/images/mode-tierlisten.jpg",
+  "/zufallsgegner": "/images/mode-zufallsgegner.jpg",
+  "/fusion": "/images/mode-fusion.jpg",
+  "/crew": "/images/mode-crew.jpg",
 };
 
 function ModeGrid({ modes }: { modes: typeof MODES }) {
