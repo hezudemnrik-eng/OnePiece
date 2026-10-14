@@ -1,5 +1,5 @@
 import quizLoreData from "../../data/quiz-lore.json";
-import { characters, getCrews, getStrongestVersion, type Character, type Role, type Stats, type Tier } from "./characters";
+import { characters, getCrews, type Character, type Role, type Tier } from "./characters";
 import { arcs, type Arc } from "./arcs";
 import { islands } from "./islands";
 import { classifyFruit } from "./fruitType";
@@ -109,18 +109,6 @@ function generateCharacterQuestion(rng: () => number): QuizQuestion {
       };
     },
     () => {
-      const tiers: Tier[] = ["S", "A", "B", "C", "D"];
-      const wrong = distractors(tiers, c.tier, 3, rng);
-      return {
-        id: `gen-tier-${c.id}`,
-        category: "charaktere",
-        difficulty: "mittel",
-        prompt: `Welchem Tier wird ${c.name} in dieser App zugeordnet?`,
-        options: shuffle([c.tier, ...wrong], rng),
-        correct: 0,
-      };
-    },
-    () => {
       const isAlive = c.alive;
       return {
         id: `gen-alive-${c.id}`,
@@ -167,25 +155,14 @@ function generateCharacterQuestion(rng: () => number): QuizQuestion {
       ? c.crew
       : q.prompt.includes("Rolle")
         ? c.role
-        : q.prompt.includes("Tier")
-          ? c.tier
-          : q.prompt.startsWith("Wer ist auf diesem Bild")
-            ? c.name
-            : null;
+        : q.prompt.startsWith("Wer ist auf diesem Bild")
+          ? c.name
+          : null;
   if (correctValue !== null) {
     q.correct = q.options.indexOf(correctValue);
   }
   return q;
 }
-
-const STAT_LABELS: Record<keyof Stats, string> = {
-  staerke: "Stärke",
-  haki: "Haki",
-  intelligenz: "Intelligenz",
-  geschwindigkeit: "Geschwindigkeit",
-  durabilitaet: "Durabilität",
-};
-const STAT_KEYS = Object.keys(STAT_LABELS) as (keyof Stats)[];
 
 function pickTwoDistinct<T>(arr: T[], rng: () => number): [T, T] {
   const a = pickOne(arr, rng);
@@ -193,26 +170,6 @@ function pickTwoDistinct<T>(arr: T[], rng: () => number): [T, T] {
   let guard = 0;
   while (b === a && guard++ < 20) b = pickOne(arr, rng);
   return [a, b];
-}
-
-/** Harder template: which of two characters scores higher on a given stat — ground truth comes straight from our own stat data, never invented lore. */
-function generateComparisonQuestion(rng: () => number): QuizQuestion {
-  const [a, b] = pickTwoDistinct(characters, rng);
-  const statKey = pickOne(STAT_KEYS, rng);
-  const valueA = getStrongestVersion(a).stats[statKey];
-  const valueB = getStrongestVersion(b).stats[statKey];
-  const diff = Math.abs(valueA - valueB);
-  const difficulty: QuizDifficulty = diff <= 8 ? "schwer" : diff <= 25 ? "mittel" : "leicht";
-  const correctValue = valueA >= valueB ? a.name : b.name;
-  const options = shuffle([a.name, b.name], rng);
-  return {
-    id: `gen-cmp-${statKey}-${a.id}-${b.id}`,
-    category: "charaktere",
-    difficulty,
-    prompt: `Wer hat mehr ${STAT_LABELS[statKey]}: ${a.name} oder ${b.name}?`,
-    options,
-    correct: options.indexOf(correctValue),
-  };
 }
 
 const FRUIT_CLASS_LABELS: Record<"logia" | "zoan" | "paramecia", string> = {
@@ -300,9 +257,7 @@ function generateAnyQuestion(rng: () => number, arcPool: Arc[]): QuizQuestion | 
   const generators: Array<() => QuizQuestion | null> = [
     () => generateCharacterQuestion(rng),
     () => generateCharacterQuestion(rng),
-    () => generateComparisonQuestion(rng),
-    () => generateComparisonQuestion(rng),
-    () => generateComparisonQuestion(rng),
+    () => generateCharacterQuestion(rng),
     () => generateFruitClassQuestion(rng),
     () => generateArcSagaQuestion(rng, arcPool),
     () => generateArcOrderQuestion(rng, arcPool),
