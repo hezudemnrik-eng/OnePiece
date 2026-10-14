@@ -1,12 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Anton, Geist, Geist_Mono, Pirata_One } from "next/font/google";
+import { Anton, Bitter, Geist_Mono, Pirata_One } from "next/font/google";
 import Script from "next/script";
 import { AuthGate } from "@/components/AuthGate";
 import { THEME_BOOTSTRAP_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Warm slab-serif body face (replaces the earlier geometric Geist Sans) —
+// reads more like carved/painted lettering on wood/parchment, matching the
+// Holz-Gold illustrated assets (bars, icons, frames, Berry coin) rather than
+// a generic app-UI sans-serif.
+const bodyFont = Bitter({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
@@ -54,7 +58,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="de"
-      className={`${geistSans.variable} ${geistMono.variable} ${anton.variable} ${pirataOne.variable} h-full antialiased`}
+      className={`${bodyFont.variable} ${geistMono.variable} ${anton.variable} ${pirataOne.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {/* Applies a saved manual light/dark override before first paint, so
