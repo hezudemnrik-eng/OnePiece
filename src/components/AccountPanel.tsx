@@ -13,6 +13,7 @@ import {
 } from "@/lib/supabase";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 import { COSMETIC_FRAMES, getLevelProgress } from "@/lib/levels";
+import { FRAME_IMAGES } from "@/lib/frameImages";
 import { formatBerry } from "@/lib/fusionTraits";
 
 type Props = {
@@ -23,7 +24,9 @@ type Props = {
 export function AccountPanel({ onSignedOut }: Props) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [frameClass, setFrameClass] = useState("");
+  const [frameImage, setFrameImage] = useState<string | null>(null);
   const [colorClass, setColorClass] = useState("");
+  const [title, setTitle] = useState<{ label: string; className: string } | null>(null);
   const [berries, setBerries] = useState(0);
   const [level, setLevel] = useState(1);
   const [loaded, setLoaded] = useState(false);
@@ -37,7 +40,10 @@ export function AccountPanel({ onSignedOut }: Props) {
           items.find((i) => i.category === "frame" && i.id === levelInfo?.equippedFrame)?.className ??
           ""
       );
+      setFrameImage(levelInfo?.equippedFrame ? (FRAME_IMAGES[levelInfo.equippedFrame] ?? null) : null);
       setColorClass(items.find((i) => i.category === "color" && i.id === levelInfo?.equippedColor)?.className ?? "");
+      const activeTitle = items.find((i) => i.category === "title" && i.id === levelInfo?.equippedTitle);
+      setTitle(activeTitle ? { label: activeTitle.label, className: activeTitle.className } : null);
       setBerries(levelInfo?.berries ?? 0);
       setLevel(getLevelProgress(levelInfo?.xp ?? 0).level);
       setLoaded(true);
@@ -64,14 +70,30 @@ export function AccountPanel({ onSignedOut }: Props) {
         {animationsEnabled ? "✨" : "🔇"}
       </button>
       <Link href="/profil" className="relative shrink-0">
-        {avatar?.imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={avatar.imageUrl}
-            alt={avatar.name}
-            referrerPolicy="no-referrer"
-            className={`h-9 w-9 rounded-full object-cover object-top border-2 border-foreground ${frameClass}`}
-          />
+        {frameImage ? (
+          <span className="relative flex h-[3.25rem] w-[3.25rem] items-center justify-center">
+            {avatar?.imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatar.imageUrl}
+                alt={avatar.name}
+                referrerPolicy="no-referrer"
+                className="h-9 w-9 rounded-full object-cover object-top"
+              />
+            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+          </span>
+        ) : (
+          avatar?.imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatar.imageUrl}
+              alt={avatar.name}
+              referrerPolicy="no-referrer"
+              className={`h-9 w-9 rounded-full object-cover object-top border-2 border-foreground ${frameClass}`}
+            />
+          )
         )}
         <span className="absolute -bottom-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold tabular-nums text-poster-ink">
           {level}
@@ -82,6 +104,7 @@ export function AccountPanel({ onSignedOut }: Props) {
       <span className="hidden min-w-0 truncate whitespace-nowrap sm:inline">
         <span className={`font-semibold ${colorClass}`}>{user.username}</span>
         {user.isAdmin && <span className="ml-1 text-xs text-accent-ink">(Admin)</span>}
+        {title && <span className={`ml-1.5 text-xs opacity-70 ${title.className}`}>{title.label}</span>}
       </span>
       <span className="shrink-0 whitespace-nowrap text-black/50 dark:text-white/40">{formatBerry(berries)}</span>
       <Link href="/profil" className="hidden shrink-0 text-black/50 dark:text-white/40 hover:underline sm:inline">

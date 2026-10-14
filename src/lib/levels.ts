@@ -75,15 +75,18 @@ export const FARMABLE_MODES = ["crew", "blind-ranking"] as const;
 export const BERRY_PER_LEVEL = 50;
 export const ACHIEVEMENT_BERRY_BONUS = 100;
 
-// Flat/scaled XP awards per completed action across the app.
-export const XP_MATCH_WIN = 25;
-export const XP_MATCH_LOSS = 10;
-export const XP_QUIZ_BASE = 5;
-export const XP_QUIZ_PER_CORRECT = 1;
-export const XP_CREW_COMPLETE = 12;
-export const XP_BLIND_RANKING_COMPLETE = 12;
-export const XP_FUSION_BASE = 10;
-export const XP_ACHIEVEMENT_BONUS = 15;
+// Flat/scaled XP awards per completed action across the app. Boosted
+// (Boss, 2026-10-14: "Das spielen soll auch mehr Xp geben") — the daily
+// cap and level curve from migration 0011 are unchanged, so this mainly
+// means fewer runs needed to fill a day's budget, not a redesign of it.
+export const XP_MATCH_WIN = 40;
+export const XP_MATCH_LOSS = 15;
+export const XP_QUIZ_BASE = 8;
+export const XP_QUIZ_PER_CORRECT = 2;
+export const XP_CREW_COMPLETE = 18;
+export const XP_BLIND_RANKING_COMPLETE = 18;
+export const XP_FUSION_BASE = 15;
+export const XP_ACHIEVEMENT_BONUS = 20;
 
 /** Fusions-Pirat XP scales with the bounty: +1 XP per 100M Berry, capped. */
 export function fusionXpForBounty(bounty: number): number {

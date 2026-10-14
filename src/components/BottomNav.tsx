@@ -3,6 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
+import { ICON_IMAGES } from "@/lib/iconImages";
+
+function NavIcon({ icon }: { icon: string }) {
+  const image = ICON_IMAGES[icon];
+  if (image) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={image} alt="" aria-hidden className="h-5 w-5 object-contain" />;
+  }
+  return (
+    <span className="text-lg" aria-hidden>
+      {icon}
+    </span>
+  );
+}
 
 function isGroupActive(pathname: string, groupHref: string, groupId: string): boolean {
   if (pathname === groupHref) return true;
@@ -28,9 +42,7 @@ export function BottomNav() {
           pathname === "/" ? "text-accent-ink" : "text-black/50 dark:text-white/40"
         }`}
       >
-        <span className="text-lg" aria-hidden>
-          🏠
-        </span>
+        <NavIcon icon="🏠" />
         Home
       </Link>
       {MODE_GROUPS.map((g) => {
@@ -43,9 +55,7 @@ export function BottomNav() {
               active ? "text-accent-ink" : "text-black/50 dark:text-white/40"
             }`}
           >
-            <span className="text-lg" aria-hidden>
-              {g.icon}
-            </span>
+            <NavIcon icon={g.icon} />
             {g.title}
           </Link>
         );
@@ -56,9 +66,7 @@ export function BottomNav() {
           pathname.startsWith(SHOP_TILE.href) ? "text-accent-ink" : "text-black/50 dark:text-white/40"
         }`}
       >
-        <span className="text-lg" aria-hidden>
-          {SHOP_TILE.icon}
-        </span>
+        <NavIcon icon={SHOP_TILE.icon} />
         {SHOP_TILE.title}
       </Link>
     </nav>
