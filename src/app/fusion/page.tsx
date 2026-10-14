@@ -5,7 +5,7 @@ export default function FusionPage() {
   return (
     <PageShell
       title="Fusions-Pirat"
-      subtitle="Würfle dir Teufelsfrucht, Haki, Body, Weapon, Race, Sensei und Mind von zufälligen Charakteren zusammen — am Ende bekommst du ein Kopfgeld für deinen Fusions-Piraten."
+      subtitle="Wähle pro Runde eine von 7 Kategorien — am Ende dein Kopfgeld."
       accent="fusion"
     >
       <FusionBuilderBoard />
