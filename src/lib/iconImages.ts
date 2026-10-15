@@ -14,6 +14,8 @@ export const ICON_IMAGES: Record<string, string> = {
   "🎲": "/images/icons/icon-zufallsgegner.png",
   "🧬": "/images/icons/icon-fusion.png",
   "📜": "/images/icons/icon-tierlisten.png",
+  "📖": "/images/icons/icon-quests.png",
+  "👑": "/images/icons/icon-ranking.png",
 };
 
 /** Logout button icon (Boss's ChatGPT asset) — replaces the 🚪 emoji in AccountPanel. */
