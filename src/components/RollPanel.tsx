@@ -74,11 +74,11 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
   if (displayed.length === 0) return null;
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-3">
       <p className="text-xs uppercase tracking-[0.2em] text-mode-draft">
         {spinning ? "Rollt…" : readOnly ? "Gerade angeboten" : "Wähle einen Charakter"}
       </p>
-      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="grid w-full grid-cols-1 gap-2.5 sm:grid-cols-3">
         {displayed.map((char, i) => {
           const isSTier = !spinning && char.tier === "S";
           const fruitClass = !spinning ? classifyFruit(char.devilFruit) : null;
@@ -86,7 +86,7 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
           return (
             <div
               key={i}
-              className="op-parchment op-wanted flex flex-col items-center gap-3 rounded-2xl p-4"
+              className="op-parchment op-wanted flex flex-col items-center gap-2 rounded-2xl p-3"
             >
               {char.imageUrl && (
                 <div
@@ -98,7 +98,7 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
                     src={char.imageUrl}
                     alt={spinning ? "" : char.name}
                     referrerPolicy="no-referrer"
-                    className={`h-32 w-auto rounded-xl border-2 object-cover object-top shadow-lg transition-opacity ${spinning ? "opacity-70 blur-[1px]" : "opacity-100"}`}
+                    className={`h-44 w-auto rounded-xl border-2 object-cover object-top shadow-lg transition-opacity ${spinning ? "opacity-70 blur-[1px]" : "opacity-100"}`}
                     style={{ borderColor: fruitColor ?? "var(--poster-ink)" }}
                   />
                 </div>
