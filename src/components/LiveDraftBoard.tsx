@@ -375,7 +375,18 @@ export function LiveDraftBoard() {
   async function handleJoin(codeOverride?: string) {
     if (!myUserId) return;
     setErrorMsg("");
-    const found = await fetchLiveDraftByCode(codeOverride ?? codeInput);
+    const code = codeOverride ?? codeInput;
+    // Retry the lookup a few times before giving up: right after an invite
+    // is sent, the invitee's accept can reach us before the just-created
+    // lobby row has replicated, which looked exactly like an invalid code
+    // (a one-shot fetch here was why the invite pop-up sometimes failed to
+    // join at all).
+    let found: LiveDraftSession | null = null;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      found = await fetchLiveDraftByCode(code);
+      if (found) break;
+      if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, 500));
+    }
     if (!found) {
       setErrorMsg("Kein Draft mit diesem Code gefunden.");
       return;
@@ -663,7 +674,12 @@ export function LiveDraftBoard() {
   // Retries a few times against replica lag: a one-shot attempt that quietly
   // gave up on a transient `null` fetch — while permanently marking itself
   // "already tried" — was why a rematch sometimes left someone stuck on the
-  // old result screen.
+  // old result screen. Resetting the ref alone doesn't actually get retried
+  // though, since none of this effect's other dependencies change on their
+  // own afterwards (the old session's rematchInviteCode never changes
+  // again) — so `nowTick`, which already ticks once a second for the
+  // on-screen timers, is included here purely to give the effect a reason
+  // to re-run and notice the ref was reset.
   useEffect(() => {
     if (!session || session.phase !== "result" || isSpectator) return;
     if (session.host_id === myUserId || !session.state.rematchInviteCode) return;
@@ -680,12 +696,12 @@ export function LiveDraftBoard() {
         }
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
-      // Let the next poll/realtime tick try again instead of giving up for good.
+      // Let the next tick try again instead of giving up for good.
       rematchJoinFiredRef.current = false;
       setErrorMsg("Konnte dem Rematch nicht automatisch beitreten. Versuche es gleich erneut…");
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.state.rematchInviteCode, session?.phase, myUserId, isSpectator]);
+  }, [session?.state.rematchInviteCode, session?.phase, myUserId, isSpectator, nowTick]);
 
   async function handleSendEmote(emote: DraftEmote) {
     if (!session || !myUserId) return;
