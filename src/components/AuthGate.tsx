@@ -86,8 +86,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         <div className="md:pl-16">
           <header
             id="app-header"
-            className="sticky top-0 z-20 relative shadow-[0_2px_4px_rgba(0,0,0,0.35)]"
-            style={{ backgroundColor: "#693c1b" }}
+            className="sticky top-0 z-20 relative bg-cover bg-center shadow-[0_2px_4px_rgba(0,0,0,0.35)]"
+            style={{ backgroundImage: "url('/images/bar-header.png')", backgroundColor: "#693c1b" }}
           >
             <Link href="/" className="flex justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -97,7 +97,10 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
                 className="h-auto w-full object-contain sm:h-24 sm:w-auto md:h-28"
               />
             </Link>
-            <div className="absolute right-3 top-[calc(env(safe-area-inset-top)+0.5rem)] flex min-w-0 items-center gap-3 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] sm:right-4">
+            <div
+              className="absolute right-3 top-[calc(env(safe-area-inset-top)+0.5rem)] flex min-w-0 items-center gap-3 rounded-full px-3 py-1.5 shadow-[0_1px_4px_rgba(0,0,0,0.4)] sm:right-4"
+              style={{ backgroundColor: "rgba(20, 13, 6, 0.55)" }}
+            >
               <AccountPanel onSignedOut={refreshUser} />
             </div>
           </header>
