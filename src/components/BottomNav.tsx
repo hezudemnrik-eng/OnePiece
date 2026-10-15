@@ -67,7 +67,7 @@ export function BottomNav() {
           <span className={navSlotClass(item.isActive(pathname))}>
             <NavIcon icon={item.icon} />
           </span>
-          <span className="truncate whitespace-nowrap text-[10px] font-medium text-white/90 drop-shadow-md">{item.label}</span>
+          <span className="truncate whitespace-nowrap text-sm font-medium text-white/90 drop-shadow-md">{item.label}</span>
         </Link>
       ))}
     </nav>
