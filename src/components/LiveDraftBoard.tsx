@@ -810,13 +810,33 @@ export function LiveDraftBoard() {
     );
   }
 
+  // Dedicated background for the lobby-setup screens (Boss, 2026-10-15: "die
+  // Ansicht bei der Lobbyerstellung soll auch ein Hintergrund bekommen") —
+  // same fixed+overlay technique as the page-level background in
+  // draft/live/page.tsx, just rendered later in the DOM so it paints over it
+  // only while home/create-form/join-form/lobby are shown.
+  function renderLobbyBackground() {
+    return (
+      <>
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-25 dark:opacity-20"
+          style={{ backgroundImage: "url(/live-draft/lobby-background.jpg)" }}
+        />
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-white/70 dark:bg-black/70" />
+      </>
+    );
+  }
+
   if (effectiveView === "loading") {
     return <LoadingSpinner label="Verbinde…" />;
   }
 
   if (effectiveView === "home") {
     return (
-      <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
+      <>
+        {renderLobbyBackground()}
+        <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Dein Name
           <Input value={nickname} onChange={(e) => setNickname(e.target.value || "Spieler")} />
@@ -827,13 +847,16 @@ export function LiveDraftBoard() {
             Mit Code beitreten
           </Button>
         </div>
-      </Card>
+        </Card>
+      </>
     );
   }
 
   if (effectiveView === "create-form") {
     return (
-      <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
+      <>
+        {renderLobbyBackground()}
+        <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Anzahl Spieler (2 oder 4)
           <Select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))}>
@@ -864,13 +887,16 @@ export function LiveDraftBoard() {
             Zurück
           </Button>
         </div>
-      </Card>
+        </Card>
+      </>
     );
   }
 
   if (effectiveView === "join-form") {
     return (
-      <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
+      <>
+        {renderLobbyBackground()}
+        <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Einladungscode
           <Input
@@ -891,7 +917,8 @@ export function LiveDraftBoard() {
             Zurück
           </Button>
         </div>
-      </Card>
+        </Card>
+      </>
     );
   }
 
@@ -903,7 +930,9 @@ export function LiveDraftBoard() {
     const teamsAssigned = !teamModeEnabled || claimedPlayers.every((p) => p.team);
     const canStart = full && teamsAssigned;
     return (
-      <Card variant="spotlight" accent="draft" className="op-chatti-frame flex flex-col gap-4 max-w-md">
+      <>
+        {renderLobbyBackground()}
+        <Card variant="spotlight" accent="draft" className="op-chatti-frame flex flex-col gap-4 max-w-md">
         <div>
           <p className="text-sm text-black/60 dark:text-white/50">Einladungscode</p>
           <p className="font-mono text-2xl tracking-widest">{session.invite_code}</p>
@@ -985,7 +1014,8 @@ export function LiveDraftBoard() {
         <Button variant="ghost" onClick={backToHome} className="self-start text-black/50 dark:text-white/40">
           Verlassen
         </Button>
-      </Card>
+        </Card>
+      </>
     );
   }
 
