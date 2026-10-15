@@ -162,7 +162,7 @@ export function HomeOverview() {
                 )
               )}
               <span
-                className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center bg-contain bg-center bg-no-repeat text-xs font-bold tabular-nums text-poster-ink"
+                className="absolute -bottom-2 -left-2 flex h-8 w-8 items-center justify-center bg-contain bg-center bg-no-repeat text-xs font-bold tabular-nums text-poster-ink"
                 style={{ backgroundImage: "url('/images/ui/level-badge.png')" }}
               >
                 {progress.level}
@@ -170,25 +170,19 @@ export function HomeOverview() {
             </span>
 
             <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 items-center gap-2 text-base">
-                <span className={`truncate whitespace-nowrap font-semibold text-white ${colorClass}`}>{user?.username}</span>
-                {user?.isAdmin && <span className="shrink-0 text-xs text-accent-ink">(Admin)</span>}
-                {title && <span className={`shrink-0 text-xs opacity-80 ${title.className}`}>{title.label}</span>}
-              </div>
-              <div className="mt-1 flex items-center justify-between gap-2 mb-1 text-sm">
-                <span className="flex min-w-0 items-center gap-1.5 truncate whitespace-nowrap font-semibold text-white">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/ship-wheel.webp" alt="" aria-hidden className="h-4 w-4 shrink-0 object-contain" />
-                  {progress.rankTitle}
-                </span>
-                <span className="shrink-0 whitespace-nowrap tabular-nums text-white/70 font-[family-name:var(--font-mono)]">
+              {user?.isAdmin && <span className="block text-xs font-semibold text-accent-ink">[Admin]</span>}
+              <span className={`block truncate whitespace-nowrap font-semibold text-white ${colorClass}`}>{user?.username}</span>
+              {title && <span className={`block truncate whitespace-nowrap text-sm italic opacity-90 ${title.className}`}>{title.label}</span>}
+              <div className="mt-1.5 flex min-w-0 items-center gap-2 text-sm">
+                <span className="shrink-0 whitespace-nowrap font-semibold text-white">Lvl {progress.level}</span>
+                <ProgressBar progress={progress.progress} size="md" className="flex-1" />
+                <span className="shrink-0 whitespace-nowrap tabular-nums text-white/70 text-xs font-[family-name:var(--font-mono)]">
                   {progress.xp - progress.levelStartXp}/{progress.levelEndXp - progress.levelStartXp} XP
                 </span>
               </div>
-              <ProgressBar progress={progress.progress} size="md" />
-              <span className="mt-1.5 flex items-center gap-1 whitespace-nowrap font-display tabular-nums text-accent-ink">
+              <span className="mt-2 flex items-center gap-1.5 whitespace-nowrap font-display text-base tabular-nums text-accent-ink">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={BERRY_ICON} alt="" aria-hidden className="h-4 w-4 object-contain drop-shadow-sm" />
+                <img src={BERRY_ICON} alt="" aria-hidden className="h-5 w-5 object-contain drop-shadow-sm" />
                 {(levelInfo?.berries ?? 0).toLocaleString("de-DE")}
               </span>
             </div>
