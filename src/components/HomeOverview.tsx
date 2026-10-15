@@ -195,7 +195,7 @@ export function HomeOverview() {
       {myLobby ? (
         <Link href={`/draft/live?code=${myLobby.inviteCode}`}>
           <div
-            className="op-card relative flex min-h-[124px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
+            className="op-card relative flex min-h-[140px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
             style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/images/banner-weiterspielen.jpg')" }}
           >
             <p className="truncate whitespace-nowrap text-xs font-bold uppercase tracking-wide text-accent-ink">Weiterspielen</p>
@@ -214,7 +214,7 @@ export function HomeOverview() {
       ) : lastMode ? (
         <Link href={lastMode.href}>
           <div
-            className="op-card relative flex min-h-[124px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
+            className="op-card relative flex min-h-[140px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
             style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/images/banner-weiterspielen.jpg')" }}
           >
             <p className="truncate whitespace-nowrap text-xs font-bold uppercase tracking-wide text-accent-ink">Weiterspielen</p>
@@ -237,7 +237,7 @@ export function HomeOverview() {
         </Link>
       ) : (
         <div
-          className="op-card relative flex min-h-[124px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
+          className="op-card relative flex min-h-[140px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
           style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/images/banner-weiterspielen.jpg')" }}
         >
           <p className="truncate whitespace-nowrap text-lg font-semibold text-white mb-1">Willkommen an Bord! 🏴‍☠️</p>
@@ -284,7 +284,7 @@ export function HomeOverview() {
         {[...MODE_GROUPS, SHOP_TILE].map((g) => (
           <Link key={g.href} href={g.href}>
             <div
-              className="relative flex min-h-[80px] flex-col justify-end overflow-hidden rounded-xl border bg-cover bg-center p-3 shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+              className="relative flex min-h-[150px] flex-col justify-end overflow-hidden rounded-xl border bg-cover bg-center p-3 shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
               style={{
                 borderColor: `color-mix(in srgb, var(--mode-${"id" in g ? (g.id === "kampf" ? "duell" : g.id === "raetsel-ranking" ? "quiz" : "crew") : "shop"}) 55%, transparent)`,
                 backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.05)), url('${TILE_IMAGES[g.href] ?? ""}')`,
