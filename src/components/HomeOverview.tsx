@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { characters } from "@/lib/characters";
 import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
@@ -114,7 +114,7 @@ export function HomeOverview() {
   const avatar = avatarFor(user?.avatarCharacterId ?? null);
 
   return (
-    <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-6 flex flex-col gap-4">
+    <main className="mx-auto w-full min-w-0 max-w-3xl px-4 py-4 flex flex-col gap-[10px]">
       <p className="truncate whitespace-nowrap text-sm text-black/60 dark:text-white/50">
         {greetingText ?? "Willkommen"}
         {user?.username ? `, ${user.username}` : ""}.
@@ -125,41 +125,33 @@ export function HomeOverview() {
       {isSupabaseConfigured() && loaded && progress && (
         <Link href="/profil">
           <div
-            className={`op-card flex items-center gap-4 bg-cover bg-center p-4 ${
-              rankFrameImage ? "op-rank-frame" : rankFrameClass ? rankFrameClass : "op-framed"
-            }`}
-            style={
-              {
-                backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')",
-                ...(rankFrameImage ? { "--op-rank-frame-src": `url(${rankFrameImage})` } : {}),
-              } as CSSProperties
-            }
+            className="op-card op-framed flex items-center gap-4 bg-cover bg-center p-4"
+            style={{
+              backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')",
+            }}
           >
             <span className="relative flex h-20 w-20 shrink-0 items-center justify-center">
-              {frameImage ? (
-                <>
-                  {avatar?.imageUrl && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={avatar.imageUrl}
-                      alt={avatar.name}
-                      referrerPolicy="no-referrer"
-                      className="h-14 w-14 rounded-full object-cover object-top"
-                    />
-                  )}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
-                </>
-              ) : (
-                avatar?.imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={avatar.imageUrl}
-                    alt={avatar.name}
-                    referrerPolicy="no-referrer"
-                    className={`h-14 w-14 rounded-full object-cover object-top border-2 border-white ${frameClass}`}
-                  />
-                )
+              {avatar?.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatar.imageUrl}
+                  alt={avatar.name}
+                  referrerPolicy="no-referrer"
+                  className={`h-14 w-14 rounded-full object-cover object-top ${
+                    frameImage || rankFrameImage ? "" : `border-2 border-white ${frameClass}`
+                  }`}
+                />
+              )}
+              {frameImage && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+              )}
+              {!frameImage && rankFrameImage && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={rankFrameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
+              )}
+              {!frameImage && !rankFrameImage && rankFrameClass && (
+                <span className={`pointer-events-none absolute inset-0 rounded-full ${rankFrameClass}`} />
               )}
               <span
                 className="absolute -bottom-2 -left-2 flex h-8 w-8 items-center justify-center bg-contain bg-center bg-no-repeat text-xs font-bold tabular-nums text-poster-ink"
@@ -193,7 +185,7 @@ export function HomeOverview() {
       {myLobby ? (
         <Link href={`/draft/live?code=${myLobby.inviteCode}`}>
           <div
-            className="op-card relative flex min-h-[140px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
+            className="op-card relative flex min-h-[124px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
             style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/images/banner-weiterspielen.jpg')" }}
           >
             <p className="truncate whitespace-nowrap text-xs font-bold uppercase tracking-wide text-accent-ink">Weiterspielen</p>
@@ -212,7 +204,7 @@ export function HomeOverview() {
       ) : lastMode ? (
         <Link href={lastMode.href}>
           <div
-            className="op-card relative flex min-h-[140px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
+            className="op-card relative flex min-h-[124px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
             style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/images/banner-weiterspielen.jpg')" }}
           >
             <p className="truncate whitespace-nowrap text-xs font-bold uppercase tracking-wide text-accent-ink">Weiterspielen</p>
@@ -235,7 +227,7 @@ export function HomeOverview() {
         </Link>
       ) : (
         <div
-          className="op-card relative flex min-h-[140px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
+          className="op-card relative flex min-h-[124px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
           style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/images/banner-weiterspielen.jpg')" }}
         >
           <p className="truncate whitespace-nowrap text-lg font-semibold text-white mb-1">Willkommen an Bord! 🏴‍☠️</p>
@@ -282,7 +274,7 @@ export function HomeOverview() {
         {[...MODE_GROUPS, SHOP_TILE].map((g) => (
           <Link key={g.href} href={g.href}>
             <div
-              className="relative flex min-h-[110px] flex-col justify-end overflow-hidden rounded-xl border bg-cover bg-center p-3 shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+              className="relative flex min-h-[80px] flex-col justify-end overflow-hidden rounded-xl border bg-cover bg-center p-3 shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
               style={{
                 borderColor: `color-mix(in srgb, var(--mode-${"id" in g ? (g.id === "kampf" ? "duell" : g.id === "raetsel-ranking" ? "quiz" : "crew") : "shop"}) 55%, transparent)`,
                 backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.05)), url('${TILE_IMAGES[g.href] ?? ""}')`,
