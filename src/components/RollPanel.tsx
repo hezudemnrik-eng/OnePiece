@@ -29,6 +29,12 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
   const [animationsEnabled] = useAnimationsEnabled();
   const [spinning, setSpinning] = useState(false);
   const [spinFrames, setSpinFrames] = useState<Character[]>([]);
+  // Boss, 2026-10-15: "Ich will die Bilder ganz Groß ... Ohne Scrollen" — three
+  // stacked cards fought the zero-scroll fit (bigger images -> taller content
+  // -> useFitScreen just shrinks the scale factor more, no visible gain).
+  // Showing one offer at a time means only one card's height ever has to fit,
+  // so the image can be genuinely large while still landing on one screen.
+  const [index, setIndex] = useState(0);
   const offeredKey = offered.map((c) => c.id).join(",");
   const lastKeyRef = useRef<string>(offeredKey);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -42,7 +48,9 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
     if (offered.length === 0) return;
     const changed = offeredKey !== lastKeyRef.current;
     lastKeyRef.current = offeredKey;
-    if (!changed || !animationsEnabled) return;
+    if (!changed) return;
+    setIndex(0);
+    if (!animationsEnabled) return;
 
     timersRef.current.forEach(clearTimeout);
     timersRef.current = [];
@@ -73,56 +81,90 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
 
   if (displayed.length === 0) return null;
 
+  const clampedIndex = Math.min(index, displayed.length - 1);
+  const char = displayed[clampedIndex];
+  const isSTier = !spinning && char.tier === "S";
+  const fruitClass = !spinning ? classifyFruit(char.devilFruit) : null;
+  const fruitColor = fruitClass ? FRUIT_COLORS[fruitClass] : undefined;
+
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex w-full flex-col items-center gap-3">
       <p className="text-xs uppercase tracking-[0.2em] text-mode-draft">
         {spinning ? "Rollt…" : readOnly ? "Gerade angeboten" : "Wähle einen Charakter"}
       </p>
-      <div className="grid w-full grid-cols-1 gap-2.5 sm:grid-cols-3">
-        {displayed.map((char, i) => {
-          const isSTier = !spinning && char.tier === "S";
-          const fruitClass = !spinning ? classifyFruit(char.devilFruit) : null;
-          const fruitColor = fruitClass ? FRUIT_COLORS[fruitClass] : undefined;
-          return (
+      <div className="flex w-full max-w-sm items-center gap-2">
+        {displayed.length > 1 && (
+          <button
+            type="button"
+            onClick={() => setIndex((i) => (i - 1 + displayed.length) % displayed.length)}
+            disabled={spinning}
+            aria-label="Vorheriger Charakter"
+            className="shrink-0 rounded-full border border-black/15 p-2 text-lg disabled:opacity-30 dark:border-white/15"
+          >
+            ‹
+          </button>
+        )}
+        <div
+          key={clampedIndex}
+          className="op-parchment op-wanted op-pop-in flex flex-1 flex-col items-center gap-2 rounded-2xl p-3"
+        >
+          {char.imageUrl && (
             <div
-              key={i}
-              className="op-parchment op-wanted flex flex-col items-center gap-2 rounded-2xl p-3"
+              className={`w-full ${isSTier ? "op-s-tier-glow" : ""}`}
+              style={fruitColor ? { boxShadow: `0 0 0 3px ${fruitColor}55` } : undefined}
             >
-              {char.imageUrl && (
-                <div
-                  className={`rounded-xl ${!spinning ? "op-pop-in" : ""} ${isSTier ? "op-s-tier-glow" : ""}`}
-                  style={fruitColor ? { boxShadow: `0 0 0 3px ${fruitColor}55` } : undefined}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={char.imageUrl}
-                    alt={spinning ? "" : char.name}
-                    referrerPolicy="no-referrer"
-                    className={`h-44 w-auto rounded-xl border-2 object-cover object-top shadow-lg transition-opacity ${spinning ? "opacity-70 blur-[1px]" : "opacity-100"}`}
-                    style={{ borderColor: fruitColor ?? "var(--poster-ink)" }}
-                  />
-                </div>
-              )}
-              {fruitClass && !spinning && (
-                <span
-                  className="-mt-2 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
-                  style={{ background: fruitColor }}
-                >
-                  {fruitClass}
-                </span>
-              )}
-              <div className="w-full">
-                <CharacterCard character={char} />
-              </div>
-              {!readOnly && (
-                <Button onClick={() => onPick(char.id)} disabled={spinning} className="w-full shadow hover:shadow-md">
-                  Wählen
-                </Button>
-              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={char.imageUrl}
+                alt={spinning ? "" : char.name}
+                referrerPolicy="no-referrer"
+                className={`h-72 w-full rounded-xl border-2 object-cover object-top shadow-lg transition-opacity ${spinning ? "opacity-70 blur-[1px]" : "opacity-100"}`}
+                style={{ borderColor: fruitColor ?? "var(--poster-ink)" }}
+              />
             </div>
-          );
-        })}
+          )}
+          {fruitClass && !spinning && (
+            <span
+              className="-mt-2 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
+              style={{ background: fruitColor }}
+            >
+              {fruitClass}
+            </span>
+          )}
+          <div className="w-full">
+            <CharacterCard character={char} />
+          </div>
+          {!readOnly && (
+            <Button onClick={() => onPick(char.id)} disabled={spinning} className="w-full shadow hover:shadow-md">
+              Wählen
+            </Button>
+          )}
+        </div>
+        {displayed.length > 1 && (
+          <button
+            type="button"
+            onClick={() => setIndex((i) => (i + 1) % displayed.length)}
+            disabled={spinning}
+            aria-label="Nächster Charakter"
+            className="shrink-0 rounded-full border border-black/15 p-2 text-lg disabled:opacity-30 dark:border-white/15"
+          >
+            ›
+          </button>
+        )}
       </div>
+      {displayed.length > 1 && (
+        <div className="flex gap-1.5">
+          {displayed.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setIndex(i)}
+              aria-label={`Zu Charakter ${i + 1}`}
+              className={`h-2 w-2 rounded-full transition ${i === clampedIndex ? "bg-mode-draft" : "bg-black/20 dark:bg-white/20"}`}
+            />
+          ))}
+        </div>
+      )}
       {!readOnly && (
         <Button variant="secondary" onClick={onSkip} disabled={spinning || skipsLeft <= 0} className="hover:border-mode-draft/50">
           Alle neu würfeln ({skipsLeft} übrig)
