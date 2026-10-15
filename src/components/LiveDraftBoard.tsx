@@ -852,7 +852,7 @@ export function LiveDraftBoard() {
     return (
       <>
         {renderLobbyBackground()}
-        <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
+        <Card variant="spotlight" accent="draft" className="op-chatti-frame flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Dein Name
           <Input value={nickname} onChange={(e) => setNickname(e.target.value || "Spieler")} />
@@ -872,7 +872,7 @@ export function LiveDraftBoard() {
     return (
       <>
         {renderLobbyBackground()}
-        <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
+        <Card variant="spotlight" accent="draft" className="op-chatti-frame flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Anzahl Spieler (2 oder 4)
           <Select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))}>
@@ -912,7 +912,7 @@ export function LiveDraftBoard() {
     return (
       <>
         {renderLobbyBackground()}
-        <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
+        <Card variant="spotlight" accent="draft" className="op-chatti-frame flex flex-col gap-4 max-w-md">
         <label className="flex flex-col gap-1 text-sm">
           Einladungscode
           <Input
