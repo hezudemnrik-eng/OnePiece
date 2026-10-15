@@ -38,6 +38,26 @@ const pirataOne = Pirata_One({
 export const metadata: Metadata = {
   title: "One Piece Draft-App",
   description: "Privates Fan-Projekt: Draft-Spiele und Tierlisten rund um One Piece.",
+  // "Zum Home-Bildschirm hinzufügen" + schwarz-transparente Statusleiste:
+  // erst im installierten Standalone-Modus liegt sie über dem Header-Banner
+  // statt über einer leeren Fläche (Boss' Chatti-Mockup).
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Pirate Draft",
+  },
+  // Next only emits the modern "mobile-web-app-capable" meta tag; older
+  // iOS (pre-16.4) only honors the legacy "apple-"-prefixed one.
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
+  icons: {
+    icon: [
+      { url: "/images/icons/app/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/images/icons/app/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/images/icons/app/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {
