@@ -9,10 +9,10 @@ function NavIcon({ icon }: { icon: string }) {
   const image = ICON_IMAGES[icon];
   if (image) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={image} alt="" aria-hidden className="h-9 w-9 object-contain drop-shadow-md" />;
+    return <img src={image} alt="" aria-hidden className="h-16 w-16 object-contain drop-shadow-md" />;
   }
   return (
-    <span className="text-2xl drop-shadow-md" aria-hidden>
+    <span className="text-6xl drop-shadow-md" aria-hidden>
       {icon}
     </span>
   );
@@ -27,7 +27,7 @@ function isGroupActive(pathname: string, groupHref: string, groupId: string): bo
  * each slot (not wider than flex-1's share at phone widths) so the
  * highlight never bleeds into a neighboring icon. */
 function navSlotClass(active: boolean): string {
-  return `flex items-center justify-center rounded-xl p-1.5 transition ${
+  return `flex items-center justify-center rounded-xl p-0.5 transition ${
     active ? "bg-[rgba(244,197,66,0.35)] shadow-[0_0_0_2px_rgba(244,197,66,0.65)]" : ""
   }`;
 }
@@ -67,7 +67,7 @@ export function BottomNav() {
           <span className={navSlotClass(item.isActive(pathname))}>
             <NavIcon icon={item.icon} />
           </span>
-          <span className="truncate whitespace-nowrap text-[10px] font-medium text-white/90 drop-shadow-md">{item.label}</span>
+          <span className="truncate whitespace-nowrap text-sm font-medium text-white/90 drop-shadow-md">{item.label}</span>
         </Link>
       ))}
     </nav>
