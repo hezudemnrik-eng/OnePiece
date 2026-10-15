@@ -76,16 +76,24 @@ function loadNickname(): string {
 }
 
 /** Avatar+Rahmen+Titel+Namensfarbe for a seated player, mirroring FriendsPanel's Avatar — falls back to the bare name when no profile cosmetics are loaded yet (e.g. an open seat, or before the lookup resolves). */
+const TEAM_RING_COLOR: Record<DraftTeam, string> = {
+  A: "var(--mode-draft)",
+  B: "#e11d48",
+};
+
 function PlayerIdentity({
   userId,
   name,
   cosmetics,
   shopItems,
+  team,
 }: {
   userId?: string | null;
   name: string;
   cosmetics: Record<string, PublicProfileCosmetics>;
   shopItems: ShopItem[];
+  /** Tints the avatar ring with the player's Team A/B color (Boss's ask) when set. */
+  team?: DraftTeam;
 }) {
   const c = userId ? cosmetics[userId] : undefined;
   const avatar = c?.avatarCharacterId ? characters.find((ch) => ch.id === c.avatarCharacterId) : null;
@@ -101,13 +109,16 @@ function PlayerIdentity({
   return (
     <span className="inline-flex min-w-0 items-center gap-1.5">
       {avatar?.imageUrl && (
-        <span className="relative flex h-9 w-9 shrink-0 items-center justify-center">
+        <span
+          className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full"
+          style={team ? { boxShadow: `0 0 0 2px ${TEAM_RING_COLOR[team]}` } : undefined}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={avatar.imageUrl}
             alt=""
             referrerPolicy="no-referrer"
-            className={`h-7 w-7 rounded-full object-cover object-top ${frameImage ? "" : frameClass}`}
+            className={`h-9 w-9 rounded-full object-cover object-top ${frameImage ? "" : frameClass}`}
           />
           {frameImage && (
             // eslint-disable-next-line @next/next/no-img-element
@@ -707,6 +718,29 @@ export function LiveDraftBoard() {
     return session?.state.players.find((p) => p.id === playerId)?.name ?? "?";
   }
 
+  // MVP = the character that dealt the most total damage across the battle
+  // log, attributed back to whichever player drafted it (Boss's ask — the
+  // draft itself has no other per-player performance metric to show).
+  function computeMvp(s: LiveDraftSession): { characterName: string; playerName: string } | null {
+    if (!s.battle) return null;
+    const damageByName = new Map<string, number>();
+    for (const r of s.battle.rounds) {
+      damageByName.set(r.attackerName, (damageByName.get(r.attackerName) ?? 0) + r.damage);
+    }
+    let best: { name: string; damage: number } | null = null;
+    for (const [name, damage] of damageByName) {
+      if (!best || damage > best.damage) best = { name, damage };
+    }
+    if (!best) return null;
+    for (const p of s.state.players) {
+      const picked = p.pickedCharacterIds
+        .map((id) => characters.find((c) => c.id === id))
+        .find((c) => c?.name === best!.name);
+      if (picked) return { characterName: best.name, playerName: p.name };
+    }
+    return null;
+  }
+
   // Chat is intentionally limited to a fixed set of preset reactions (Q108)
   // — no free text, so no moderation surface needed for a feature this small.
   // The reactions themselves show up as the floating pop-up overlay
@@ -865,7 +899,7 @@ export function LiveDraftBoard() {
                 <span className="shrink-0">Sitz {i + 1}:</span>
                 {p.userId ? (
                   <span key={p.userId} className="op-pop-in">
-                    <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} />
+                    <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} team={p.team} />
                   </span>
                 ) : (
                   <em className="text-black/40 dark:text-white/30">offen</em>
@@ -894,8 +928,8 @@ export function LiveDraftBoard() {
           ))}
         </ul>
         {!isSpectator && !full && friends.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <p className="text-sm text-black/60 dark:text-white/50">Freund einladen</p>
+          <div className="op-card flex flex-col gap-2 border-2 border-mode-draft/40 p-3">
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-mode-draft">📨 Freund einladen</p>
             <ul className="flex flex-col gap-1.5">
               {friends.map((f) => {
                 const alreadyInLobby = session.state.players.some((p) => p.userId === f.userId);
@@ -904,8 +938,8 @@ export function LiveDraftBoard() {
                   <li key={f.userId} className="flex items-center justify-between gap-3 text-sm">
                     <span className="min-w-0 truncate">{f.username}</span>
                     <Button
-                      variant="secondary"
-                      className="shrink-0 px-3 py-1 text-xs"
+                      variant={alreadyInLobby || invited ? "secondary" : "primary"}
+                      className="shrink-0 px-3 py-1.5 text-xs"
                       disabled={alreadyInLobby || invited}
                       onClick={() => handleInviteFriend(f.userId)}
                     >
@@ -939,24 +973,56 @@ export function LiveDraftBoard() {
       .filter((c): c is NonNullable<typeof c> => Boolean(c));
 
     const disconnected = !isSpectator && player.userId && player.userId !== myUserId && isPlayerStale(player.lastSeenAt);
+    const me = !isSpectator ? session.state.players.find((p) => p.userId === myUserId) : undefined;
+    const myPicks = (me?.pickedCharacterIds ?? [])
+      .map((id) => characters.find((c) => c.id === id))
+      .filter((c): c is NonNullable<typeof c> => Boolean(c));
 
     return (
       <div className="grid gap-6 md:grid-cols-[1fr_280px]">
         {renderFloatingEmotes()}
         <div>
-          <div className="mb-4">
+          <div className="mb-4 flex flex-col items-start gap-1">
+            <span
+              key={session.state.round}
+              className="op-round-flash font-[family-name:var(--font-display)] text-2xl font-semibold text-mode-draft"
+            >
+              Runde {session.state.round} von {session.state.teamSize}
+            </span>
             <p key={player.id} className="op-turn-pulse text-sm">
               Am Zug: <span className="font-semibold">{player.name}</span>
-              {myTurn && <span className="text-mode-draft"> (du!)</span>} ·{" "}
-              <span key={session.state.round} className="op-round-flash inline-block font-semibold">
-                Runde {session.state.round}
-              </span>
+              {myTurn && <span className="text-mode-draft"> (du!)</span>}
             </p>
           </div>
           {disconnected && (
             <p className="mb-3 text-sm text-danger">
               ⚠️ {player.name} scheint die Verbindung verloren zu haben — der Entwurf pausiert, bis die Person zurück ist.
             </p>
+          )}
+          {myPicks.length > 0 && (
+            <div className="mb-4 flex flex-col gap-1.5">
+              <p className="text-xs uppercase tracking-[0.2em] text-black/50 dark:text-white/40">Dein Team</p>
+              <div className="flex flex-wrap gap-2">
+                {myPicks.map((c) => (
+                  <div key={c.id} className="op-pop-in flex flex-col items-center gap-1">
+                    {c.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={c.imageUrl}
+                        alt={c.name}
+                        referrerPolicy="no-referrer"
+                        className="h-14 w-14 rounded-lg border-2 object-cover object-top shadow"
+                        style={{ borderColor: "var(--mode-draft)" }}
+                      />
+                    ) : (
+                      <div className="flex h-14 w-14 items-center justify-center rounded-lg border-2 border-mode-draft text-[10px]">
+                        {c.name}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
           <RollPanel
             offered={offered}
@@ -978,7 +1044,7 @@ export function LiveDraftBoard() {
               className={`p-3 transition-shadow ${p.id === player.id ? "op-current-turn-glow" : ""}`}
             >
               <p className="mb-2 flex items-center gap-1 text-sm">
-                <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} />
+                <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} team={p.team} />
                 {p.id === player.id && <span className="shrink-0 text-mode-draft">🎯</span>}
                 {p.team && <span className="shrink-0 text-mode-draft">· Team {p.team}</span>}
                 <span className="shrink-0">
@@ -1059,10 +1125,49 @@ export function LiveDraftBoard() {
           ? me.team === session.battle.winnerTeam
           : session.state.players.indexOf(me) === (session.battle.winnerTeam === "A" ? 0 : 1)
         : null;
+    const mvp = computeMvp(session);
+    const seatedCount = session.state.players.filter((p) => p.userId).length;
+    const rematchReadyCount = session.state.players.filter((p) => p.rematchReady).length;
     return (
       <div className="flex flex-col gap-6">
+        {renderFloatingEmotes()}
         {session.battle && <VictoryBanner won={myWon} label={myWon === null ? `${winnerLabel} gewinnt!` : undefined} />}
         <h2 className="text-xl font-semibold">Draft beendet</h2>
+        {!isSpectator && me && (
+          <div className="flex flex-col gap-2">
+            {errorMsg && <p className="text-sm text-danger">{errorMsg}</p>}
+            <Button onClick={handleVoteRematch} disabled={me.rematchReady} className="py-3 text-lg">
+              {me.rematchReady ? "Warte auf die anderen…" : "⚔️ Rematch"}
+            </Button>
+            {me.rematchReady && (
+              <div className="flex flex-wrap items-center gap-2">
+                {session.state.players
+                  .filter((p) => p.userId)
+                  .map((p) => (
+                    <span
+                      key={p.id}
+                      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                        p.rematchReady
+                          ? "border-mode-draft bg-mode-draft/15 text-mode-draft"
+                          : "border-black/15 text-black/50 dark:border-white/15 dark:text-white/40"
+                      }`}
+                    >
+                      {p.rematchReady ? "✅" : "⏳"} {p.name}
+                    </span>
+                  ))}
+                <span className="text-xs text-black/50 dark:text-white/40">
+                  ({rematchReadyCount}/{seatedCount} bereit)
+                </span>
+              </div>
+            )}
+            {renderChatBar()}
+          </div>
+        )}
+        {mvp && (
+          <p className="op-pop-in text-sm">
+            🏅 <span className="font-semibold">MVP:</span> {mvp.characterName} ({mvp.playerName})
+          </p>
+        )}
         {newAchievements.length > 0 && (
           <div className="op-pop-in rounded-xl border border-accent bg-accent/10 p-3">
             <p className="mb-1 text-sm font-semibold text-accent-ink">🏆 Neue Erfolge freigeschaltet!</p>
@@ -1079,7 +1184,7 @@ export function LiveDraftBoard() {
           {session.state.players.map((p) => (
             <Card key={p.id} variant="framed" accent="draft" className="p-3">
               <p className="mb-2">
-                <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} />
+                <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} team={p.team} />
               </p>
               <ul className="space-y-1 text-sm">
                 {p.pickedCharacterIds.map((id) => (
@@ -1096,16 +1201,6 @@ export function LiveDraftBoard() {
           </Card>
         ) : (
           <p className="text-sm text-black/50 dark:text-white/40">Kampfsimulation wird berechnet…</p>
-        )}
-        {!isSpectator && me && (
-          <div className="flex flex-col gap-2">
-            {errorMsg && <p className="text-sm text-danger">{errorMsg}</p>}
-            <Button onClick={handleVoteRematch} disabled={me.rematchReady}>
-              {me.rematchReady
-                ? `Warte auf die anderen… (${session.state.players.filter((p) => p.rematchReady).length}/${session.state.players.filter((p) => p.userId).length} bereit)`
-                : "Rematch"}
-            </Button>
-          </div>
         )}
         <Button variant="ghost" onClick={backToHome} className="self-start text-black/50 dark:text-white/40">
           Zur Startseite
