@@ -67,6 +67,30 @@ const STALE_MS = 15000;
 
 type View = "loading" | "home" | "create-form" | "join-form" | "lobby" | "drafting" | "roles" | "result";
 
+// Chatti-drawn emote icons (Boss, 2026-10-15: no unicode/stock emoji for
+// Live-Draft) — one PNG per DRAFT_EMOTES id, used for both the chat bar
+// buttons and the floating pop-up reactions.
+const EMOTE_ICON: Record<DraftEmote, string> = {
+  thumbsup: "/live-draft/emotes/thumbsup.png",
+  laugh: "/live-draft/emotes/laugh.png",
+  shocked: "/live-draft/emotes/shocked.png",
+  fire: "/live-draft/emotes/fire.png",
+  angry: "/live-draft/emotes/angry.png",
+  wow: "/live-draft/emotes/wow.png",
+  heart: "/live-draft/emotes/heart.png",
+  peek: "/live-draft/emotes/peek.png",
+};
+const EMOTE_ALT: Record<DraftEmote, string> = {
+  thumbsup: "Daumen hoch",
+  laugh: "Lachen",
+  shocked: "Geschockt",
+  fire: "Feuer",
+  angry: "Wütend",
+  wow: "Staunen",
+  heart: "Herz",
+  peek: "Spitzbübisch",
+};
+
 function loadNickname(): string {
   try {
     return window.localStorage.getItem(NICKNAME_KEY) || "Spieler";
@@ -170,7 +194,7 @@ export function LiveDraftBoard() {
   // Floating pop-up emotes (Boss's ask): a short-lived overlay item per new
   // chat message, independent of the small text log, that animates in and
   // fades out on its own via CSS (see op-emote-pop in globals.css).
-  const [floatingEmotes, setFloatingEmotes] = useState<{ key: string; emote: string; label: string; leftPct: number }[]>([]);
+  const [floatingEmotes, setFloatingEmotes] = useState<{ key: string; emote: DraftEmote; label: string; leftPct: number }[]>([]);
   const lastChatAtRef = useRef<string>("");
 
   const unsubscribeRef = useRef<(() => void) | null>(null);
@@ -753,9 +777,9 @@ export function LiveDraftBoard() {
           <button
             key={emote}
             onClick={() => handleSendEmote(emote)}
-            className="rounded-full border border-black/15 dark:border-white/15 px-2 py-1 text-base transition hover:border-mode-draft/50"
+            className="rounded-full border border-black/15 dark:border-white/15 p-1 transition hover:border-mode-draft/50"
           >
-            {emote}
+            <img src={EMOTE_ICON[emote]} alt={EMOTE_ALT[emote]} className="h-7 w-7" />
           </button>
         ))}
       </div>
@@ -777,7 +801,7 @@ export function LiveDraftBoard() {
               className="op-emote-pop absolute flex flex-col items-center gap-1"
               style={{ left: `${f.leftPct}%` }}
             >
-              <span className="text-4xl drop-shadow-md">{f.emote}</span>
+              <img src={EMOTE_ICON[f.emote]} alt={f.label} className="h-10 w-10 drop-shadow-md" />
               <span className="whitespace-nowrap rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">{f.label}</span>
             </span>
           ))}
@@ -879,7 +903,7 @@ export function LiveDraftBoard() {
     const teamsAssigned = !teamModeEnabled || claimedPlayers.every((p) => p.team);
     const canStart = full && teamsAssigned;
     return (
-      <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
+      <Card variant="spotlight" accent="draft" className="op-chatti-frame flex flex-col gap-4 max-w-md">
         <div>
           <p className="text-sm text-black/60 dark:text-white/50">Einladungscode</p>
           <p className="font-mono text-2xl tracking-widest">{session.invite_code}</p>
@@ -1039,9 +1063,9 @@ export function LiveDraftBoard() {
           {session.state.players.map((p) => (
             <Card
               key={p.id}
-              variant="framed"
+              variant="plain"
               accent="draft"
-              className={`p-3 transition-shadow ${p.id === player.id ? "op-current-turn-glow" : ""}`}
+              className={`op-chatti-frame p-3 transition-shadow ${p.id === player.id ? "op-current-turn-glow" : ""}`}
             >
               <p className="mb-2 flex items-center gap-1 text-sm">
                 <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} team={p.team} />
@@ -1136,9 +1160,12 @@ export function LiveDraftBoard() {
         {!isSpectator && me && (
           <div className="flex flex-col gap-2">
             {errorMsg && <p className="text-sm text-danger">{errorMsg}</p>}
-            <Button onClick={handleVoteRematch} disabled={me.rematchReady} className="py-3 text-lg">
-              {me.rematchReady ? "Warte auf die anderen…" : "⚔️ Rematch"}
-            </Button>
+            <div className="flex items-center gap-3">
+              <img src="/live-draft/badge-rematch.png" alt="" className="h-12 w-12 shrink-0" />
+              <Button onClick={handleVoteRematch} disabled={me.rematchReady} className="flex-1 py-3 text-lg">
+                {me.rematchReady ? "Warte auf die anderen…" : "Rematch"}
+              </Button>
+            </div>
             {me.rematchReady && (
               <div className="flex flex-wrap items-center gap-2">
                 {session.state.players
@@ -1164,8 +1191,9 @@ export function LiveDraftBoard() {
           </div>
         )}
         {mvp && (
-          <p className="op-pop-in text-sm">
-            🏅 <span className="font-semibold">MVP:</span> {mvp.characterName} ({mvp.playerName})
+          <p className="op-pop-in flex items-center gap-2 text-sm">
+            <img src="/live-draft/badge-mvp.png" alt="MVP" className="h-8 w-8" />
+            <span className="font-semibold">MVP:</span> {mvp.characterName} ({mvp.playerName})
           </p>
         )}
         {newAchievements.length > 0 && (
@@ -1182,7 +1210,7 @@ export function LiveDraftBoard() {
         )}
         <div className="grid gap-4 sm:grid-cols-2">
           {session.state.players.map((p) => (
-            <Card key={p.id} variant="framed" accent="draft" className="p-3">
+            <Card key={p.id} variant="plain" accent="draft" className="op-chatti-frame p-3">
               <p className="mb-2">
                 <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} team={p.team} />
               </p>
@@ -1195,7 +1223,7 @@ export function LiveDraftBoard() {
           ))}
         </div>
         {session.battle ? (
-          <Card variant="framed" accent="draft" className="p-4">
+          <Card variant="plain" accent="draft" className="op-chatti-frame p-4">
             <p className="mb-2 font-semibold">Kampfsimulation: {winnerLabel} gewinnt!</p>
             <AnimatedBattleLog battle={session.battle} />
           </Card>
