@@ -125,7 +125,7 @@ function PlayerIdentity({
 
 export function LiveDraftBoard() {
   const searchParams = useSearchParams();
-  const autoJoinedRef = useRef(false);
+  const lastAutoJoinCodeRef = useRef<string | null>(null);
   const [view, setView] = useState<View>("loading");
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [nickname, setNickname] = useState(() => loadNickname());
@@ -257,16 +257,21 @@ export function LiveDraftBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.state.chatLog]);
 
-  // Lets the Übersicht's "weiterspielen" links (/draft/live?code=XXXX) jump
-  // straight back into a lobby or in-progress draft without retyping the code.
+  // Lets the Übersicht's "weiterspielen" links and the app-wide invite
+  // pop-up (/draft/live?code=XXXX) jump straight back into a lobby or
+  // in-progress draft without retyping the code. Keyed on the code itself
+  // (not a one-shot ref) — Next.js reuses this same component instance for
+  // a same-route navigation, so accepting a *second* invite while already
+  // on this page only updates the `code` search param without remounting;
+  // a fire-once ref would silently ignore that second invite.
   useEffect(() => {
-    if (!myUserId || autoJoinedRef.current) return;
+    if (!myUserId) return;
     const code = searchParams.get("code");
-    if (!code) return;
-    autoJoinedRef.current = true;
+    if (!code || code === lastAutoJoinCodeRef.current) return;
+    lastAutoJoinCodeRef.current = code;
     handleJoin(code);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [myUserId]);
+  }, [myUserId, searchParams]);
 
   useEffect(() => {
     const id = setInterval(() => setNowTick(Date.now()), 1000);
@@ -587,9 +592,18 @@ export function LiveDraftBoard() {
         setErrorMsg("Konnte kein Rematch starten.");
         return;
       }
+      // Everyone already voted and is pre-seeded above — Boss wants the
+      // rematch to drop straight into the round instead of a redundant
+      // lobby screen. Move the fresh session past "lobby" before anyone
+      // (host included) can see it, so nobody has to press "Start" again.
+      let startedSession = created;
+      const started = await writeLiveDraft(created.id, created.updated_at, { phase: "drafting" });
+      if (started.session) startedSession = started.session;
       // Retries against whoever's vote landed last, same optimistic-concurrency
       // pattern as every other write here — only the host writes this field,
-      // but a vote from another player can still land in between.
+      // but a vote from another player can still land in between. Written
+      // only now (after the phase flip above) so a non-host client never
+      // observes the invite code while the new session is still "lobby".
       let current = session;
       for (let attempt = 0; attempt < 5; attempt++) {
         const result = await writeLiveDraft(current.id, current.updated_at, {
@@ -601,21 +615,40 @@ export function LiveDraftBoard() {
         current = refetched;
       }
       setIsSpectator(false);
-      attach(created);
+      attach(startedSession);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.state.players, session?.phase, myUserId, isSpectator]);
 
   // Everyone else just watches the finished session for the invite code the
   // host wrote above and jumps straight in — they're already seated in the
-  // new lobby (pre-filled by claimSeat/assignTeam just above), so this is a
-  // plain attach, not a seat-claiming join.
+  // new round (pre-filled by claimSeat/assignTeam and moved past "lobby" by
+  // the host above), so this fetches and attaches directly instead of going
+  // through handleJoin's seat-claiming path, which doesn't apply here.
+  // Retries a few times against replica lag: a one-shot attempt that quietly
+  // gave up on a transient `null` fetch — while permanently marking itself
+  // "already tried" — was why a rematch sometimes left someone stuck on the
+  // old result screen.
   useEffect(() => {
     if (!session || session.phase !== "result" || isSpectator) return;
     if (session.host_id === myUserId || !session.state.rematchInviteCode) return;
     if (rematchJoinFiredRef.current) return;
     rematchJoinFiredRef.current = true;
-    handleJoin(session.state.rematchInviteCode);
+    const inviteCode = session.state.rematchInviteCode;
+    (async () => {
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const found = await fetchLiveDraftByCode(inviteCode);
+        if (found) {
+          setIsSpectator(false);
+          attach(found);
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      // Let the next poll/realtime tick try again instead of giving up for good.
+      rematchJoinFiredRef.current = false;
+      setErrorMsg("Konnte dem Rematch nicht automatisch beitreten. Versuche es gleich erneut…");
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.state.rematchInviteCode, session?.phase, myUserId, isSpectator]);
 
@@ -639,6 +672,7 @@ export function LiveDraftBoard() {
     matchRecordedRef.current = false;
     rematchCreateFiredRef.current = false;
     rematchJoinFiredRef.current = false;
+    lastAutoJoinCodeRef.current = null;
     setInvitedFriendIds([]);
     setFloatingEmotes([]);
     lastChatAtRef.current = "";
