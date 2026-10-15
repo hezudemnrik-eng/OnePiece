@@ -1,6 +1,7 @@
 import { LiveDraftBoard } from "@/components/LiveDraftBoard";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { PageShell } from "@/components/ui/PageShell";
+import { FitScreen } from "@/components/ui/FitScreen";
 
 export default function LiveDraftPage() {
   if (!isSupabaseConfigured()) {
@@ -25,13 +26,18 @@ export default function LiveDraftPage() {
         style={{ backgroundImage: "url(/live-draft/background.jpg)" }}
       />
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-white/70 dark:bg-black/70" />
-      <PageShell
-        title="Live-Draft über mehrere Geräte"
-        subtitle="Lobby erstellen und den Code an Freunde schicken, oder mit einem Code beitreten. Jeder draftet von seinem eigenen Gerät."
-        accent="draft"
-      >
-        <LiveDraftBoard />
-      </PageShell>
+      {/* Boss wants the Live-Draft screen to always fit without scrolling,
+          same as Home (Q96/zero-scroll follow-up) — see FitScreen/useFitScreen. */}
+      <FitScreen>
+        <PageShell
+          title="Live-Draft über mehrere Geräte"
+          subtitle="Lobby erstellen und den Code an Freunde schicken, oder mit einem Code beitreten. Jeder draftet von seinem eigenen Gerät."
+          accent="draft"
+          compact
+        >
+          <LiveDraftBoard />
+        </PageShell>
+      </FitScreen>
     </>
   );
 }
