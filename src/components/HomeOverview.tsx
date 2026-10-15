@@ -199,7 +199,7 @@ export function HomeOverview() {
       {myLobby ? (
         <Link href={`/draft/live?code=${myLobby.inviteCode}`}>
           <div
-            className="op-card relative flex min-h-[96px] items-end overflow-hidden bg-cover bg-center p-4"
+            className="op-card relative flex min-h-[96px] items-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
             style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.78), rgba(0,0,0,0.15)), url('/images/banner-weiterspielen.jpg')" }}
           >
             <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
@@ -219,7 +219,7 @@ export function HomeOverview() {
       ) : lastMode ? (
         <Link href={lastMode.href}>
           <div
-            className="op-card relative flex min-h-[96px] items-end overflow-hidden bg-cover bg-center p-4"
+            className="op-card relative flex min-h-[96px] items-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
             style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.78), rgba(0,0,0,0.15)), url('/images/banner-weiterspielen.jpg')" }}
           >
             <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
@@ -241,7 +241,7 @@ export function HomeOverview() {
         </Link>
       ) : (
         <div
-          className="op-card relative flex min-h-[96px] flex-col justify-end overflow-hidden bg-cover bg-center p-4"
+          className="op-card relative flex min-h-[96px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
           style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.78), rgba(0,0,0,0.15)), url('/images/banner-weiterspielen.jpg')" }}
         >
           <p className="truncate whitespace-nowrap text-sm font-semibold text-white mb-1">Willkommen an Bord! 🏴‍☠️</p>
@@ -253,26 +253,33 @@ export function HomeOverview() {
         <Link href="/questbuch">
           <div
             className="op-card flex items-center gap-3 bg-cover bg-center px-4 py-3"
-            style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/map-background.jpg')" }}
+            style={{ backgroundImage: "url('/images/bar-bottomnav.png')" }}
           >
             {ICON_IMAGES[challenge.icon] ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={ICON_IMAGES[challenge.icon]} alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain drop-shadow-md" />
+              <img src={ICON_IMAGES[challenge.icon]} alt="" aria-hidden className="h-10 w-10 shrink-0 object-contain drop-shadow-md" />
             ) : (
-              <span className="shrink-0 text-xl drop-shadow-md" aria-hidden>
+              <span className="shrink-0 text-2xl drop-shadow-md" aria-hidden>
                 📖
               </span>
             )}
-            {questClaimed ? (
-              <span className="min-w-0 truncate whitespace-nowrap text-sm text-white">
-                <span className="font-semibold">Tagesquest erledigt ✅</span> — Questbuch öffnen
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate whitespace-nowrap text-xs font-bold uppercase tracking-wide text-white/90">Tagesquest</span>
+                {questClaimed && (
+                  <span className="shrink-0 whitespace-nowrap rounded-full bg-[rgba(74,222,128,0.2)] px-2 py-0.5 text-[11px] font-semibold text-[#4ade80]">
+                    ✅ Erledigt!
+                  </span>
+                )}
+              </div>
+              <span className="block truncate whitespace-nowrap text-sm text-white">
+                {questClaimed ? "Questbuch öffnen" : challenge.text}
               </span>
-            ) : (
-              <span className="min-w-0 truncate whitespace-nowrap text-sm text-white">
-                <span className="font-semibold">Heute: </span>
-                {challenge.text}
-              </span>
-            )}
+              <div className="mt-1.5 flex items-center gap-2">
+                <ProgressBar progress={questClaimed ? 1 : 0} size="sm" fillClassName="bg-[#4ade80]" className="flex-1" />
+                <span className="shrink-0 text-[11px] tabular-nums text-white/70">{questClaimed ? "1" : "0"}/1</span>
+              </div>
+            </div>
           </div>
         </Link>
       )}
