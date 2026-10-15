@@ -53,6 +53,7 @@ export function BottomNav() {
 
   return (
     <nav
+      id="app-bottomnav"
       className="md:hidden fixed inset-x-0 bottom-0 z-20 flex items-stretch justify-around bg-cover bg-center shadow-[0_-2px_4px_rgba(0,0,0,0.35)]"
       style={{ backgroundImage: "url('/images/bar-bottomnav.png')", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >

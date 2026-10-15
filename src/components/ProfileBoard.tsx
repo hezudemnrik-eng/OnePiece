@@ -181,9 +181,14 @@ export function ProfileBoard() {
   return (
     <div className="flex flex-col gap-8 max-w-2xl">
       <div
-        className={`op-wanted op-parchment flex items-center gap-4 rounded-xl p-5 ${activeRankFrameImage ? "op-rank-frame" : activeRankFrameClass}`}
+        className={`op-wanted flex items-center gap-4 rounded-xl bg-cover bg-center p-5 ${
+          activeRankFrameImage ? "op-rank-frame" : activeRankFrameClass || "op-framed"
+        }`}
         style={
-          activeRankFrameImage ? ({ "--op-rank-frame-src": `url(${activeRankFrameImage})` } as CSSProperties) : undefined
+          {
+            backgroundImage: "linear-gradient(rgba(246,229,195,0.55), rgba(246,229,195,0.55)), url('/images/profile-card-bg.jpg')",
+            ...(activeRankFrameImage ? { "--op-rank-frame-src": `url(${activeRankFrameImage})` } : {}),
+          } as CSSProperties
         }
       >
         {activeFrameImage ? (

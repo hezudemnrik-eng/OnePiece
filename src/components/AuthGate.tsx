@@ -85,6 +85,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         <IconRail />
         <div className="md:pl-16">
           <header
+            id="app-header"
             className="sticky top-0 z-20 relative pt-[env(safe-area-inset-top)] shadow-[0_2px_4px_rgba(0,0,0,0.35)]"
             style={{ backgroundColor: "#693c1b" }}
           >
