@@ -1059,13 +1059,13 @@ export function LiveDraftBoard() {
             <p className="mt-3 text-sm text-black/50 dark:text-white/40">Warte, bis {player.name} gezogen hat…</p>
           )}
         </div>
-        <aside className="flex flex-col gap-4">
+        <aside className="flex flex-col gap-2 sm:gap-4">
           {session.state.players.map((p) => (
             <Card
               key={p.id}
               variant="plain"
               accent="draft"
-              className={`op-chatti-frame p-3 transition-shadow ${p.id === player.id ? "op-current-turn-glow" : ""}`}
+              className={`op-chatti-frame p-2 sm:p-3 transition-shadow ${p.id === player.id ? "op-current-turn-glow" : ""}`}
             >
               <p className="mb-2 flex items-center gap-1 text-sm">
                 <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} team={p.team} />
@@ -1075,7 +1075,11 @@ export function LiveDraftBoard() {
                   ({p.pickedCharacterIds.length}/{session.state.teamSize})
                 </span>
               </p>
-              <ul className="space-y-1 text-sm text-black/70 dark:text-white/60">
+              {/* Full pick-name list hidden below sm (Boss, 2026-10-15: draft picks
+                  felt too small/cramped on mobile) — the own-picks thumbnail row
+                  above the roll panel already shows these; this list just ate into
+                  the vertical budget useFitScreen scales down to fit one screen. */}
+              <ul className="hidden space-y-1 text-sm text-black/70 dark:text-white/60 sm:block">
                 {p.pickedCharacterIds.map((id) => (
                   <li key={id} className="op-slide-in">
                     {characters.find((c) => c.id === id)?.name}

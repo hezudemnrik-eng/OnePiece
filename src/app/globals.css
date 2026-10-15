@@ -183,6 +183,17 @@ body {
   border-image-repeat: stretch;
 }
 
+/* Narrower border on phones (Boss, 2026-10-15: draft-picks felt cramped on
+   mobile after the ornate frame shipped) — the decorative border itself ate
+   into the vertical budget useFitScreen scales down to fit one screen, on
+   top of the per-card padding. Still reads as the same frame, just thinner. */
+@media (max-width: 640px) {
+  .op-chatti-frame {
+    border-width: 10px;
+    border-image-width: 10px;
+  }
+}
+
 /* --- Dezente Rand/Schatten-Bausteine ---
    Wiederverwendbare Bausteine für einen dünnen, zurückhaltenden Rand +
    weichen Schatten statt der früheren dicken Tinten-Outlines mit hartem
