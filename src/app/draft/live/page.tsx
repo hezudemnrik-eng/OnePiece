@@ -18,12 +18,20 @@ export default function LiveDraftPage() {
   }
 
   return (
-    <PageShell
-      title="Live-Draft über mehrere Geräte"
-      subtitle="Lobby erstellen und den Code an Freunde schicken, oder mit einem Code beitreten. Jeder draftet von seinem eigenen Gerät."
-      accent="draft"
-    >
-      <LiveDraftBoard />
-    </PageShell>
+    <>
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-25 dark:opacity-20"
+        style={{ backgroundImage: "url(/live-draft/background.jpg)" }}
+      />
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-white/70 dark:bg-black/70" />
+      <PageShell
+        title="Live-Draft über mehrere Geräte"
+        subtitle="Lobby erstellen und den Code an Freunde schicken, oder mit einem Code beitreten. Jeder draftet von seinem eigenen Gerät."
+        accent="draft"
+      >
+        <LiveDraftBoard />
+      </PageShell>
+    </>
   );
 }
