@@ -830,7 +830,9 @@ export function LiveDraftBoard() {
               <span className="flex min-w-0 items-center gap-1">
                 <span className="shrink-0">Sitz {i + 1}:</span>
                 {p.userId ? (
-                  <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} />
+                  <span key={p.userId} className="op-pop-in">
+                    <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} />
+                  </span>
                 ) : (
                   <em className="text-black/40 dark:text-white/30">offen</em>
                 )}
@@ -911,7 +913,10 @@ export function LiveDraftBoard() {
           <div className="mb-4">
             <p key={player.id} className="op-turn-pulse text-sm">
               Am Zug: <span className="font-semibold">{player.name}</span>
-              {myTurn && <span className="text-mode-draft"> (du!)</span>} · Runde {session.state.round}
+              {myTurn && <span className="text-mode-draft"> (du!)</span>} ·{" "}
+              <span key={session.state.round} className="op-round-flash inline-block font-semibold">
+                Runde {session.state.round}
+              </span>
             </p>
           </div>
           {disconnected && (
@@ -932,9 +937,15 @@ export function LiveDraftBoard() {
         </div>
         <aside className="flex flex-col gap-4">
           {session.state.players.map((p) => (
-            <Card key={p.id} variant="framed" accent="draft" className="p-3">
+            <Card
+              key={p.id}
+              variant="framed"
+              accent="draft"
+              className={`p-3 transition-shadow ${p.id === player.id ? "op-current-turn-glow" : ""}`}
+            >
               <p className="mb-2 flex items-center gap-1 text-sm">
                 <PlayerIdentity userId={p.userId} name={p.name} cosmetics={cosmetics} shopItems={shopItems} />
+                {p.id === player.id && <span className="shrink-0 text-mode-draft">🎯</span>}
                 {p.team && <span className="shrink-0 text-mode-draft">· Team {p.team}</span>}
                 <span className="shrink-0">
                   ({p.pickedCharacterIds.length}/{session.state.teamSize})
