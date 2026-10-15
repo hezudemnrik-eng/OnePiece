@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useFitScreen } from "@/lib/useFitScreen";
 import { characters } from "@/lib/characters";
 import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
 import { COSMETIC_FRAMES, getLevelProgress } from "@/lib/levels";
@@ -113,52 +114,10 @@ export function HomeOverview() {
   const onlineFriends = friends.filter((f) => f.online);
   const avatar = avatarFor(user?.avatarCharacterId ?? null);
 
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState({ wrapperHeight: null as number | null, scale: 1 });
-
   // Boss wants Home to always fit on one screen with zero scrolling (Q69),
-  // on every phone size — fixed px tuning only ever fits the one device it
-  // was measured on. Instead, measure the content's natural height against
-  // whatever vertical space is actually left between the header and the
-  // bottom nav, and scale the whole page down to fit when it doesn't
-  // (never scaled up past 1x). transform:scale is visual-only, so the
-  // wrapper's height is set to the post-scale height to collapse the
-  // reserved layout space to match — otherwise a gap (or overlap) would
-  // appear where the unscaled space used to be.
-  useLayoutEffect(() => {
-    function recalc() {
-      if (!contentRef.current || window.innerWidth >= 768) {
-        setFit({ wrapperHeight: null, scale: 1 });
-        return;
-      }
-      const headerH = document.getElementById("app-header")?.offsetHeight ?? 0;
-      const navH = document.getElementById("app-bottomnav")?.offsetHeight ?? 0;
-      const available = window.innerHeight - headerH - navH;
-      const natural = contentRef.current.scrollHeight;
-      // No floor on the scale: Boss's "kein Scrollen" is a hard requirement,
-      // so the page must always fit even on the most cramped viewports
-      // (small phone + browser toolbars), ahead of any minimum-legibility
-      // preference.
-      const scale = natural > available ? available / natural : 1;
-      setFit({ wrapperHeight: Math.round(natural * scale), scale });
-    }
-    recalc();
-    // Header/nav height depends on images (banner, icons) that are still
-    // loading at mount time, so a one-shot measurement can read 0px for
-    // them and under-scale the page. A ResizeObserver catches the height
-    // change once those images actually load and re-measures.
-    const ro = new ResizeObserver(recalc);
-    if (contentRef.current) ro.observe(contentRef.current);
-    const headerEl = document.getElementById("app-header");
-    const navEl = document.getElementById("app-bottomnav");
-    if (headerEl) ro.observe(headerEl);
-    if (navEl) ro.observe(navEl);
-    window.addEventListener("resize", recalc);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", recalc);
-    };
-  }, [loaded, challenge, myLobby, questClaimed, progress]);
+  // on every phone size — see useFitScreen for why this is a ResizeObserver
+  // based scale-to-fit instead of fixed-px tuning.
+  const { contentRef, fit } = useFitScreen();
 
   return (
     <div style={fit.wrapperHeight != null ? { height: fit.wrapperHeight, overflow: "hidden" } : undefined}>
