@@ -856,7 +856,7 @@ export function LiveDraftBoard() {
           variant="spotlight"
           accent="draft"
           className="op-chatti-frame flex flex-col gap-4 max-w-md"
-          style={{ backgroundColor: "color-mix(in srgb, var(--surface) 60%, transparent)" }}
+          style={{ backgroundColor: "rgba(10, 8, 6, 0.32)" }}
         >
         <label className="flex flex-col gap-1 text-sm">
           Dein Name
@@ -881,7 +881,7 @@ export function LiveDraftBoard() {
           variant="spotlight"
           accent="draft"
           className="op-chatti-frame flex flex-col gap-4 max-w-md"
-          style={{ backgroundColor: "color-mix(in srgb, var(--surface) 60%, transparent)" }}
+          style={{ backgroundColor: "rgba(10, 8, 6, 0.32)" }}
         >
         <label className="flex flex-col gap-1 text-sm">
           Anzahl Spieler (2 oder 4)
@@ -926,7 +926,7 @@ export function LiveDraftBoard() {
           variant="spotlight"
           accent="draft"
           className="op-chatti-frame flex flex-col gap-4 max-w-md"
-          style={{ backgroundColor: "color-mix(in srgb, var(--surface) 60%, transparent)" }}
+          style={{ backgroundColor: "rgba(10, 8, 6, 0.32)" }}
         >
         <label className="flex flex-col gap-1 text-sm">
           Einladungscode
@@ -967,7 +967,7 @@ export function LiveDraftBoard() {
           variant="spotlight"
           accent="draft"
           className="op-chatti-frame flex flex-col gap-4 max-w-md"
-          style={{ backgroundColor: "color-mix(in srgb, var(--surface) 60%, transparent)" }}
+          style={{ backgroundColor: "rgba(10, 8, 6, 0.32)" }}
         >
         <div>
           <p className="text-sm text-black/60 dark:text-white/50">Einladungscode</p>
