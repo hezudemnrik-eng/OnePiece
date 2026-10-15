@@ -165,6 +165,24 @@ body {
   border-image-repeat: round;
 }
 
+/* Ornate Live-Draft panel frame (Boss, 2026-10-15 — "ja, überall" on the
+   100-question Chatti-art pass): his alpha-transparent frame PNG as a
+   9-slice border-image. No "fill" keyword, so the naturally-transparent
+   center of the source image is simply not drawn and the panel's own
+   .op-card background shows through — distinct from .op-framed's repeating
+   rope motif, this one source is a single ornate rectangle so it stretches
+   rather than tiles. Flattens border-radius since the painted corners
+   already read as a frame; rounding would just clip them. */
+.op-chatti-frame {
+  border-radius: 0;
+  border-style: solid;
+  border-width: 18px;
+  border-image-source: url("/live-draft/panel-frame.png");
+  border-image-slice: 22%;
+  border-image-width: 18px;
+  border-image-repeat: stretch;
+}
+
 /* --- Dezente Rand/Schatten-Bausteine ---
    Wiederverwendbare Bausteine für einen dünnen, zurückhaltenden Rand +
    weichen Schatten statt der früheren dicken Tinten-Outlines mit hartem

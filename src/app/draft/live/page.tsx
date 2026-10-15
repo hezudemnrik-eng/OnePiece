@@ -23,7 +23,7 @@ export default function LiveDraftPage() {
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-25 dark:opacity-20"
-        style={{ backgroundImage: "url(/live-draft/background.jpg)" }}
+        style={{ backgroundImage: "url(/live-draft/deck-background.jpg)" }}
       />
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-white/70 dark:bg-black/70" />
       {/* Boss wants the Live-Draft screen to always fit without scrolling,

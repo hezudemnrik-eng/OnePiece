@@ -23,7 +23,8 @@ export type DraftPlayer = {
 };
 
 /** Chat is intentionally limited to a fixed set of preset reactions (Q108) rather than free text — no moderation surface needed for a feature this small. */
-export const DRAFT_EMOTES = ["👍", "😅", "😱", "🔥", "😤", "🎉"] as const;
+/** Chatti-drawn emote icon ids (Boss, 2026-10-15: "alles designs und Icon und Emotes sollen von chatti erstellt werden" — no unicode/stock emoji). Files live under /public/live-draft/emotes/<id>.png, see DRAFT_EMOTE_LABELS in LiveDraftBoard.tsx for the German alt text. */
+export const DRAFT_EMOTES = ["thumbsup", "laugh", "shocked", "fire", "angry", "wow", "heart", "peek"] as const;
 export type DraftEmote = (typeof DRAFT_EMOTES)[number];
 export type ChatMessage = { playerId: string; emote: DraftEmote; at: string };
 
