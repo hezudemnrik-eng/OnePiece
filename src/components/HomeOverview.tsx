@@ -193,40 +193,40 @@ export function HomeOverview() {
       {myLobby ? (
         <Link href={`/draft/live?code=${myLobby.inviteCode}`}>
           <div
-            className="op-card relative flex min-h-[96px] items-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
-            style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.78), rgba(0,0,0,0.15)), url('/images/banner-weiterspielen.jpg')" }}
+            className="op-card relative flex min-h-[140px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
+            style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/images/banner-weiterspielen.jpg')" }}
           >
-            <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-              <span className="min-w-0 text-sm font-semibold text-white">
-                <span className="block truncate whitespace-nowrap">
-                  Weiterspielen: Live-Draft <span className="font-mono">{myLobby.inviteCode}</span>
-                </span>
-                <span className="block truncate whitespace-nowrap font-normal text-white/70">
-                  {myLobby.phase === "lobby" ? "wartet auf Spieler" : "läuft gerade"}
-                </span>
+            <p className="truncate whitespace-nowrap text-xs font-bold uppercase tracking-wide text-accent-ink">Weiterspielen</p>
+            <div className="mt-1 flex min-w-0 items-center justify-between gap-2">
+              <span className="truncate whitespace-nowrap text-lg font-semibold text-white">
+                Live-Draft <span className="font-mono">{myLobby.inviteCode}</span>
               </span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain" />
             </div>
+            <span className="truncate whitespace-nowrap text-sm text-white/70">
+              {myLobby.phase === "lobby" ? "wartet auf Spieler" : "läuft gerade"}
+            </span>
           </div>
         </Link>
       ) : lastMode ? (
         <Link href={lastMode.href}>
           <div
-            className="op-card relative flex min-h-[96px] items-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
-            style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.78), rgba(0,0,0,0.15)), url('/images/banner-weiterspielen.jpg')" }}
+            className="op-card relative flex min-h-[140px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
+            style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/images/banner-weiterspielen.jpg')" }}
           >
-            <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
-              <span className="flex min-w-0 items-center gap-2 truncate whitespace-nowrap text-sm font-semibold text-white">
+            <p className="truncate whitespace-nowrap text-xs font-bold uppercase tracking-wide text-accent-ink">Weiterspielen</p>
+            <div className="mt-1 flex min-w-0 items-center justify-between gap-2">
+              <span className="flex min-w-0 items-center gap-2 truncate whitespace-nowrap text-lg font-semibold text-white">
                 {ICON_IMAGES[lastMode.icon] ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={ICON_IMAGES[lastMode.icon]} alt="" aria-hidden className="h-10 w-10 shrink-0 object-contain drop-shadow-md" />
+                  <img src={ICON_IMAGES[lastMode.icon]} alt="" aria-hidden className="h-8 w-8 shrink-0 object-contain drop-shadow-md" />
                 ) : (
                   <span className="shrink-0 text-2xl drop-shadow-md" aria-hidden>
                     {lastMode.icon}
                   </span>
                 )}
-                <span className="truncate">Weiterspielen: {lastMode.title}</span>
+                <span className="truncate">{lastMode.title}</span>
               </span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain" />
@@ -235,10 +235,10 @@ export function HomeOverview() {
         </Link>
       ) : (
         <div
-          className="op-card relative flex min-h-[96px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
-          style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.78), rgba(0,0,0,0.15)), url('/images/banner-weiterspielen.jpg')" }}
+          className="op-card relative flex min-h-[140px] flex-col justify-end overflow-hidden border border-[#c084fc]/70 bg-cover bg-center p-4 shadow-[0_0_16px_rgba(192,132,252,0.45)]"
+          style={{ backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/images/banner-weiterspielen.jpg')" }}
         >
-          <p className="truncate whitespace-nowrap text-sm font-semibold text-white mb-1">Willkommen an Bord! 🏴‍☠️</p>
+          <p className="truncate whitespace-nowrap text-lg font-semibold text-white mb-1">Willkommen an Bord! 🏴‍☠️</p>
           <p className="truncate whitespace-nowrap text-sm text-white/70">Wähle unten einen Bereich und leg los.</p>
         </div>
       )}
@@ -289,7 +289,17 @@ export function HomeOverview() {
               }}
             >
               <div className="flex items-center justify-between gap-1">
-                <span className="truncate whitespace-nowrap text-xs font-semibold leading-tight text-white">{g.title}</span>
+                <span className="flex min-w-0 items-center gap-1.5">
+                  {ICON_IMAGES[g.icon] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={ICON_IMAGES[g.icon]} alt="" aria-hidden className="h-6 w-6 shrink-0 object-contain drop-shadow-md" />
+                  ) : (
+                    <span className="shrink-0 text-base drop-shadow-md" aria-hidden>
+                      {g.icon}
+                    </span>
+                  )}
+                  <span className="truncate whitespace-nowrap text-xs font-semibold leading-tight text-white">{g.title}</span>
+                </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-7 w-7 shrink-0 object-contain" />
               </div>
