@@ -22,19 +22,20 @@ import { useLayoutEffect, useRef, useState } from "react";
  */
 export function useFitScreen(headerId = "app-header", footerId = "app-bottomnav") {
   const contentRef = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState({ wrapperHeight: null as number | null, scale: 1 });
+  const [fit, setFit] = useState({ wrapperHeight: null as number | null, scale: 1, widthPct: 100 });
 
   useLayoutEffect(() => {
     function recalc() {
       if (!contentRef.current || window.innerWidth >= 768) {
-        setFit({ wrapperHeight: null, scale: 1 });
+        setFit({ wrapperHeight: null, scale: 1, widthPct: 100 });
         return;
       }
+      const el = contentRef.current;
       const headerH = document.getElementById(headerId)?.offsetHeight ?? 0;
       const footerH = document.getElementById(footerId)?.offsetHeight ?? 0;
       const available = window.innerHeight - headerH - footerH;
-      const natural = contentRef.current.scrollHeight;
-      if (natural <= 0 || available <= 0) return;
+      if (available <= 0) return;
+
       // No floor (and, below, no ceiling either) on the scale: "kein
       // Scrollen" is a hard requirement, so the page must always fit even on
       // the most cramped viewports, and on a roomier viewport the mockup
@@ -44,8 +45,34 @@ export function useFitScreen(headerId = "app-header", footerId = "app-bottomnav"
       // individual sections) reuses one simple, already-proven mechanism
       // instead of a flex-grow/grid-fr measurement cycle that fights the
       // very ResizeObserver driving this recalc.
-      const scale = available / natural;
-      setFit({ wrapperHeight: Math.round(natural * scale), scale });
+      //
+      // transform:scale stretches width along with height, so the caller
+      // narrows the box by widthPct (100/scale) to cancel that out — see
+      // FitScreen.tsx. But narrowing the box changes how its text wraps,
+      // which changes its natural scrollHeight, which changes the scale
+      // needed, which changes widthPct again — on a short-content view
+      // (the Live-Draft lobby forms) that fed back into the very
+      // ResizeObserver driving this recalc and oscillated forever between
+      // two line-wrap states instead of settling. Two fixed-point passes,
+      // each measuring scrollHeight at the width the previous pass
+      // settled on, converges close enough without looping against the
+      // observer. (The non-oscillating alternative — scaling height only
+      // via scaleY — was rejected: it stretches text/buttons vertically
+      // instead of keeping them proportional.)
+      let widthPct = 100;
+      let scale = 1;
+      let natural = 0;
+      for (let pass = 0; pass < 2; pass++) {
+        const prevWidth = el.style.width;
+        el.style.width = `${widthPct}%`;
+        natural = el.scrollHeight;
+        el.style.width = prevWidth;
+        if (natural <= 0) return;
+        scale = available / natural;
+        widthPct = 100 / scale;
+      }
+      el.style.width = `${widthPct}%`; // matches the inline style setFit below will render, so there's no flash back to the pre-pass width
+      setFit({ wrapperHeight: Math.round(available), scale, widthPct });
     }
     recalc();
     const ro = new ResizeObserver(recalc);

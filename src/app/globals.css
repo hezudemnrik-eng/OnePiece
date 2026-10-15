@@ -181,6 +181,11 @@ body {
   border-image-slice: 22%;
   border-image-width: 18px;
   border-image-repeat: stretch;
+  /* Boss, 2026-10-15: the lobby/deck background art (now actually visible,
+     see useFitScreen/.op-parchment fixes) sits right behind this card's text
+     once the fill is near-transparent — a shadow keeps labels/inputs
+     readable over busy artwork without needing an opaque fill. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
 }
 
 /* Narrower border on phones (Boss, 2026-10-15: draft-picks felt cramped on

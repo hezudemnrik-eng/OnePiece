@@ -118,8 +118,16 @@ export function HomeOverview() {
     <div style={fit.wrapperHeight != null ? { height: fit.wrapperHeight, overflow: "hidden" } : undefined}>
     <main
       ref={contentRef}
-      style={{ transform: `scale(${fit.scale})`, transformOrigin: "top center" }}
-      className="mx-auto w-full min-w-0 max-w-3xl px-4 py-4 flex flex-col gap-[10px]">
+      style={{
+        transform: `scale(${fit.scale})`,
+        transformOrigin: "top center",
+        // See FitScreen.tsx: transform:scale stretches width along with
+        // height, so without compensating the box renders wider/narrower
+        // than the viewport whenever scale isn't ~1. fit.widthPct is the
+        // inverse factor that cancels that out (computed in useFitScreen).
+        width: `${fit.widthPct}%`,
+      }}
+      className="mx-auto min-w-0 max-w-3xl px-4 py-4 flex flex-col gap-[10px]">
       <p className="truncate whitespace-nowrap text-sm text-black/60 dark:text-white/50">
         {greetingText ?? "Willkommen"}
         {user?.username ? `, ${user.username}` : ""}.
