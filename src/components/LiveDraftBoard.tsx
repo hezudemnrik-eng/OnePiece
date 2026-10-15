@@ -857,7 +857,7 @@ export function LiveDraftBoard() {
           Dein Name
           <Input value={nickname} onChange={(e) => setNickname(e.target.value || "Spieler")} />
         </label>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button onClick={() => setView("create-form")}>Lobby erstellen</Button>
           <Button variant="secondary" onClick={() => setView("join-form")}>
             Mit Code beitreten
