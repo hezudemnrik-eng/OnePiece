@@ -44,7 +44,8 @@ export function VictoryBanner({ won, label }: Props) {
   if (!visible) return null;
 
   const text = label ?? (won === true ? "SIEG!" : won === false ? "NIEDERLAGE" : "KAMPF BEENDET");
-  const color = won === true ? "text-emerald-400" : won === false ? "text-rose-400" : "text-amber-300";
+  const color = won === true ? "text-emerald-950" : "text-rose-50";
+  const bannerSrc = won === true ? "/live-draft/victory-banner.png" : "/live-draft/defeat-banner.png";
 
   // Comic-lettering stroke (4-direction outline) plus a bold offset shadow
   // for depth, instead of the earlier soft blurred drop-shadow (Phase 11).
@@ -71,12 +72,16 @@ export function VictoryBanner({ won, label }: Props) {
             }}
           />
         ))}
-      <p
-        className={`op-banner-in font-[family-name:var(--font-display)] text-6xl sm:text-7xl ${color}`}
-        style={{ textShadow: inkTextShadow }}
-      >
-        {text}
-      </p>
+      <div className="op-banner-in relative flex w-full max-w-xl items-center justify-center px-6">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={bannerSrc} alt="" className="absolute inset-0 h-auto w-full select-none" draggable={false} />
+        <p
+          className={`relative font-[family-name:var(--font-display)] text-4xl sm:text-5xl ${color}`}
+          style={{ textShadow: inkTextShadow }}
+        >
+          {text}
+        </p>
+      </div>
     </div>
   );
 }
