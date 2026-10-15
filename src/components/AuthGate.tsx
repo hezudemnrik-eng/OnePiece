@@ -78,7 +78,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   if (user && user.username && !user.isAnonymous) {
     return (
       <div
-        className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
+        className="isolate min-h-screen bg-cover bg-center bg-no-repeat bg-fixed"
         style={{ backgroundImage: "linear-gradient(var(--op-map-overlay), var(--op-map-overlay)), url('/images/map-background.jpg')" }}
       >
         <DraftInviteOverlay />

@@ -852,12 +852,17 @@ export function LiveDraftBoard() {
     return (
       <>
         {renderLobbyBackground()}
-        <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
+        <Card
+          variant="spotlight"
+          accent="draft"
+          className="op-chatti-frame flex flex-col gap-4 max-w-md"
+          style={{ backgroundColor: "rgba(10, 8, 6, 0.32)" }}
+        >
         <label className="flex flex-col gap-1 text-sm">
           Dein Name
           <Input value={nickname} onChange={(e) => setNickname(e.target.value || "Spieler")} />
         </label>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button onClick={() => setView("create-form")}>Lobby erstellen</Button>
           <Button variant="secondary" onClick={() => setView("join-form")}>
             Mit Code beitreten
@@ -872,7 +877,12 @@ export function LiveDraftBoard() {
     return (
       <>
         {renderLobbyBackground()}
-        <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
+        <Card
+          variant="spotlight"
+          accent="draft"
+          className="op-chatti-frame flex flex-col gap-4 max-w-md"
+          style={{ backgroundColor: "rgba(10, 8, 6, 0.32)" }}
+        >
         <label className="flex flex-col gap-1 text-sm">
           Anzahl Spieler (2 oder 4)
           <Select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))}>
@@ -912,7 +922,12 @@ export function LiveDraftBoard() {
     return (
       <>
         {renderLobbyBackground()}
-        <Card variant="spotlight" accent="draft" className="flex flex-col gap-4 max-w-md">
+        <Card
+          variant="spotlight"
+          accent="draft"
+          className="op-chatti-frame flex flex-col gap-4 max-w-md"
+          style={{ backgroundColor: "rgba(10, 8, 6, 0.32)" }}
+        >
         <label className="flex flex-col gap-1 text-sm">
           Einladungscode
           <Input
@@ -948,7 +963,12 @@ export function LiveDraftBoard() {
     return (
       <>
         {renderLobbyBackground()}
-        <Card variant="spotlight" accent="draft" className="op-chatti-frame flex flex-col gap-4 max-w-md">
+        <Card
+          variant="spotlight"
+          accent="draft"
+          className="op-chatti-frame flex flex-col gap-4 max-w-md"
+          style={{ backgroundColor: "rgba(10, 8, 6, 0.32)" }}
+        >
         <div>
           <p className="text-sm text-black/60 dark:text-white/50">Einladungscode</p>
           <p className="font-mono text-2xl tracking-widest">{session.invite_code}</p>
