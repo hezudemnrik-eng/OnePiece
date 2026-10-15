@@ -233,8 +233,24 @@ body {
 .op-wanted {
   background-color: var(--poster-paper);
   color: var(--poster-ink);
-  border: 1.5px solid color-mix(in srgb, var(--poster-ink) 55%, transparent);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Plain thin border only when .op-wanted isn't also wearing an
+   illustrated frame (.op-framed / .op-rank-frame). Scoped with :not()
+   instead of relying on cascade order: this rule used to be a bare
+   `border: 1.5px solid …` shorthand, which — besides resetting
+   border-image to `none` and silently hiding the rank-frame artwork on
+   the profile-hero card — also set border-width to 1.5px, which (being
+   declared after .op-framed/.op-rank-frame in the file, same specificity)
+   overrode their 14px/56px border-width even once border-image was
+   restored, squeezing the frame's visual width down while its
+   border-image-width stayed full size, so the artwork bled over the
+   card's text instead of framing it. */
+.op-wanted:not(.op-framed):not(.op-rank-frame) {
+  border-width: 1.5px;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--poster-ink) 55%, transparent);
 }
 
 /* Form fields (Input/Select/textarea) default to a dark-mode-reactive fill
