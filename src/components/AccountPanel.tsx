@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { fetchMyLevelInfo, getCurrentAuthUser, isSupabaseConfigured, signOutUser, type AuthUser } from "@/lib/supabase";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 import { BERRY_ICON, LOGOUT_ICON } from "@/lib/iconImages";
@@ -52,6 +53,14 @@ export function AccountPanel({ onSignedOut }: Props) {
         <img src={BERRY_ICON} alt="" aria-hidden className="h-4 w-4 object-contain drop-shadow-sm" />
         {berries.toLocaleString("de-DE")}
       </span>
+      <Link
+        href="/shop"
+        title="Berries kaufen"
+        aria-label="Berries kaufen"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent-ink/90 text-sm font-bold leading-none text-poster-ink shadow-sm"
+      >
+        +
+      </Link>
       <button
         onClick={handleLogout}
         title="Abmelden"
