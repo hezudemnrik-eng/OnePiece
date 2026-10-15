@@ -22,10 +22,10 @@ export default function LiveDraftPage() {
     <>
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-25 dark:opacity-20"
+        className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-55 dark:opacity-45"
         style={{ backgroundImage: "url(/live-draft/deck-background.jpg)" }}
       />
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-white/70 dark:bg-black/70" />
+      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-white/45 dark:bg-black/45" />
       {/* Boss wants the Live-Draft screen to always fit without scrolling,
           same as Home (Q96/zero-scroll follow-up) — see FitScreen/useFitScreen. */}
       <FitScreen>

@@ -779,7 +779,7 @@ export function LiveDraftBoard() {
             onClick={() => handleSendEmote(emote)}
             className="rounded-full border border-black/15 dark:border-white/15 p-1 transition hover:border-mode-draft/50"
           >
-            <img src={EMOTE_ICON[emote]} alt={EMOTE_ALT[emote]} className="h-7 w-7" />
+            <img src={EMOTE_ICON[emote]} alt={EMOTE_ALT[emote]} className="h-10 w-10" />
           </button>
         ))}
       </div>
@@ -801,7 +801,7 @@ export function LiveDraftBoard() {
               className="op-emote-pop absolute flex flex-col items-center gap-1"
               style={{ left: `${f.leftPct}%` }}
             >
-              <img src={EMOTE_ICON[f.emote]} alt={f.label} className="h-10 w-10 drop-shadow-md" />
+              <img src={EMOTE_ICON[f.emote]} alt={f.label} className="h-16 w-16 drop-shadow-md" />
               <span className="whitespace-nowrap rounded-full bg-black/60 px-2 py-0.5 text-xs text-white">{f.label}</span>
             </span>
           ))}
@@ -820,10 +820,10 @@ export function LiveDraftBoard() {
       <>
         <div
           aria-hidden
-          className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-25 dark:opacity-20"
+          className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-center bg-no-repeat opacity-55 dark:opacity-45"
           style={{ backgroundImage: "url(/live-draft/lobby-background.jpg)" }}
         />
-        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-white/70 dark:bg-black/70" />
+        <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 bg-white/45 dark:bg-black/45" />
       </>
     );
   }
@@ -1195,7 +1195,7 @@ export function LiveDraftBoard() {
           <div className="flex flex-col gap-2">
             {errorMsg && <p className="text-sm text-danger">{errorMsg}</p>}
             <div className="flex items-center gap-3">
-              <img src="/live-draft/badge-rematch.png" alt="" className="h-12 w-12 shrink-0" />
+              <img src="/live-draft/badge-rematch.png" alt="" className="h-20 w-20 shrink-0" />
               <Button onClick={handleVoteRematch} disabled={me.rematchReady} className="flex-1 py-3 text-lg">
                 {me.rematchReady ? "Warte auf die anderen…" : "Rematch"}
               </Button>
@@ -1226,7 +1226,7 @@ export function LiveDraftBoard() {
         )}
         {mvp && (
           <p className="op-pop-in flex items-center gap-2 text-sm">
-            <img src="/live-draft/badge-mvp.png" alt="MVP" className="h-8 w-8" />
+            <img src="/live-draft/badge-mvp.png" alt="MVP" className="h-14 w-14" />
             <span className="font-semibold">MVP:</span> {mvp.characterName} ({mvp.playerName})
           </p>
         )}
