@@ -9,10 +9,10 @@ function NavIcon({ icon }: { icon: string }) {
   const image = ICON_IMAGES[icon];
   if (image) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={image} alt="" aria-hidden className="h-12 w-12 object-contain drop-shadow-md" />;
+    return <img src={image} alt="" aria-hidden className="h-14 w-14 object-contain drop-shadow-md" />;
   }
   return (
-    <span className="text-4xl drop-shadow-md" aria-hidden>
+    <span className="text-5xl drop-shadow-md" aria-hidden>
       {icon}
     </span>
   );
@@ -27,7 +27,7 @@ function isGroupActive(pathname: string, groupHref: string, groupId: string): bo
  * each slot (not wider than flex-1's share at phone widths) so the
  * highlight never bleeds into a neighboring icon. */
 function navSlotClass(active: boolean): string {
-  return `flex items-center justify-center rounded-xl p-1.5 transition ${
+  return `flex items-center justify-center rounded-xl p-1 transition ${
     active ? "bg-[rgba(244,197,66,0.35)] shadow-[0_0_0_2px_rgba(244,197,66,0.65)]" : ""
   }`;
 }
