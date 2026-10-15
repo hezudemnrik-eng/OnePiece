@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useFitScreen } from "@/lib/useFitScreen";
 import { characters } from "@/lib/characters";
 import { MODES, MODE_GROUPS, SHOP_TILE } from "@/lib/modes";
-import { COSMETIC_FRAMES, getLevelProgress } from "@/lib/levels";
+import { getLevelProgress } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
 import { BERRY_ICON, ICON_IMAGES } from "@/lib/iconImages";
 import { getLastPlayedHref } from "@/lib/lastPlayed";
@@ -57,7 +57,6 @@ export function HomeOverview() {
   const [levelInfo, setLevelInfo] = useState<MyLevelInfo | null>(null);
   const [frameImage, setFrameImage] = useState<string | null>(null);
   const [frameClass, setFrameClass] = useState("");
-  const [rankFrameClass, setRankFrameClass] = useState("");
   const [colorClass, setColorClass] = useState("");
   const [title, setTitle] = useState<{ label: string; className: string } | null>(null);
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -95,7 +94,6 @@ export function HomeOverview() {
       setLevelInfo(level);
       setFrameClass(items.find((i) => i.category === "frame" && i.id === level?.equippedFrame)?.className ?? "");
       setFrameImage(level?.equippedFrame ? (FRAME_IMAGES[level.equippedFrame] ?? null) : null);
-      setRankFrameClass(COSMETIC_FRAMES.find((f) => f.id === level?.equippedRankFrame)?.className ?? "");
       setColorClass(items.find((i) => i.category === "color" && i.id === level?.equippedColor)?.className ?? "");
       const activeTitle = items.find((i) => i.category === "title" && i.id === level?.equippedTitle);
       setTitle(activeTitle ? { label: activeTitle.label, className: activeTitle.className } : null);
@@ -152,9 +150,6 @@ export function HomeOverview() {
               {frameImage && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-contain" />
-              )}
-              {!frameImage && rankFrameClass && (
-                <span className={`pointer-events-none absolute inset-0 rounded-full ${rankFrameClass}`} />
               )}
               <span
                 className="absolute -bottom-2 -left-2 flex h-8 w-8 items-center justify-center bg-contain bg-center bg-no-repeat text-xs font-bold tabular-nums text-poster-ink"
