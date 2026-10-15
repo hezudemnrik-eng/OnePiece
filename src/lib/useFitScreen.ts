@@ -34,10 +34,17 @@ export function useFitScreen(headerId = "app-header", footerId = "app-bottomnav"
       const footerH = document.getElementById(footerId)?.offsetHeight ?? 0;
       const available = window.innerHeight - headerH - footerH;
       const natural = contentRef.current.scrollHeight;
-      // No floor on the scale: "kein Scrollen" is a hard requirement, so the
-      // page must always fit even on the most cramped viewports (small
-      // phone + browser toolbars), ahead of any minimum-legibility preference.
-      const scale = natural > available ? available / natural : 1;
+      if (natural <= 0 || available <= 0) return;
+      // No floor (and, below, no ceiling either) on the scale: "kein
+      // Scrollen" is a hard requirement, so the page must always fit even on
+      // the most cramped viewports, and on a roomier viewport the mockup
+      // packs content edge-to-edge down to the bottom bar rather than
+      // leaving a gap — so content scales up to fill the space too, not
+      // just down to avoid overflowing it. Scaling (rather than flex-growing
+      // individual sections) reuses one simple, already-proven mechanism
+      // instead of a flex-grow/grid-fr measurement cycle that fights the
+      // very ResizeObserver driving this recalc.
+      const scale = available / natural;
       setFit({ wrapperHeight: Math.round(natural * scale), scale });
     }
     recalc();
