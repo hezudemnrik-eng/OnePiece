@@ -9,9 +9,22 @@ type Props = {
   label?: string;
 };
 
+const CONFETTI_COLORS = ["#f0b429", "#e11d48", "#059669", "#2563eb", "#9333ea", "#f97316"];
+
+function makeConfetti() {
+  return Array.from({ length: 18 }, (_, i) => ({
+    key: i,
+    left: Math.random() * 100,
+    delay: Math.random() * 0.4,
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    rotate: Math.random() * 360,
+  }));
+}
+
 export function VictoryBanner({ won, label }: Props) {
   const [visible, setVisible] = useState(true);
   const [animationsEnabled] = useAnimationsEnabled();
+  const [confetti] = useState(() => (won === true ? makeConfetti() : []));
 
   useEffect(() => {
     if (animationsEnabled) {
@@ -44,7 +57,20 @@ export function VictoryBanner({ won, label }: Props) {
   ].join(", ");
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/40">
+      {animationsEnabled &&
+        confetti.map((c) => (
+          <span
+            key={c.key}
+            className="op-confetti"
+            style={{
+              left: `${c.left}%`,
+              backgroundColor: c.color,
+              animationDelay: `${c.delay}s`,
+              transform: `rotate(${c.rotate}deg)`,
+            }}
+          />
+        ))}
       <p
         className={`op-banner-in font-[family-name:var(--font-display)] text-6xl sm:text-7xl ${color}`}
         style={{ textShadow: inkTextShadow }}
