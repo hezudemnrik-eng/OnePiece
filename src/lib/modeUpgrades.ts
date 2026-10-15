@@ -12,10 +12,13 @@ export type GameMode = "imu" | "zufallsgegner" | "live-draft" | "quiz" | "crew" 
 // instead, applied client-side in rollFusionOption() (src/lib/fusionTraits.ts).
 export type ModeUpgradeEffect = "xp-berry" | "fusion-tier";
 
+// No "live-draft" entry here (migration 0025 — Boss, 2026-10-15: Shop-Boosts
+// gelten überall außer im Live-Draft). The upgrade can't be bought here, and
+// award_xp() forces its multiplier to 1 server-side for anyone who already
+// owned a level before this change.
 export const MODE_UPGRADE_CATALOG: { mode: GameMode; label: string; effect: ModeUpgradeEffect }[] = [
   { mode: "imu", label: "Imu-Duell", effect: "xp-berry" },
   { mode: "zufallsgegner", label: "Zufallsgegner", effect: "xp-berry" },
-  { mode: "live-draft", label: "Live-Draft", effect: "xp-berry" },
   { mode: "quiz", label: "Quiz", effect: "xp-berry" },
   { mode: "crew", label: "Crew-Builder", effect: "xp-berry" },
   { mode: "blind-ranking", label: "Blind Ranking", effect: "xp-berry" },
