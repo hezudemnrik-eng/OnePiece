@@ -10,6 +10,8 @@ type Props = {
   assignments: Record<string, Role> | undefined;
   onAssign: (characterId: string, role: Role) => void;
   onConfirm: () => void;
+  /** Fills every character's best role in one click instead of one tap each (see autoAssignRoles in draft.ts). */
+  onAutoAssign?: () => void;
   confirmLabel?: string;
   readOnly?: boolean;
 };
@@ -20,16 +22,31 @@ const FIT_STYLES: Record<string, string> = {
   neutral: "border-black/15 dark:border-white/15",
 };
 
-export function RoleAssignmentPanel({ roster, assignments, onAssign, onConfirm, confirmLabel = "Kampf starten", readOnly = false }: Props) {
+export function RoleAssignmentPanel({
+  roster,
+  assignments,
+  onAssign,
+  onConfirm,
+  onAutoAssign,
+  confirmLabel = "Kampf starten",
+  readOnly = false,
+}: Props) {
   const takenRoles = new Set(Object.values(assignments ?? {}));
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <p className="text-sm font-semibold">Rollen zuteilen (optional)</p>
-        <p className="text-xs text-black/60 dark:text-white/50">
-          Richtige Rolle = Stat-Bonus, falsche Rolle = Malus. &quot;Sonstige&quot; ist immer neutral. Jede Rolle nur einmal pro Spieler.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold">Rollen zuteilen (optional)</p>
+          <p className="text-xs text-black/60 dark:text-white/50">
+            Richtige Rolle = Stat-Bonus, falsche Rolle = Malus. &quot;Sonstige&quot; ist immer neutral. Jede Rolle nur einmal pro Spieler.
+          </p>
+        </div>
+        {!readOnly && onAutoAssign && (
+          <Button variant="secondary" onClick={onAutoAssign} className="shrink-0 px-3 py-1.5 text-xs">
+            Automatisch zuteilen
+          </Button>
+        )}
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {roster.map((char) => {

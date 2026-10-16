@@ -250,6 +250,33 @@ export function assignRole(state: DraftState, playerId: string, characterId: str
   return { ...state, players };
 }
 
+/**
+ * Assigns every one of this player's picks the best possible role in one
+ * click instead of one tap per character: each character's own canonical
+ * role if it's still free (the stat bonus, see roleFit in crewRoles.ts),
+ * otherwise "Sonstige" (neutral). A mismatched, non-"Sonstige" role is
+ * never worth choosing over "Sonstige" — it only ever carries a malus — so
+ * this single greedy pass already is the optimal assignment for the whole
+ * roster, not just a shortcut heuristic. Replaces any existing assignments.
+ */
+export function autoAssignRoles(state: DraftState, playerId: string, allCharacters: Character[]): DraftState {
+  if (!state.finished) return state;
+  const roster = getTeam(state, playerId, allCharacters);
+  const used = new Set<Role>();
+  const nextAssignments: Record<string, Role> = {};
+  for (const char of roster) {
+    if (char.role !== "Sonstige" && !used.has(char.role)) {
+      nextAssignments[char.id] = char.role;
+      used.add(char.role);
+    }
+  }
+  for (const char of roster) {
+    if (!nextAssignments[char.id]) nextAssignments[char.id] = "Sonstige";
+  }
+  const players = state.players.map((p) => (p.id === playerId ? { ...p, roleAssignments: nextAssignments } : p));
+  return { ...state, players };
+}
+
 /** Marks a player ready for battle — role assignment is optional, this can be called with nothing assigned to just fight with unmodified stats. */
 export function confirmRoles(state: DraftState, playerId: string): DraftState {
   const players = state.players.map((p) => (p.id === playerId ? { ...p, rolesReady: true } : p));
