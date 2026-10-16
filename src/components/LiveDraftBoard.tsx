@@ -308,8 +308,15 @@ export function LiveDraftBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myUserId, searchParams]);
 
+  // nowTick doesn't drive any on-screen countdown (there is no visible
+  // per-second timer in this board) — it only exists so the heartbeat
+  // (every PRESENCE_INTERVAL_MS) and stale-player check (STALE_MS = 15s)
+  // below get re-evaluated periodically. Ticking every 1s forced this
+  // whole (large, image-heavy) board to fully re-render once a second,
+  // which is exactly the "laggt sehr beim Live Draft" symptom on phones.
+  // Every 4s is still far tighter than the 7s/15s thresholds it feeds.
   useEffect(() => {
-    const id = setInterval(() => setNowTick(Date.now()), 1000);
+    const id = setInterval(() => setNowTick(Date.now()), 4000);
     return () => clearInterval(id);
   }, []);
 
