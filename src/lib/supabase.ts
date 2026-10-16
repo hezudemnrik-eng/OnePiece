@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { DraftState } from "./draft";
 import type { BattleResult } from "./battle-sim";
 import { XP_DUEL_COMPLETE, XP_MATCH_LOSS, XP_MATCH_WIN, XP_QUIZ_BASE, XP_QUIZ_PER_CORRECT } from "./levels";
-import { getTodaysChallenge, type DailyQuestId } from "./dailyChallenge";
+import { getTodaysChallenge, todayKeyBerlin, type DailyQuestId } from "./dailyChallenge";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -510,12 +510,11 @@ export async function fetchDailyQuestClaimedToday(): Promise<boolean> {
   if (!supabase) return false;
   const userId = await ensureSupabaseSession();
   if (!userId) return false;
-  const todayIso = new Date().toISOString().slice(0, 10);
   const { data } = await supabase
     .from("daily_quest_claims")
     .select("claim_date")
     .eq("user_id", userId)
-    .eq("claim_date", todayIso)
+    .eq("claim_date", todayKeyBerlin())
     .maybeSingle();
   return Boolean(data);
 }

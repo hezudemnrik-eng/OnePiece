@@ -49,13 +49,41 @@ const CHALLENGE_POOL: DailyChallenge[] = [
   { id: "duell", text: "Spiele ein Duell mit einem Charakter, den du noch nie genutzt hast.", href: "/duell", icon: "⚡", accent: "duell" },
 ];
 
+// Boss and every player are in Germany, so "today" has to mean the
+// Europe/Berlin calendar day, not UTC. Using getUTC*() here previously
+// rolled the quest (and, via todayKeyBerlin() below, the claimed flag)
+// over at UTC midnight = 1-2am local depending on DST, so right after
+// local midnight the app still showed yesterday's (already claimed)
+// quest — looking exactly like it was "stuck", not "updated".
+function berlinDateParts(date: Date): { year: number; month: number; day: number } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  return { year: get("year"), month: get("month") - 1, day: get("day") };
+}
+
 function dayOfYear(date: Date): number {
-  const start = Date.UTC(date.getUTCFullYear(), 0, 0);
-  const diff = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - start;
+  const { year, month, day } = berlinDateParts(date);
+  const start = Date.UTC(year, 0, 0);
+  const diff = Date.UTC(year, month, day) - start;
   return Math.floor(diff / 86_400_000);
 }
 
 export function getTodaysChallenge(date: Date = new Date()): DailyChallenge {
   const index = dayOfYear(date) % CHALLENGE_POOL.length;
   return CHALLENGE_POOL[index];
+}
+
+/**
+ * The Europe/Berlin calendar day as "YYYY-MM-DD", matching the `claim_date`
+ * the claim_daily_quest() RPC now writes (migration 0026) — both sides of
+ * the "already claimed today" check must agree on what day it is.
+ */
+export function todayKeyBerlin(date: Date = new Date()): string {
+  const { year, month, day } = berlinDateParts(date);
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
