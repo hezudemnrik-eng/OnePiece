@@ -32,14 +32,6 @@ export const SHOP_TILE = { href: "/shop", icon: "🛒", title: "Shop" };
 /** Every game mode's nav entry — shared by the category hub pages and (formerly) the sidebar. */
 export const MODES: GameMode[] = [
   {
-    href: "/draft",
-    icon: "⚔️",
-    title: "PvP-Draft gegen Freunde",
-    desc: "Snake-Draft im Hotseat, danach Kampfsimulation.",
-    group: "kampf",
-    accent: "draft",
-  },
-  {
     href: "/draft/live",
     icon: "🌐",
     title: "Live-Draft (mehrere Geräte)",
@@ -57,23 +49,6 @@ export const MODES: GameMode[] = [
     matchMode: "imu",
     group: "kampf",
     accent: "imu",
-  },
-  {
-    href: "/zufallsgegner",
-    icon: "🎲",
-    title: "Gegen Zufallsgegner",
-    desc: "Ranked-Übungsrunde gegen eine leichtere KI.",
-    matchMode: "zufallsgegner",
-    group: "kampf",
-    accent: "zufallsgegner",
-  },
-  {
-    href: "/duell",
-    icon: "⚡",
-    title: "Gegeneinander",
-    desc: "1-gegen-1-Duell: zwei Charaktere, ein Sieger.",
-    group: "kampf",
-    accent: "duell",
   },
   {
     href: "/crew",

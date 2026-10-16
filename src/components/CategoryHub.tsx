@@ -14,14 +14,11 @@ type Props = {
 
 /** Illustrated artwork (Boss's ChatGPT assets) for sub-modes that have one yet — others fall back to the plain emoji card. */
 const MODE_IMAGES: Record<string, string> = {
-  "/draft": "/images/mode-draft.jpg",
   "/draft/live": "/images/mode-live-draft.jpg",
   "/imu": "/images/mode-imu.jpg",
-  "/duell": "/images/mode-duell.jpg",
   "/quiz": "/images/mode-quiz.jpg",
   "/blind-ranking": "/images/mode-blind-ranking.jpg",
   "/tierlisten": "/images/mode-tierlisten.jpg",
-  "/zufallsgegner": "/images/mode-zufallsgegner.jpg",
   "/fusion": "/images/mode-fusion.jpg",
   "/crew": "/images/mode-crew.jpg",
 };

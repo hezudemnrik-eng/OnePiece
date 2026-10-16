@@ -14,7 +14,6 @@ import { FRAME_IMAGES } from "@/lib/frameImages";
 import { RANK_FRAME_IMAGES } from "@/lib/rankFrameImages";
 import { BERRY_ICON } from "@/lib/iconImages";
 import { FUSION_ACHIEVEMENTS } from "@/lib/fusionAchievements";
-import { DUEL_ACHIEVEMENTS } from "@/lib/duelAchievements";
 import { QUIZ_ACHIEVEMENTS } from "@/lib/quizAchievements";
 import { CREW_ACHIEVEMENTS } from "@/lib/crewAchievements";
 import { BLIND_RANKING_ACHIEVEMENTS } from "@/lib/blindRankingAchievements";
@@ -58,7 +57,6 @@ const MODE_LABELS: Record<MatchMode, string> = {
 // (see migration 0010), so no schema change was needed to add these.
 const ACHIEVEMENT_GROUPS = [
   { label: "Fusions-Pirat", items: FUSION_ACHIEVEMENTS },
-  { label: "Duell", items: DUEL_ACHIEVEMENTS },
   { label: "Draft", items: DRAFT_ACHIEVEMENTS },
   { label: "Quiz", items: QUIZ_ACHIEVEMENTS },
   { label: "Crew Builder", items: CREW_ACHIEVEMENTS },
