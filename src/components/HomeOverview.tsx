@@ -293,7 +293,7 @@ export function HomeOverview() {
                 backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.05)), url('${TILE_IMAGES[g.href] ?? ""}')`,
               }}
             >
-              <div className="flex items-center justify-between gap-1">
+              <div className="flex items-start justify-between gap-1">
                 <span className="flex min-w-0 items-center gap-2">
                   {ICON_IMAGES[g.icon] ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -303,7 +303,10 @@ export function HomeOverview() {
                       {g.icon}
                     </span>
                   )}
-                  <span className="truncate whitespace-nowrap text-sm font-semibold leading-tight text-white">{g.title}</span>
+                  {/* No truncate/nowrap here (unlike the other tiles' single-line
+                      labels) - "Rätsel & Ranking" is long enough at this font size
+                      to need the second line rather than an ellipsis. */}
+                  <span className="line-clamp-2 text-sm font-semibold leading-tight text-white">{g.title}</span>
                 </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain" />
