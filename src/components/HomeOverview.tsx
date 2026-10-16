@@ -287,26 +287,29 @@ export function HomeOverview() {
         {[...MODE_GROUPS, SHOP_TILE].map((g) => (
           <Link key={g.href} href={g.href}>
             <div
-              className="relative flex min-h-[80px] flex-col justify-end overflow-hidden rounded-xl border bg-cover bg-center p-3 shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
+              className="relative flex min-h-[168px] flex-col justify-end overflow-hidden rounded-xl border bg-cover bg-center p-4 shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
               style={{
                 borderColor: `color-mix(in srgb, var(--mode-${"id" in g ? (g.id === "kampf" ? "duell" : g.id === "raetsel-ranking" ? "quiz" : "crew") : "shop"}) 55%, transparent)`,
                 backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0.05)), url('${TILE_IMAGES[g.href] ?? ""}')`,
               }}
             >
-              <div className="flex items-center justify-between gap-1">
-                <span className="flex min-w-0 items-center gap-1.5">
+              <div className="flex items-start justify-between gap-1">
+                <span className="flex min-w-0 items-center gap-2">
                   {ICON_IMAGES[g.icon] ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={ICON_IMAGES[g.icon]} alt="" aria-hidden className="h-6 w-6 shrink-0 object-contain drop-shadow-md" />
+                    <img src={ICON_IMAGES[g.icon]} alt="" aria-hidden className="h-11 w-11 shrink-0 object-contain drop-shadow-md" />
                   ) : (
-                    <span className="shrink-0 text-base drop-shadow-md" aria-hidden>
+                    <span className="shrink-0 text-3xl drop-shadow-md" aria-hidden>
                       {g.icon}
                     </span>
                   )}
-                  <span className="truncate whitespace-nowrap text-xs font-semibold leading-tight text-white">{g.title}</span>
+                  {/* No truncate/nowrap here (unlike the other tiles' single-line
+                      labels) - "Rätsel & Ranking" is long enough at this font size
+                      to need the second line rather than an ellipsis. */}
+                  <span className="line-clamp-2 text-base font-semibold leading-tight text-white">{g.title}</span>
                 </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-7 w-7 shrink-0 object-contain" />
+                <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-11 w-11 shrink-0 object-contain" />
               </div>
             </div>
           </Link>
