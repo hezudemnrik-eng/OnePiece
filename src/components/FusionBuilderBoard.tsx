@@ -56,7 +56,7 @@ function FusionGridCard({
         onClick ? "hover:brightness-95 active:brightness-90" : "opacity-75"
       } ${locked ? "op-pop-in" : ""}`}
     >
-      <span className="absolute left-1 top-1 z-10 rounded bg-black/55 px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white">
+      <span className="absolute left-1 top-1 z-10 max-w-[calc(100%-0.5rem)] truncate rounded bg-black/55 px-1 py-0.5 text-[8px] font-semibold uppercase text-white">
         {categoryLabel}
       </span>
       {locked && (
@@ -85,7 +85,13 @@ function FusionGridCard({
             {option.sourceName.slice(0, 2).toUpperCase()}
           </span>
         )}
-        <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/85 via-black/45 to-transparent px-1.5 pb-1.5 pt-5 font-[family-name:var(--font-display)] text-xs leading-tight text-white">
+        {/* Full name, wrapped to up to 2 lines instead of single-line
+            ellipsis — FitScreen (Q106/#108) narrows this grid's layout
+            width whenever it scales the page, which made a one-line
+            truncate cut off longer names (e.g. "Bartholomew…") much more
+            often than before. line-clamp keeps it to 2 lines so longer
+            names stay readable without the card growing unbounded. */}
+        <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-gradient-to-t from-black/85 via-black/45 to-transparent px-1.5 pb-1 pt-5 font-[family-name:var(--font-display)] text-[11px] leading-tight text-white">
           {option.sourceName}
         </span>
       </div>
