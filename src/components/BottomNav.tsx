@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MODES } from "@/lib/modes";
@@ -50,10 +51,39 @@ const NAV_ITEMS: { href: string; icon: string; label: string; isActive: (pathnam
 /** Fixed bottom bar for mobile (Q51). */
 export function BottomNav() {
   const pathname = usePathname();
+  const navRef = useRef<HTMLElement>(null);
+
+  // The nav is `fixed`, so page content needs matching bottom padding
+  // reserved or it renders underneath it — including the fixed nav's own
+  // hit area, which then silently eats clicks meant for whatever sits in
+  // that overlap (e.g. Fusion Pirates' "Neuen Fusions-Piraten würfeln").
+  // That padding (see AuthGate) used to be a value hand-picked to match
+  // this bar's height; PR #97 grew the icons/label without updating it,
+  // so it drifted out of sync. Publishing the bar's real measured height
+  // as a CSS variable keeps the two in lockstep regardless of future
+  // size changes here.
+  useLayoutEffect(() => {
+    function recalc() {
+      // Mirrors the md:hidden breakpoint below: above it this bar renders
+      // display:none (offsetHeight 0 already), but pin it explicitly so a
+      // stale mobile measurement never lingers across a resize.
+      const height = window.innerWidth >= 768 ? 0 : navRef.current?.offsetHeight ?? 0;
+      document.documentElement.style.setProperty("--bottom-nav-height", `${height}px`);
+    }
+    recalc();
+    const ro = new ResizeObserver(recalc);
+    if (navRef.current) ro.observe(navRef.current);
+    window.addEventListener("resize", recalc);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", recalc);
+    };
+  }, []);
 
   return (
     <nav
       id="app-bottomnav"
+      ref={navRef}
       className="md:hidden fixed inset-x-0 bottom-0 z-20 flex items-stretch justify-around bg-cover bg-center shadow-[0_-2px_4px_rgba(0,0,0,0.35)]"
       style={{ backgroundImage: "url('/images/bar-bottomnav.png')", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
