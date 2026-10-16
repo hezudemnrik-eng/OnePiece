@@ -11,7 +11,16 @@ export function FitScreen({ children }: { children: ReactNode }) {
       <div
         ref={contentRef}
         style={{
-          transform: `scale(${fit.scale})`,
+          // Centering via left:50% + translateX(-50%) in the same transform
+          // as the scale, rather than width:auto margins — margin:auto on a
+          // percentage-width element under a transform measured consistently
+          // off-center on Boss's iPhone (standalone PWA) while rendering
+          // correctly in every desktop browser tested, so the centering math
+          // itself (not just the fit numbers) had to stop depending on
+          // margin resolution.
+          position: "relative",
+          left: "50%",
+          transform: `translateX(-50%) scale(${fit.scale})`,
           transformOrigin: "top center",
           // transform:scale stretches width exactly like height — on a
           // screen whose natural content is much shorter than the
@@ -25,7 +34,6 @@ export function FitScreen({ children }: { children: ReactNode }) {
           // grows/shrinks, which is what "fit the vertical space" means
           // (fit.widthPct is that inverse factor — see useFitScreen).
           width: `${fit.widthPct}%`,
-          marginInline: "auto",
         }}
       >
         {children}

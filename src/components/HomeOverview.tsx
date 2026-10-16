@@ -119,7 +119,14 @@ export function HomeOverview() {
     <main
       ref={contentRef}
       style={{
-        transform: `scale(${fit.scale})`,
+        // See FitScreen.tsx: centered via left:50% + translateX(-50%) in
+        // the same transform as the scale, not via margin:auto — on
+        // Boss's iPhone (standalone PWA) margin:auto on a percentage-width
+        // transformed element rendered off-center while every desktop
+        // browser tested showed it dead-center.
+        position: "relative",
+        left: "50%",
+        transform: `translateX(-50%) scale(${fit.scale})`,
         transformOrigin: "top center",
         // See FitScreen.tsx: transform:scale stretches width along with
         // height, so without compensating the box renders wider/narrower
@@ -127,7 +134,7 @@ export function HomeOverview() {
         // inverse factor that cancels that out (computed in useFitScreen).
         width: `${fit.widthPct}%`,
       }}
-      className="mx-auto min-w-0 max-w-3xl px-4 py-4 flex flex-col gap-[10px]">
+      className="min-w-0 max-w-3xl px-4 py-4 flex flex-col gap-[10px]">
       <p className="truncate whitespace-nowrap text-sm text-black/60 dark:text-white/50">
         {greetingText ?? "Willkommen"}
         {user?.username ? `, ${user.username}` : ""}.
