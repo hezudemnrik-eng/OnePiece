@@ -18,12 +18,14 @@ import {
   getTeam,
   isLobbyFull,
   pickCharacter,
+  autoAssignRoles,
   resolveTeamRoleConflicts,
   sendEmote,
   skipRoll,
   touchPresence,
   voteRematch,
   type DraftEmote,
+  type DraftState,
   type DraftTeam,
 } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
@@ -445,41 +447,50 @@ export function LiveDraftBoard() {
     if (result.session) setSession(result.session);
   }
 
+  /**
+   * Applies a pure state transform and writes it, retrying against the
+   * latest fetched row if another write lands first and the optimistic-
+   * concurrency check in writeLiveDraft fails. This happens routinely
+   * during drafting/roles — every seated player's browser writes a presence
+   * heartbeat every PRESENCE_INTERVAL_MS (see touchPresence below) — so
+   * without a retry, a conflict used to just silently drop the player's own
+   * action: clicking "Bereit" (or picking/skipping on a slow connection)
+   * could do nothing at all, with no error shown, until they noticed and
+   * clicked again. Mirrors the retry loop joinLobby already used for
+   * claiming a seat.
+   */
+  async function writeDraftState(transform: (state: DraftState) => DraftState, attempts = 5): Promise<void> {
+    let current = session;
+    for (let i = 0; i < attempts && current; i++) {
+      const next = transform(current.state);
+      const result = await writeLiveDraft(current.id, current.updated_at, { state: next });
+      if (result.session) {
+        setSession(result.session);
+        return;
+      }
+      if (!result.conflict) return;
+      current = await fetchLiveDraftById(current.id);
+    }
+    if (current) setSession(current);
+  }
+
   async function handleAssignTeam(seatIndex: number, team: DraftTeam | undefined) {
     if (!session) return;
-    const next = assignTeam(session.state, seatIndex, team);
-    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
-    if (result.session) setSession(result.session);
-    else if (result.conflict) {
-      const refetched = await fetchLiveDraftById(session.id);
-      if (refetched) setSession(refetched);
-    }
+    await writeDraftState((state) => assignTeam(state, seatIndex, team));
   }
 
   async function applyPick(characterId: string) {
     if (!session) return;
     playAccept();
     vibrate(30);
-    const next = pickCharacter(session.state, characterId);
-    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
-    if (result.session) setSession(result.session);
-    else if (result.conflict) {
-      const refetched = await fetchLiveDraftById(session.id);
-      if (refetched) setSession(refetched);
-    }
+    await writeDraftState((state) => pickCharacter(state, characterId));
   }
 
   async function applySkip() {
     if (!session) return;
     playSkip();
     vibrate(15);
-    const next = skipRoll(session.state);
-    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
-    if (result.session) setSession(result.session);
-    else if (result.conflict) {
-      const refetched = await fetchLiveDraftById(session.id);
-      if (refetched) setSession(refetched);
-    }
+    await writeDraftState((state) => skipRoll(state));
   }
 
   // Presence heartbeat (Q109): each client periodically touches its own
@@ -584,26 +595,21 @@ export function LiveDraftBoard() {
     if (!session || !myUserId) return;
     const me = session.state.players.find((p) => p.userId === myUserId);
     if (!me) return;
-    const next = assignRole(session.state, me.id, characterId, role);
-    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
-    if (result.session) setSession(result.session);
-    else if (result.conflict) {
-      const refetched = await fetchLiveDraftById(session.id);
-      if (refetched) setSession(refetched);
-    }
+    await writeDraftState((state) => assignRole(state, me.id, characterId, role));
+  }
+
+  async function handleAutoAssignRoles() {
+    if (!session || !myUserId) return;
+    const me = session.state.players.find((p) => p.userId === myUserId);
+    if (!me) return;
+    await writeDraftState((state) => autoAssignRoles(state, me.id, characters));
   }
 
   async function handleConfirmRoles() {
     if (!session || !myUserId) return;
     const me = session.state.players.find((p) => p.userId === myUserId);
     if (!me) return;
-    const next = confirmRoles(session.state, me.id);
-    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
-    if (result.session) setSession(result.session);
-    else if (result.conflict) {
-      const refetched = await fetchLiveDraftById(session.id);
-      if (refetched) setSession(refetched);
-    }
+    await writeDraftState((state) => confirmRoles(state, me.id));
   }
 
   // Every participant's own browser records its own win/loss once — not
@@ -773,13 +779,7 @@ export function LiveDraftBoard() {
     if (!session || !myUserId) return;
     const me = session.state.players.find((p) => p.userId === myUserId);
     if (!me) return;
-    const next = voteRematch(session.state, me.id);
-    const result = await writeLiveDraft(session.id, session.updated_at, { state: next });
-    if (result.session) setSession(result.session);
-    else if (result.conflict) {
-      const refetched = await fetchLiveDraftById(session.id);
-      if (refetched) setSession(refetched);
-    }
+    await writeDraftState((state) => voteRematch(state, me.id));
   }
 
   function chatLabel(playerId: string): string {
@@ -1217,6 +1217,7 @@ export function LiveDraftBoard() {
             roster={roster}
             assignments={me.roleAssignments}
             onAssign={handleAssignRole}
+            onAutoAssign={handleAutoAssignRoles}
             onConfirm={handleConfirmRoles}
             confirmLabel="Bereit"
           />

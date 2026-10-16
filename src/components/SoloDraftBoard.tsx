@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { characters, type Character, type Role } from "@/lib/characters";
-import { assignRole, autoPick, createDraft, currentPlayer, getTeam, pickCharacter, skipRoll, type DraftState } from "@/lib/draft";
+import { assignRole, autoAssignRoles, autoPick, createDraft, currentPlayer, getTeam, pickCharacter, skipRoll, type DraftState } from "@/lib/draft";
 import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
 import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { generateAiTeam, generateImuBoss, type AiTeam, type Difficulty } from "@/lib/imu";
@@ -139,6 +139,10 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
     setDraft((d) => (d ? assignRole(d, d.players[0].id, characterId, role) : d));
   }
 
+  function handleAutoAssignRoles() {
+    setDraft((d) => (d ? autoAssignRoles(d, d.players[0].id, characters) : d));
+  }
+
   function applyDraft(next: DraftState) {
     setDraft(next);
     if (next.finished) {
@@ -252,6 +256,7 @@ export function SoloDraftBoard({ opponentName, difficulty, flatBonus = 0, topSha
         roster={roster}
         assignments={player.roleAssignments}
         onAssign={handleAssignRole}
+        onAutoAssign={handleAutoAssignRoles}
         onConfirm={startBattle}
         confirmLabel={`Kampf gegen ${opponentName} starten`}
       />
