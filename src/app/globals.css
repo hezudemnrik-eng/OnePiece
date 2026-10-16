@@ -92,6 +92,16 @@
   --font-mystery: var(--font-pirata);
 }
 
+/* iOS Safari treats `html`, not `body`, as the actual scrolling element —
+   `overflow-x: hidden` on body alone doesn't stop it, so a transient
+   reflow (e.g. the nav icons resizing before their images decode) can
+   leave the page elastically scrolled sideways with no way back short of
+   a reload. Boss hit this the morning after the nav-icon size change
+   ("Startseite verschoben"/"Bild verschoben", 2026-10-16). */
+html {
+  overflow-x: hidden;
+}
+
 body {
   background: var(--background);
   background-image:
