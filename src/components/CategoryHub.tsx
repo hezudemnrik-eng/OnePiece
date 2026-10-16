@@ -35,14 +35,14 @@ function ModeGrid({ modes }: { modes: typeof MODES }) {
           return (
             <Link key={m.href} href={m.href} className="group" onClick={() => setLastPlayedHref(m.href)}>
               <div
-                className="relative flex h-full min-h-[130px] flex-col justify-end overflow-hidden rounded-xl border bg-cover bg-center p-3 shadow-[0_2px_8px_rgba(0,0,0,0.25)] transition group-hover:-translate-y-0.5 group-hover:shadow-lg"
+                className="relative flex h-full min-h-[160px] flex-col justify-end overflow-hidden rounded-xl border bg-cover bg-center p-4 shadow-[0_2px_8px_rgba(0,0,0,0.25)] transition group-hover:-translate-y-0.5 group-hover:shadow-lg"
                 style={{
                   borderColor: `color-mix(in srgb, var(--mode-${m.accent}) 55%, transparent)`,
                   backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('${image}')`,
                 }}
               >
-                <span className="text-sm font-semibold leading-tight text-white">{m.title}</span>
-                <span className="text-xs text-white/70 leading-snug">{m.desc}</span>
+                <span className="text-base font-semibold leading-tight text-white">{m.title}</span>
+                <span className="text-sm text-white/70 leading-snug">{m.desc}</span>
               </div>
             </Link>
           );
@@ -52,18 +52,18 @@ function ModeGrid({ modes }: { modes: typeof MODES }) {
             <Card
               variant="spotlight"
               accent={m.accent}
-              className="h-full flex flex-col gap-1 transition group-hover:-translate-y-0.5 group-hover:shadow-lg"
+              className="h-full min-h-[160px] flex flex-col gap-1.5 justify-center transition group-hover:-translate-y-0.5 group-hover:shadow-lg"
             >
               {ICON_IMAGES[m.icon] ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={ICON_IMAGES[m.icon]} alt="" aria-hidden className="h-14 w-14 object-contain drop-shadow-md" />
+                <img src={ICON_IMAGES[m.icon]} alt="" aria-hidden className="h-16 w-16 object-contain drop-shadow-md" />
               ) : (
-                <span className="text-3xl drop-shadow-md" aria-hidden>
+                <span className="text-4xl drop-shadow-md" aria-hidden>
                   {m.icon}
                 </span>
               )}
-              <span className="text-sm font-semibold leading-tight">{m.title}</span>
-              <span className="text-xs text-black/60 dark:text-white/50 leading-snug">{m.desc}</span>
+              <span className="text-base font-semibold leading-tight">{m.title}</span>
+              <span className="text-sm text-black/60 dark:text-white/50 leading-snug">{m.desc}</span>
             </Card>
           </Link>
         );

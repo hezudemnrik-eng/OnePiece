@@ -3,7 +3,7 @@ import { PageShell } from "@/components/ui/PageShell";
 
 export default function KampfPage() {
   return (
-    <PageShell title="Kampf" subtitle="Draft, Duell & Solo-Herausforderungen." accent="duell">
+    <PageShell title="Kampf" subtitle="Draft, Duell & Solo-Herausforderungen." accent="duell" fit>
       <CategoryHub group="kampf" splitSoloLive />
     </PageShell>
   );
