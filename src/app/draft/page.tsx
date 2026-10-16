@@ -1,14 +1,7 @@
-import { DraftBoard } from "@/components/DraftBoard";
-import { PageShell } from "@/components/ui/PageShell";
+import { redirect } from "next/navigation";
 
+// PvP-Draft gegen Freunde (Hotseat) wurde entfernt — alte Links/Lesezeichen
+// landen auf der Startseite statt auf einem 404.
 export default function DraftPage() {
-  return (
-    <PageShell
-      title="PvP-Draft gegen Freunde"
-      subtitle="Hotseat-Modus auf einem Gerät für den Start. Live-Draft über mehrere Geräte braucht noch die Supabase-Anbindung (siehe .env.example)."
-      accent="draft"
-    >
-      <DraftBoard />
-    </PageShell>
-  );
+  redirect("/");
 }

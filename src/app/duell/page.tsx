@@ -1,14 +1,7 @@
-import { DuelBoard } from "@/components/DuelBoard";
-import { PageShell } from "@/components/ui/PageShell";
+import { redirect } from "next/navigation";
 
+// "Gegeneinander" (1-gegen-1-Duell) wurde entfernt — alte Links/Lesezeichen
+// landen auf der Startseite statt auf einem 404.
 export default function DuellPage() {
-  return (
-    <PageShell
-      title="Gegeneinander"
-      subtitle="Charaktere treten gegeneinander an — 1 gegen 1 oder im Team-Duell zu dritt, zufällig oder von dir gewählt. Kurze Kampfsimulation, dann steht der Sieger fest."
-      accent="duell"
-    >
-      <DuelBoard />
-    </PageShell>
-  );
+  redirect("/");
 }

@@ -1,14 +1,7 @@
-import { SoloDraftBoard } from "@/components/SoloDraftBoard";
-import { PageShell } from "@/components/ui/PageShell";
+import { redirect } from "next/navigation";
 
+// "Gegen Zufallsgegner" wurde entfernt — alte Links/Lesezeichen landen auf
+// der Startseite statt auf einem 404.
 export default function ZufallsgegnerPage() {
-  return (
-    <PageShell
-      title="Gegen Zufallsgegner"
-      subtitle="Ranked-Modus gegen eine leichtere KI – gute Übung zwischen den Partien gegen Freunde."
-      accent="zufallsgegner"
-    >
-      <SoloDraftBoard opponentName="Zufallsgegner" difficulty="mittel" topShare={0.3} storageKey="op-zufallsgegner-runs" />
-    </PageShell>
-  );
+  redirect("/");
 }

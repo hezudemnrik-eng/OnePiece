@@ -4,7 +4,7 @@
 // (mode_upgrade_cost()/mode_upgrade_bonus_percent() in that migration) —
 // these mirrors are for display only, so keep them in sync by hand.
 
-export type GameMode = "imu" | "zufallsgegner" | "live-draft" | "quiz" | "crew" | "blind-ranking" | "fusion" | "duell";
+export type GameMode = "imu" | "live-draft" | "quiz" | "crew" | "blind-ranking" | "fusion";
 
 // "xp-berry": raises XP & Berry earned in that mode (server-side, award_xp()).
 // "fusion-tier" (fusion only, migration 0023 — Boss, 2026-10-14: it should
@@ -18,12 +18,10 @@ export type ModeUpgradeEffect = "xp-berry" | "fusion-tier";
 // owned a level before this change.
 export const MODE_UPGRADE_CATALOG: { mode: GameMode; label: string; effect: ModeUpgradeEffect }[] = [
   { mode: "imu", label: "Imu-Duell", effect: "xp-berry" },
-  { mode: "zufallsgegner", label: "Zufallsgegner", effect: "xp-berry" },
   { mode: "quiz", label: "Quiz", effect: "xp-berry" },
   { mode: "crew", label: "Crew-Builder", effect: "xp-berry" },
   { mode: "blind-ranking", label: "Blind Ranking", effect: "xp-berry" },
   { mode: "fusion", label: "Fusions-Piraten", effect: "fusion-tier" },
-  { mode: "duell", label: "Duell-Board", effect: "xp-berry" },
 ];
 
 export const MODE_UPGRADE_MAX_LEVEL = 5;
