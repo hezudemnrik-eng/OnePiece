@@ -184,12 +184,16 @@ body {
    rather than tiles. Flattens border-radius since the painted corners
    already read as a frame; rounding would just clip them. */
 .op-chatti-frame {
+  /* Exposed so .op-current-turn-glow::after (below) can size its ring to
+     this card's actual outer edge at both breakpoints, instead of landing
+     underneath the border-image. */
+  --op-chatti-border-width: 18px;
   border-radius: 0;
   border-style: solid;
-  border-width: 18px;
+  border-width: var(--op-chatti-border-width);
   border-image-source: url("/live-draft/panel-frame.png");
   border-image-slice: 22%;
-  border-image-width: 18px;
+  border-image-width: var(--op-chatti-border-width);
   border-image-repeat: stretch;
   /* Boss, 2026-10-15: the lobby/deck background art (now actually visible,
      see useFitScreen/.op-parchment fixes) sits right behind this card's text
@@ -204,8 +208,9 @@ body {
    top of the per-card padding. Still reads as the same frame, just thinner. */
 @media (max-width: 640px) {
   .op-chatti-frame {
-    border-width: 10px;
-    border-image-width: 10px;
+    --op-chatti-border-width: 10px;
+    border-width: var(--op-chatti-border-width);
+    border-image-width: var(--op-chatti-border-width);
   }
 }
 
@@ -391,16 +396,39 @@ body {
 /* Live-Draft sidebar: a soft pulsing ring around whoever's turn it
    currently is, so the active player reads at a glance without having to
    read the "Am Zug" text above the roll panel. */
+/* box-shadow isn't GPU-composited, so animating it here repainted the
+   whole card (plus its op-chatti-frame border-image) every frame for as
+   long as it was someone's turn — i.e. almost the entire drafting phase —
+   which was the biggest remaining source of Live-Draft lag on phones
+   (2026-10-16). Same look (a ring that grows outward and fades), but as a
+   ::after overlay animating only opacity/transform, both of which the
+   browser can composite without repainting the card underneath. */
 @keyframes op-current-turn-glow {
   0%,
   100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--mode-draft) 55%, transparent);
+    opacity: 0;
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--mode-draft) 35%, transparent);
+    opacity: 1;
+    transform: scale(1.015);
   }
 }
 .op-current-turn-glow {
+  position: relative;
+}
+.op-current-turn-glow::after {
+  content: "";
+  position: absolute;
+  /* An absolutely positioned child sits at its containing block's padding
+     edge (inside the border), which on an .op-chatti-frame card is
+     underneath the 18px/10px frame artwork — pull it back out to the
+     card's actual outer edge so the ring reads the same as the old
+     box-shadow-on-the-card-itself did. 0px on cards without that class. */
+  inset: calc(-1 * var(--op-chatti-border-width, 0px));
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--mode-draft) 55%, transparent);
   animation: op-current-turn-glow 1.6s ease-in-out infinite;
 }
 
