@@ -3,6 +3,7 @@ import type { DraftState } from "./draft";
 import type { BattleResult } from "./battle-sim";
 import { XP_DUEL_COMPLETE, XP_MATCH_LOSS, XP_MATCH_WIN, XP_QUIZ_BASE, XP_QUIZ_PER_CORRECT } from "./levels";
 import { getTodaysChallenge, todayKeyBerlin, type DailyQuestId } from "./dailyChallenge";
+import type { TcgRarity } from "./tcgRarities";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -1330,4 +1331,82 @@ export async function purchaseModeUpgrade(mode: string): Promise<boolean> {
   if (!userId) return false;
   const { data } = await supabase.rpc("purchase_mode_upgrade", { p_mode: mode });
   return Boolean(data);
+}
+
+// --- TCG mode (migration 0027) ---
+// Admin-only while the mode is being tested (Boss, 2026-10-16) — the
+// server-side RPC re-checks profiles.is_admin on every call, this
+// client-side check (TcgBoard) is only for not showing the mode to
+// everyone else.
+
+export type TcgCard = {
+  id: string;
+  characterId: string;
+  characterName: string;
+  crew: string | null;
+  versionLabel: string;
+  rarity: TcgRarity;
+  imageUrl: string | null;
+};
+
+/** The full card catalog (not just owned cards) — used to render "not yet owned" placeholders in the collection. */
+export async function fetchTcgCards(): Promise<TcgCard[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("tcg_cards")
+    .select("id, character_id, character_name, crew, version_label, rarity, image_url")
+    .order("sort_order", { ascending: true });
+  return (data ?? []).map((r) => ({
+    id: r.id as string,
+    characterId: r.character_id as string,
+    characterName: r.character_name as string,
+    crew: r.crew as string | null,
+    versionLabel: r.version_label as string,
+    rarity: r.rarity as TcgRarity,
+    imageUrl: r.image_url as string | null,
+  }));
+}
+
+/** card_id -> quantity owned, for the signed-in user. */
+export async function fetchMyTcgCollection(): Promise<Record<string, number>> {
+  if (!supabase) return {};
+  const userId = await ensureSupabaseSession();
+  if (!userId) return {};
+  const { data } = await supabase.from("tcg_user_cards").select("card_id, quantity").eq("user_id", userId);
+  const owned: Record<string, number> = {};
+  for (const row of data ?? []) owned[row.card_id as string] = row.quantity as number;
+  return owned;
+}
+
+/** Whether today's (Europe/Berlin) daily pack has already been opened. */
+export async function fetchTcgPackClaimedToday(): Promise<boolean> {
+  if (!supabase) return false;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return false;
+  const { data } = await supabase.rpc("tcg_pack_claimed_today");
+  return Boolean(data);
+}
+
+export type TcgPackResult =
+  | { ok: true; cards: { cardId: string; characterName: string; versionLabel: string; rarity: TcgRarity; imageUrl: string | null }[] }
+  | { ok: false; error: "not_signed_in" | "not_admin" | "already_claimed" | "no_backend" };
+
+/** Opens today's daily pack (5 cards) — drop weights + the daily/admin checks all happen server-side. */
+export async function openDailyTcgPack(): Promise<TcgPackResult> {
+  if (!supabase) return { ok: false, error: "no_backend" };
+  const userId = await ensureSupabaseSession();
+  if (!userId) return { ok: false, error: "not_signed_in" };
+  const { data, error } = await supabase.rpc("tcg_open_daily_pack");
+  if (error || !data) return { ok: false, error: "not_signed_in" };
+  if (!data.ok) return { ok: false, error: data.error };
+  return {
+    ok: true,
+    cards: (data.cards as Record<string, unknown>[]).map((c) => ({
+      cardId: c.card_id as string,
+      characterName: c.character_name as string,
+      versionLabel: c.version_label as string,
+      rarity: c.rarity as TcgRarity,
+      imageUrl: c.image_url as string | null,
+    })),
+  };
 }

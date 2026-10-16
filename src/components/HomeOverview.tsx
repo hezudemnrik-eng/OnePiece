@@ -316,6 +316,21 @@ export function HomeOverview() {
         ))}
       </div>
 
+      {user?.isAdmin && (
+        <Link href="/tcg">
+          <div className="op-card flex items-center justify-between gap-2 border border-mode-tcg/40 bg-mode-tcg/10 p-3">
+            <span className="flex items-center gap-2 text-sm font-semibold text-mode-tcg">
+              <span className="text-xl" aria-hidden>
+                🎴
+              </span>
+              TCG (Admin-Test)
+            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-7 w-7 shrink-0 object-contain" />
+          </div>
+        </Link>
+      )}
+
       {isSupabaseConfigured() && loaded && onlineFriends.length > 0 && (
         <div className="flex items-center gap-2 whitespace-nowrap text-sm text-black/60 dark:text-white/50">
           <div className="flex -space-x-2">

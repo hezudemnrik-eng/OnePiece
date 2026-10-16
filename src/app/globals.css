@@ -44,6 +44,7 @@
   --mode-crew: #2dd4bf;
   --mode-fusion: #e879f9;
   --mode-shop: #4ade80;
+  --mode-tcg: #f4c542;
 
   /* Rarity tiers for character/cosmetic highlighting (Q27). Gold reuses the
      brand accent; legendary additionally gets the .op-legendary-glow
@@ -79,6 +80,7 @@
   --color-mode-crew: var(--mode-crew);
   --color-mode-fusion: var(--mode-fusion);
   --color-mode-shop: var(--mode-shop);
+  --color-mode-tcg: var(--mode-tcg);
   --color-rarity-bronze: var(--rarity-bronze);
   --color-rarity-silver: var(--rarity-silver);
   --color-rarity-gold: var(--rarity-gold);
