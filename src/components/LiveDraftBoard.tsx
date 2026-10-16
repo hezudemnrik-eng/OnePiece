@@ -9,6 +9,7 @@ import {
   assignRole,
   assignTeam,
   claimSeat,
+  clearSeat,
   confirmRoles,
   createDraft,
   currentPlayer,
@@ -37,6 +38,7 @@ import {
   ensureSupabaseSession,
   fetchFriends,
   fetchLiveDraftByCode,
+  cancelLiveDraft,
   fetchLiveDraftById,
   fetchPublicProfilesCosmetics,
   fetchShopItems,
@@ -719,6 +721,25 @@ export function LiveDraftBoard() {
     if (result.session) setSession(result.session);
   }
 
+  // "Verlassen" in the lobby screen used to only reset local view state —
+  // the draft_sessions row itself was never touched, so a host who left
+  // still had their lobby sitting in the DB as "wartet auf Spieler" and
+  // kept seeing it reappear on Home under "Weiterspielen" (and, since
+  // creating it already claimed the day's Tagesquest, with no way to make
+  // it go away). Now it actually cancels (host) or frees the seat (guest)
+  // server-side before leaving.
+  async function leaveLobby() {
+    if (session && myUserId && !isSpectator) {
+      if (session.host_id === myUserId) {
+        await cancelLiveDraft(session.id, myUserId);
+      } else {
+        const next = clearSeat(session.state, myUserId);
+        await writeLiveDraft(session.id, session.updated_at, { state: next });
+      }
+    }
+    backToHome();
+  }
+
   function backToHome() {
     unsubscribeRef.current?.();
     unsubscribeRef.current = null;
@@ -1054,8 +1075,8 @@ export function LiveDraftBoard() {
           </Button>
         )}
         {!isHost && !full && <p className="text-sm text-black/50 dark:text-white/40">Warte auf weitere Spieler…</p>}
-        <Button variant="ghost" onClick={backToHome} className="self-start text-black/50 dark:text-white/40">
-          Verlassen
+        <Button variant="ghost" onClick={leaveLobby} className="self-start text-black/50 dark:text-white/40">
+          {isHost ? "Lobby abbrechen" : "Verlassen"}
         </Button>
         </Card>
       </>
