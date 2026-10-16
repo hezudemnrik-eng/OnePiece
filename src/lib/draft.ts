@@ -131,6 +131,12 @@ export function claimSeat(state: DraftState, seatIndex: number, userId: string, 
   return { ...state, players };
 }
 
+/** Frees a seat back up (the inverse of claimSeat) — used when a non-host player leaves a lobby. */
+export function clearSeat(state: DraftState, userId: string): DraftState {
+  const players = state.players.map((p) => (p.userId === userId ? { ...p, userId: undefined, name: "", team: undefined } : p));
+  return { ...state, players };
+}
+
 /** Assigns (or clears, with `team: undefined`) the host's Team A/B pick for a seat. Only meant to be called while the draft is still in its lobby phase — callers are expected to stop offering this once the draft starts, which is what makes the assignment "locked" from then on. */
 export function assignTeam(state: DraftState, seatIndex: number, team: DraftTeam | undefined): DraftState {
   const seat = state.players[seatIndex];

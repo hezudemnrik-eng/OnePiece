@@ -370,6 +370,20 @@ export async function writeLiveDraft(
 }
 
 /**
+ * Cancels a live draft lobby the caller hosts (only while it's still in the
+ * "lobby" phase — once drafting starts, leaving is handled by the other
+ * players picking around a stale seat, not by deleting the row). Deletes
+ * the row outright so it stops showing up as "Weiterspielen" on Home and
+ * as joinable via its invite code. Silently no-ops if the caller isn't the
+ * host or the lobby already moved on (RLS/the phase filter just won't
+ * match any row).
+ */
+export async function cancelLiveDraft(id: string, hostId: string): Promise<void> {
+  if (!supabase) return;
+  await supabase.from("draft_sessions").delete().eq("id", id).eq("host_id", hostId).eq("phase", "lobby");
+}
+
+/**
  * Subscribes to live changes on one draft session row. Returns an
  * unsubscribe function. Requires the table to be added to Supabase's
  * `supabase_realtime` publication (see migration 0003).
