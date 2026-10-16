@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Anton, Bitter, Geist_Mono, Pirata_One } from "next/font/google";
 import { AuthGate } from "@/components/AuthGate";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
 // Warm slab-serif body face (replaces the earlier geometric Geist Sans) —
@@ -81,6 +82,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${bodyFont.variable} ${geistMono.variable} ${anton.variable} ${pirataOne.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <ServiceWorkerRegister />
         <AuthGate>{children}</AuthGate>
       </body>
     </html>
