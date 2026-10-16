@@ -110,7 +110,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
               <AccountPanel onSignedOut={refreshUser} />
             </div>
           </header>
-          <div className="pb-20 md:pb-0">{children}</div>
+          <div style={{ paddingBottom: "var(--bottom-nav-height, 5rem)" }}>{children}</div>
         </div>
         <BottomNav />
       </div>
