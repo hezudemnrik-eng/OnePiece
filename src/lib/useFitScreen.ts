@@ -71,6 +71,28 @@ export function useFitScreen(headerId = "app-header", footerId = "app-bottomnav"
         scale = available / natural;
         widthPct = 100 / scale;
       }
+      // The two passes above assume natural height barely changes with
+      // width (true for text reflow, the case they were written for). For
+      // content whose height scales strongly with width instead — e.g. a
+      // grid of aspect-ratio image cards, like Fusion Pirates' 7-category
+      // result grid — two passes don't converge: each narrower width still
+      // yields a visibly shorter natural height than the previous pass
+      // assumed, so the chosen scale still overflows `available` and the
+      // content's end (e.g. its "nochmal spielen" button) renders clipped
+      // behind the footer instead of above it. Keep re-measuring at the
+      // narrower width and clamping the scale down until it actually fits
+      // (bounded so content that never stabilizes still stops at some
+      // point) — a no-op correction whenever the 2 passes above already
+      // converged well (Home/Live-Draft).
+      for (let guard = 0; guard < 8; guard++) {
+        const prevWidth = el.style.width;
+        el.style.width = `${widthPct}%`;
+        const finalNatural = el.scrollHeight;
+        el.style.width = prevWidth;
+        if (finalNatural <= 0 || finalNatural * scale <= available + 0.5) break;
+        scale = available / finalNatural;
+        widthPct = 100 / scale;
+      }
       el.style.width = `${widthPct}%`; // matches the inline style setFit below will render, so there's no flash back to the pre-pass width
       setFit({ wrapperHeight: Math.round(available), scale, widthPct });
     }
