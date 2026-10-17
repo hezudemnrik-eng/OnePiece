@@ -45,7 +45,7 @@ function CardFace({
   const show = revealed ?? owned;
   return (
     <div
-      className={`relative flex flex-col overflow-hidden rounded-xl border border-black/10 bg-[var(--surface)] dark:border-white/10 ${
+      className={`relative flex flex-col rounded-xl border border-black/10 bg-[var(--surface)] dark:border-white/10 ${
         show ? (meta.frameImage ? "" : `${meta.ringClass} ${meta.glowClass}`) : "opacity-40 grayscale"
       }`}
     >
@@ -164,7 +164,7 @@ function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCa
 
       {finished ? (
         <>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             {cards.map((c, i) => (
               <div key={i} className="w-12">
                 <CardFace card={c} owned revealed />
@@ -334,7 +334,7 @@ export function TcgBoard() {
 
       <div>
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-white/80 [text-shadow:0_1px_3px_rgba(0,0,0,0.8)]">Sammlung</h2>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+        <div className="grid grid-cols-3 gap-x-3 gap-y-10 sm:grid-cols-4">
           {cards.map((card) => (
             <CardFace key={card.id} card={card} owned={Boolean(owned[card.id])} quantity={owned[card.id]} />
           ))}
