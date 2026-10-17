@@ -149,6 +149,22 @@ export function isLobbyFull(state: DraftState): boolean {
   return state.players.every((p) => Boolean(p.userId));
 }
 
+/**
+ * Picks a random starting player instead of always defaulting to seat 0 —
+ * call this once, right when a live draft actually leaves the lobby.
+ * createDraft always starts at index 0, but in a live draft seat 0 is
+ * always the host (claimSeat(initial, 0, ...) at lobby creation), so
+ * without this the host would have the first-pick advantage in every
+ * single game (Boss, 2026-10-17: "jeder soll die gleichen chancen haben").
+ * No-op once the draft has actually started picking.
+ */
+export function randomizeStartingPlayer(state: DraftState, rng: () => number = Math.random): DraftState {
+  if (state.players.length <= 1) return state;
+  if (state.round > 1 || state.players.some((p) => p.pickedCharacterIds.length > 0)) return state;
+  const currentPlayerIndex = Math.floor(rng() * state.players.length);
+  return { ...state, currentPlayerIndex, turnStartedAt: new Date().toISOString() };
+}
+
 export function currentPlayer(state: DraftState): DraftPlayer {
   return state.players[state.currentPlayerIndex];
 }

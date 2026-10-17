@@ -18,15 +18,17 @@ import {
   getTeam,
   isLobbyFull,
   pickCharacter,
+  randomizeStartingPlayer,
   resolveTeamRoleConflicts,
   sendEmote,
   skipRoll,
   touchPresence,
   voteRematch,
   type DraftEmote,
+  type DraftState,
   type DraftTeam,
 } from "@/lib/draft";
-import { simulateBattle, type BattleResult } from "@/lib/battle-sim";
+import { simulateBattle, simulateFreeForAll, type BattleResult } from "@/lib/battle-sim";
 import { getRoleAdjustedVersions } from "@/lib/crewRoles";
 import { checkDraftAchievements, type DraftAchievement } from "@/lib/draftAchievements";
 import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
@@ -441,7 +443,8 @@ export function LiveDraftBoard() {
 
   async function startDraft() {
     if (!session) return;
-    const result = await writeLiveDraft(session.id, session.updated_at, { phase: "drafting" });
+    const state = randomizeStartingPlayer(session.state);
+    const result = await writeLiveDraft(session.id, session.updated_at, { phase: "drafting", state });
     if (result.session) setSession(result.session);
   }
 
@@ -505,6 +508,15 @@ export function LiveDraftBoard() {
     return nowTick - new Date(lastSeenAt).getTime() > STALE_MS;
   }
 
+  /** Index into state.players of the non-team battle's winner — winnerIndex
+   * for a 3+ player free-for-all, otherwise the old winnerTeam "A"/"B" ->
+   * 0/1 mapping for a 2-player draft. Team-mode winners are looked up by
+   * p.team === battle.winnerTeam directly at each call site instead. */
+  function resolveWinnerIndex(state: DraftState, battle: BattleResult): number {
+    if (state.players.length > 2 && battle.winnerIndex !== undefined) return battle.winnerIndex;
+    return battle.winnerTeam === "A" ? 0 : 1;
+  }
+
   // The host's browser moves the draft into the role-assignment phase once
   // it finishes, so exactly one client writes the transition instead of
   // every client racing to.
@@ -536,6 +548,14 @@ export function LiveDraftBoard() {
       const sideBVersions = sideB.flatMap((p) => getRoleAdjustedVersions(getTeam(state, p.id, characters), p.roleAssignments));
       const sideBNames = sideB.flatMap((p) => getTeam(state, p.id, characters).map((c) => c.name));
       result = simulateBattle(sideAVersions, sideANames, sideBVersions, sideBNames);
+    } else if (state.players.length > 2) {
+      // Free-for-all with 3+ players (Boss, 2026-10-17): no fixed teams, so
+      // simulateBattle's two-sided "A vs B" shape doesn't fit — every
+      // player's roster is its own side, see simulateFreeForAll.
+      const sidesVersions = state.players.map((p) => getRoleAdjustedVersions(getTeam(state, p.id, characters), p.roleAssignments));
+      const sidesNames = state.players.map((p) => getTeam(state, p.id, characters).map((c) => c.name));
+      const ffa = simulateFreeForAll(sidesVersions, sidesNames);
+      result = { winnerTeam: "A", winnerIndex: ffa.winnerIndex, rounds: ffa.rounds };
     } else {
       const [p1, p2] = state.players;
       const rosterA = getTeam(state, p1.id, characters);
@@ -562,7 +582,7 @@ export function LiveDraftBoard() {
     if (!me) return;
     achievementsCheckedRef.current = true;
     const battle = session.battle;
-    const won = me.team ? me.team === battle.winnerTeam : session.state.players.indexOf(me) === (battle.winnerTeam === "A" ? 0 : 1);
+    const won = me.team ? me.team === battle.winnerTeam : session.state.players.indexOf(me) === resolveWinnerIndex(session.state, battle);
     const roster = getTeam(session.state, me.id, characters);
     const opponentRoster = session.state.players
       .filter((p) => (me.team ? p.team !== me.team : p.id !== me.id))
@@ -614,7 +634,7 @@ export function LiveDraftBoard() {
     const me = session.state.players.find((p) => p.userId === myUserId);
     if (!me) return;
     matchRecordedRef.current = true;
-    const won = me.team ? me.team === session.battle.winnerTeam : session.state.players.indexOf(me) === (session.battle.winnerTeam === "A" ? 0 : 1);
+    const won = me.team ? me.team === session.battle.winnerTeam : session.state.players.indexOf(me) === resolveWinnerIndex(session.state, session.battle);
     const opponents = session.state.players.filter((p) => p.id !== me.id).map((p) => p.name).join(", ");
     recordMatchResult("live-draft", opponents, won ? "win" : "loss");
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -652,7 +672,10 @@ export function LiveDraftBoard() {
       // lobby screen. Move the fresh session past "lobby" before anyone
       // (host included) can see it, so nobody has to press "Start" again.
       let startedSession = created;
-      const started = await writeLiveDraft(created.id, created.updated_at, { phase: "drafting" });
+      const started = await writeLiveDraft(created.id, created.updated_at, {
+        phase: "drafting",
+        state: randomizeStartingPlayer(created.state),
+      });
       if (started.session) startedSession = started.session;
       // Retries against whoever's vote landed last, same optimistic-concurrency
       // pattern as every other write here — only the host writes this field,
@@ -912,9 +935,10 @@ export function LiveDraftBoard() {
           style={{ backgroundColor: "rgba(10, 8, 6, 0.32)" }}
         >
         <label className="flex flex-col gap-1 text-sm">
-          Anzahl Spieler (2 oder 4)
+          Anzahl Spieler
           <Select value={playerCount} onChange={(e) => setPlayerCount(Number(e.target.value))}>
             <option value={2}>2</option>
+            <option value={3}>3</option>
             <option value={4}>4</option>
           </Select>
         </label>
@@ -1237,7 +1261,7 @@ export function LiveDraftBoard() {
           .join(" & ");
         winnerLabel = `Team ${session.battle.winnerTeam} (${names})`;
       } else {
-        winnerLabel = session.state.players[session.battle.winnerTeam === "A" ? 0 : 1]?.name ?? "";
+        winnerLabel = session.state.players[resolveWinnerIndex(session.state, session.battle)]?.name ?? "";
       }
     }
     const me = session.state.players.find((p) => p.userId === myUserId);
@@ -1245,7 +1269,7 @@ export function LiveDraftBoard() {
       !isSpectator && me && session.battle
         ? me.team
           ? me.team === session.battle.winnerTeam
-          : session.state.players.indexOf(me) === (session.battle.winnerTeam === "A" ? 0 : 1)
+          : session.state.players.indexOf(me) === resolveWinnerIndex(session.state, session.battle)
         : null;
     const mvp = computeMvp(session);
     const seatedCount = session.state.players.filter((p) => p.userId).length;
