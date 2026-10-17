@@ -109,23 +109,3 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
 };
 
 export const RARITY_ORDER: TcgRarity[] = ["rekrut", "pirat", "kopfgeldjaeger", "rookie", "supernova", "yonko", "god_tier"];
-
-/** How long the reveal animation holds on each card before the next one can flip, scaled by rarity (Q42/Q48: niedrige Raritäten schnell, God Tier darf 4+ Sekunden dauern). */
-export function revealHoldMs(rarity: TcgRarity): number {
-  switch (rarity) {
-    case "god_tier":
-      return 4200;
-    case "yonko":
-      return 2000;
-    case "supernova":
-      return 1300;
-    case "rookie":
-      return 900;
-    case "kopfgeldjaeger":
-      return 700;
-    case "pirat":
-      return 500;
-    default:
-      return 400;
-  }
-}

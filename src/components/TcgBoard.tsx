@@ -18,7 +18,10 @@ import {
   type AuthUser,
   type TcgCard,
 } from "@/lib/supabase";
-import { RARITIES, revealHoldMs, type TcgRarity } from "@/lib/tcgRarities";
+
+/** sessionStorage key a pack bought in the Shop uses to hand its drawn cards to this page's reveal overlay (set by ShopBoard, consumed once here). */
+export const TCG_PENDING_REVEAL_KEY = "tcg_pending_reveal";
+import { RARITIES, type TcgRarity } from "@/lib/tcgRarities";
 
 type DrawnCard = {
   cardId: string;
@@ -45,12 +48,18 @@ function CardFace({
   const show = revealed ?? owned;
   return (
     <div
+      // isolation: isolate pins art + frame into one locked stacking context so the
+      // frame (z-10) always paints above the art (z-auto) as a single composited unit —
+      // without it, Safari can promote the two absolutely-positioned layers independently
+      // during the parent's op-tcg-card-flip 3D rotation and reorder them mid-animation
+      // (Boss, 2026-10-17: "Der Rahmen ist beim Pack ziehen nicht im vordergrund").
       className={`relative flex flex-col rounded-xl border border-black/10 bg-[var(--surface)] dark:border-white/10 ${
         show ? (meta.frameImage ? "" : `${meta.ringClass} ${meta.glowClass}`) : "opacity-40 grayscale"
       }`}
+      style={{ isolation: "isolate" }}
     >
       {/* aspect-[2/3] sits on the art box itself (not the outer card), matching the Chatti frame artwork's own 2:3 canvas exactly — putting it on the outer box instead squeezed this shorter (meta text below eats some of that height), which stretched the frame off its native proportions and made it look like a smaller picture floating mid-card instead of a border flush with the art. */}
-      <div className="relative aspect-[2/3] bg-black/20">
+      <div className="relative z-0 aspect-[2/3] bg-black/20">
         {show && card.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={card.imageUrl} alt={card.characterName} referrerPolicy="no-referrer" className="h-full w-full object-cover object-top" />
@@ -67,11 +76,13 @@ function CardFace({
           <span className="absolute right-1 top-1 rounded-full bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-white">×{quantity}</span>
         )}
       </div>
-      {show && meta.frameImage && (
+      {meta.frameImage && (
         // Sits on the outer card (not clipped to the art box) and renders
         // last so it's the topmost layer — Boss wants the enlarged frame
         // never cropped by the art box's own edge, only by the card's
-        // outer rounded corner.
+        // outer rounded corner. Always shown, even face-down/unrevealed
+        // (Boss, 2026-10-17: "der Rahmen immer vorallem") — it just picks
+        // up the outer card's grayscale/opacity when not shown yet.
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={meta.frameImage}
@@ -96,24 +107,28 @@ const BURST_COLOR: Record<TcgRarity, string | null> = {
   god_tier: "rgba(244,197,66,0.8)",
 };
 
-/** Sequential pack-reveal overlay — one card flips in at a time, shown large and alone, held longer for rarer pulls (Q40/Q42/Q48). Always animated regardless of the global "Animationen aus" switch (Q47 — this is the mode's one highlight moment), and never skippable (Q43). */
+/** Sequential pack-reveal overlay — each card shows face-down first; tapping it reveals the card, tapping again advances to the next one (Boss, 2026-10-17: tap-driven instead of auto-timed). Always animated regardless of the global "Animationen aus" switch (Q47 — this is the mode's one highlight moment), and never skippable (Q43) — only tapping advances it. */
 function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCard[]; fragmentsGained: number; onClose: () => void }) {
   const [index, setIndex] = useState(0);
+  const [revealed, setRevealed] = useState(false);
   const [finished, setFinished] = useState(false);
   const current = cards[index];
 
-  useEffect(() => {
-    if (finished) return;
-    const t = setTimeout(() => {
-      if (index < cards.length - 1) setIndex((i) => i + 1);
-      else setFinished(true);
-    }, revealHoldMs(current.rarity));
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, finished]);
+  function handleTap() {
+    if (!revealed) {
+      setRevealed(true);
+      return;
+    }
+    if (index < cards.length - 1) {
+      setIndex((i) => i + 1);
+      setRevealed(false);
+    } else {
+      setFinished(true);
+    }
+  }
 
   const meta = RARITIES[current.rarity];
-  const burstColor = BURST_COLOR[current.rarity];
+  const burstColor = revealed ? BURST_COLOR[current.rarity] : null;
 
   return (
     <div
@@ -132,7 +147,7 @@ function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCa
       </div>
 
       {!finished && (
-        <div key={index} className="relative flex flex-col items-center gap-3">
+        <button onClick={handleTap} key={index} className="relative flex flex-col items-center gap-3" aria-label={revealed ? "Nächste Karte" : "Karte aufdecken"}>
           {burstColor && (
             <div
               key={`burst-${index}`}
@@ -141,14 +156,24 @@ function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCa
               aria-hidden
             />
           )}
-          <div className="op-tcg-card-flip relative w-56 sm:w-64">
-            <CardFace card={current} owned revealed />
+          {/* my-14: the frame <img> inside CardFace is position:absolute and scaled up to
+              1.3x for the biggest rarities, so it overscans this box without adding to its
+              layout size — flexbox centering then has no reserved room for that overscan and
+              can push its top/bottom past the viewport edge on a short screen, visibly
+              cropping the frame (Boss, 2026-10-17: "komplett sichtbar... überallem liegen").
+              This margin reserves worst-case (god_tier, 130%) headroom on both sides. */}
+          <div className={`relative my-14 w-56 sm:w-64 ${revealed ? "op-tcg-card-flip" : ""}`}>
+            <CardFace card={current} owned revealed={revealed} />
           </div>
-          <div className="op-tcg-label-in flex flex-col items-center gap-0.5 text-center">
-            <p className={`text-sm font-bold ${meta.textClass}`}>{meta.label}</p>
-            {current.duplicate && <p className="text-xs font-semibold text-amber-400">Duplikat</p>}
-          </div>
-        </div>
+          {revealed ? (
+            <div className="op-tcg-label-in flex flex-col items-center gap-0.5 text-center">
+              <p className={`text-sm font-bold ${meta.textClass}`}>{meta.label}</p>
+              {current.duplicate && <p className="text-xs font-semibold text-amber-400">Duplikat</p>}
+            </div>
+          ) : (
+            <p className="text-sm text-white/60">Tippen zum Aufdecken</p>
+          )}
+        </button>
       )}
 
       {finished ? (
@@ -166,6 +191,7 @@ function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCa
       ) : (
         <p className="text-sm text-white/60">
           Karte {index + 1} von {cards.length}
+          {revealed && " — tippen für die nächste"}
         </p>
       )}
     </div>
@@ -208,6 +234,20 @@ export function TcgBoard() {
       setGlobalEnabled(enabled);
       if (u?.isAdmin || enabled) await refresh();
       setLoaded(true);
+
+      // A pack bought in the Shop hands its drawn cards over here via
+      // sessionStorage (same reveal overlay, no duplicate animation code).
+      const pending = sessionStorage.getItem(TCG_PENDING_REVEAL_KEY);
+      if (pending) {
+        sessionStorage.removeItem(TCG_PENDING_REVEAL_KEY);
+        try {
+          const result = JSON.parse(pending) as { cards: DrawnCard[]; fragmentsGained: number };
+          setDrawn(result.cards);
+          setFragmentsGained(result.fragmentsGained);
+        } catch {
+          // malformed/stale payload — ignore
+        }
+      }
     });
   }, []);
 
@@ -249,9 +289,8 @@ export function TcgBoard() {
   }
 
   async function handleExchangeFragments() {
-    const amount = Math.floor(fragments / 10) * 10;
-    if (amount <= 0) return;
-    const ok = await exchangeTcgFragments(amount);
+    if (fragments <= 0) return;
+    const ok = await exchangeTcgFragments(fragments);
     if (ok) await refresh();
   }
 
@@ -313,9 +352,9 @@ export function TcgBoard() {
         {error && <p className="text-xs text-danger">{error}</p>}
         <div className="flex items-center gap-2 text-xs text-amber-500">
           <span>{fragments} Fragmente</span>
-          {fragments >= 10 && (
+          {fragments > 0 && (
             <button onClick={handleExchangeFragments} className="underline">
-              in Berry umtauschen (10:1)
+              in Berry umtauschen (1:1)
             </button>
           )}
         </div>
