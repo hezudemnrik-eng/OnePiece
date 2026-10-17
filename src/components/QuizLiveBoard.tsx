@@ -10,6 +10,8 @@ import {
   type QuizQuestion,
 } from "@/lib/quiz";
 import { loadSeenQuestionIds, rememberQuestionIds } from "@/lib/quizHistory";
+import { checkQuizAchievements, type QuizAchievement } from "@/lib/quizAchievements";
+import { XP_ACHIEVEMENT_BONUS } from "@/lib/levels";
 import {
   advanceQuizTurn,
   awardQuizTurnPoint,
@@ -20,7 +22,9 @@ import {
   fetchQuizTurnOrder,
   finalizeQuizParticipant,
   getCurrentAuthUser,
+  incrementXp,
   joinQuizSession,
+  unlockAchievement,
   type QuizParticipant,
   type QuizSession,
 } from "@/lib/supabase";
@@ -57,6 +61,8 @@ export function QuizLiveBoard() {
 
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
+
+  const [newAchievements, setNewAchievements] = useState<QuizAchievement[]>([]);
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const finalizedRef = useRef(false);
@@ -107,6 +113,7 @@ export function QuizLiveBoard() {
     setQuestions(qs);
     finalizedRef.current = false;
     setSelected(null);
+    setNewAchievements([]);
     attachPolling(created.id);
     setView("playing");
   }
@@ -123,6 +130,7 @@ export function QuizLiveBoard() {
     setQuestions(found.questions as QuizQuestion[]);
     finalizedRef.current = false;
     setSelected(null);
+    setNewAchievements([]);
     attachPolling(found.id);
     setView("playing");
   }
@@ -139,12 +147,22 @@ export function QuizLiveBoard() {
   useEffect(() => {
     if (gameOver && !finalizedRef.current && session) {
       finalizedRef.current = true;
-      finalizeQuizParticipant(session.id).then(() => {
+      finalizeQuizParticipant(session.id).then(async () => {
+        const myScore = participants.find((p) => p.user_id === myUserId)?.score ?? 0;
+        const earned = checkQuizAchievements(myScore, questions.length, session.difficulty as QuizDifficulty | "alle");
+        if (earned.length > 0) {
+          const results = await Promise.all(earned.map(async (a) => ({ a, isNew: await unlockAchievement(a.id) })));
+          const fresh = results.filter((r) => r.isNew).map((r) => r.a);
+          if (fresh.length > 0) {
+            incrementXp(fresh.length * XP_ACHIEVEMENT_BONUS);
+            setNewAchievements(fresh);
+          }
+        }
         if (pollRef.current) clearInterval(pollRef.current);
         setView("finished");
       });
     }
-  }, [gameOver, session]);
+  }, [gameOver, session, participants, myUserId, questions.length]);
 
   async function choose(optionIndex: number) {
     if (selected !== null || !isMyTurn || !session) return;
@@ -344,6 +362,18 @@ export function QuizLiveBoard() {
     return (
       <div className="flex flex-col gap-6 max-w-md">
         <h2 className="text-xl font-semibold">Quiz beendet!</h2>
+        {newAchievements.length > 0 && (
+          <div className="op-pop-in rounded-xl border border-mode-quiz bg-mode-quiz/10 p-3">
+            <p className="mb-1 text-sm font-semibold text-mode-quiz">🏆 Neue Erfolge freigeschaltet!</p>
+            <ul className="flex flex-col gap-0.5 text-xs text-black/70 dark:text-white/60">
+              {newAchievements.map((a) => (
+                <li key={a.id}>
+                  <span className="font-medium">{a.label}</span> — {a.description}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div>
           <p className="mb-2 text-sm font-semibold">
             Bestenliste · Code <span className="font-[family-name:var(--font-mono)]">{session.invite_code}</span>
