@@ -67,17 +67,6 @@ function CardFace({
           <span className="absolute right-1 top-1 rounded-full bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-white">×{quantity}</span>
         )}
       </div>
-      <div className="px-1.5 py-1 text-center">
-        <p className={`truncate text-[11px] font-semibold ${show ? meta.textClass : "text-black/40 dark:text-white/30"}`}>
-          {show ? meta.label : "???"}
-        </p>
-        {show && (
-          <>
-            <p className="truncate text-xs font-semibold text-black dark:text-white">{card.characterName}</p>
-            <p className="truncate text-[11px] text-black/60 dark:text-white/50">{card.versionLabel}</p>
-          </>
-        )}
-      </div>
       {show && meta.frameImage && (
         // Sits on the outer card (not clipped to the art box) and renders
         // last so it's the topmost layer — Boss wants the enlarged frame
