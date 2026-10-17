@@ -1466,7 +1466,7 @@ export async function openDailyTcgPack(): Promise<TcgPackResult> {
   return parseTcgPackResult(data, error);
 }
 
-/** Buys a 5-card pack for 200 Berry (migration 0029) — same drop odds as the free daily pack, just an extra pull; doesn't touch the daily-claim limit or award XP. */
+/** Buys a 5-card pack for 200 Berry — same drop odds as the free daily pack, just an extra pull; doesn't touch the daily-claim limit. Awards the same 15 XP as the free pack (migration 0030 — Boss, 2026-10-17: XP for every pack opened, bought included). */
 export async function buyTcgPack(): Promise<TcgPackResult> {
   if (!supabase) return { ok: false, error: "no_backend" };
   const userId = await ensureSupabaseSession();
