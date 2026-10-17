@@ -85,40 +85,88 @@ function CardFace({
   );
 }
 
-/** Sequential pack-reveal overlay — one card flips in at a time, held longer for rarer pulls (Q40/Q42/Q48). Always animated regardless of the global "Animationen aus" switch (Q47 — this is the mode's one highlight moment), and never skippable (Q43). */
+/** Burst glow strength behind the big card, scaled by rarity so higher pulls visibly hit harder. */
+const BURST_COLOR: Record<TcgRarity, string | null> = {
+  rekrut: null,
+  pirat: null,
+  kopfgeldjaeger: "rgba(14,165,233,0.45)",
+  rookie: "rgba(139,92,246,0.5)",
+  supernova: "rgba(249,115,22,0.6)",
+  yonko: "rgba(225,29,72,0.65)",
+  god_tier: "rgba(244,197,66,0.8)",
+};
+
+/** Sequential pack-reveal overlay — one card flips in at a time, shown large and alone, held longer for rarer pulls (Q40/Q42/Q48). Always animated regardless of the global "Animationen aus" switch (Q47 — this is the mode's one highlight moment), and never skippable (Q43). */
 function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCard[]; fragmentsGained: number; onClose: () => void }) {
-  const [shown, setShown] = useState(0);
+  const [index, setIndex] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const current = cards[index];
 
   useEffect(() => {
-    if (shown >= cards.length) return;
-    const t = setTimeout(() => setShown((n) => n + 1), revealHoldMs(cards[shown].rarity));
+    if (finished) return;
+    const t = setTimeout(() => {
+      if (index < cards.length - 1) setIndex((i) => i + 1);
+      else setFinished(true);
+    }, revealHoldMs(current.rarity));
     return () => clearTimeout(t);
-  }, [shown, cards]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, finished]);
 
-  const done = shown >= cards.length;
+  const meta = RARITIES[current.rarity];
+  const burstColor = BURST_COLOR[current.rarity];
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/70 bg-cover bg-center p-4"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-black/70 bg-cover bg-center p-4"
       style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.75)), url(/images/tcg/bg-pack-open.webp)" }}
     >
-      <div className="grid w-full max-w-sm grid-cols-5 gap-2">
-        {cards.map((c, i) => (
-          <div key={i} className="relative">
-            <CardFace card={c} owned revealed={i < shown} />
-            {i < shown && c.duplicate && (
-              <span className="absolute inset-x-0 -bottom-4 text-center text-[10px] font-semibold text-amber-400">Duplikat</span>
-            )}
-          </div>
+      <div className="flex items-center gap-1.5">
+        {cards.map((_, i) => (
+          <span
+            key={i}
+            className={`h-1.5 w-1.5 rounded-full transition-colors ${
+              i === index && !finished ? "bg-white" : i < index || finished ? "bg-white/60" : "bg-white/20"
+            }`}
+          />
         ))}
       </div>
-      {done ? (
+
+      {!finished && (
+        <div key={index} className="relative flex flex-col items-center gap-3">
+          {burstColor && (
+            <div
+              key={`burst-${index}`}
+              className="op-tcg-burst pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full"
+              style={{ background: `radial-gradient(circle, ${burstColor} 0%, transparent 70%)` }}
+              aria-hidden
+            />
+          )}
+          <div className="op-tcg-card-flip relative w-56 sm:w-64">
+            <CardFace card={current} owned revealed />
+          </div>
+          <div className="op-tcg-label-in flex flex-col items-center gap-0.5 text-center">
+            <p className={`text-sm font-bold ${meta.textClass}`}>{meta.label}</p>
+            {current.duplicate && <p className="text-xs font-semibold text-amber-400">Duplikat</p>}
+          </div>
+        </div>
+      )}
+
+      {finished ? (
         <>
+          <div className="flex gap-2">
+            {cards.map((c, i) => (
+              <div key={i} className="w-12">
+                <CardFace card={c} owned revealed />
+              </div>
+            ))}
+          </div>
           {fragmentsGained > 0 && <p className="text-sm text-amber-400">+{fragmentsGained} Fragmente aus Duplikaten</p>}
           <Button onClick={onClose}>Weiter zur Sammlung</Button>
         </>
       ) : (
-        <p className="text-sm text-white/60">Tippe nicht weg, die Karten decken sich auf…</p>
+        <p className="text-sm text-white/60">
+          Karte {index + 1} von {cards.length}
+        </p>
       )}
     </div>
   );
@@ -236,7 +284,7 @@ export function TcgBoard() {
       style={{ backgroundImage: "linear-gradient(rgba(5,8,18,0.55), rgba(5,8,18,0.88)), url(/images/tcg/bg-tcg-start.webp)", backgroundSize: "cover", backgroundPosition: "center" }}
     >
       {user?.isAdmin && (
-        <div className="op-card flex flex-wrap items-center gap-2 border border-mode-tcg/40 bg-mode-tcg/10 p-3 text-xs">
+        <div className="op-card flex flex-wrap items-center gap-2 p-3 text-xs">
           <span className="font-semibold text-mode-tcg">Admin:</span>
           <Button size="sm" variant="secondary" onClick={handleToggleGlobal} disabled={busyAdminAction}>
             {globalEnabled ? "Für alle sperren" : "Für alle freischalten"}
@@ -275,7 +323,7 @@ export function TcgBoard() {
 
       <div>
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-white/80 [text-shadow:0_1px_3px_rgba(0,0,0,0.8)]">Sammlung</h2>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {cards.map((card) => (
             <CardFace key={card.id} card={card} owned={Boolean(owned[card.id])} quantity={owned[card.id]} />
           ))}
