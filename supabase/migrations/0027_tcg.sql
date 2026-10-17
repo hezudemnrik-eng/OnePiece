@@ -32,6 +32,7 @@ create table if not exists public.tcg_cards (
 
 alter table public.tcg_cards enable row level security;
 
+drop policy if exists "tcg cards are readable by everyone signed in" on public.tcg_cards;
 create policy "tcg cards are readable by everyone signed in"
   on public.tcg_cards for select
   using (auth.role() = 'authenticated');
@@ -48,6 +49,7 @@ create table if not exists public.tcg_user_cards (
 
 alter table public.tcg_user_cards enable row level security;
 
+drop policy if exists "users read their own tcg cards" on public.tcg_user_cards;
 create policy "users read their own tcg cards"
   on public.tcg_user_cards for select
   using (auth.uid() = user_id);
@@ -70,6 +72,7 @@ create table if not exists public.tcg_pack_claims (
 
 alter table public.tcg_pack_claims enable row level security;
 
+drop policy if exists "users read their own tcg pack claims" on public.tcg_pack_claims;
 create policy "users read their own tcg pack claims"
   on public.tcg_pack_claims for select
   using (auth.uid() = user_id);
@@ -97,6 +100,7 @@ on conflict (id) do nothing;
 
 alter table public.tcg_settings enable row level security;
 
+drop policy if exists "tcg settings are readable by everyone signed in" on public.tcg_settings;
 create policy "tcg settings are readable by everyone signed in"
   on public.tcg_settings for select
   using (auth.role() = 'authenticated');
