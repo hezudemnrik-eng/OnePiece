@@ -23,6 +23,7 @@ import { formatBerry } from "@/lib/fusionTraits";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { FriendsPanel } from "./FriendsPanel";
 import { InviteCodesPanel } from "./InviteCodesPanel";
+import { TcgAdminPanel } from "./TcgAdminPanel";
 import { Card } from "./ui/Card";
 import { ProgressBar } from "./ui/ProgressBar";
 import {
@@ -294,6 +295,7 @@ export function ProfileBoard() {
       </div>
 
       {user?.isAdmin && <InviteCodesPanel />}
+      {user?.isAdmin && <TcgAdminPanel />}
 
       {myStats && (
         <div>

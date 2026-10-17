@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatBerry } from "@/lib/fusionTraits";
 import { Button } from "./ui/Button";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
+  buyTcgPack,
   exchangeTcgFragments,
+  fetchMyLevelInfo,
   fetchMyTcgCollection,
   fetchMyTcgFragments,
   fetchTcgCards,
@@ -13,14 +16,15 @@ import {
   getCurrentAuthUser,
   isSupabaseConfigured,
   openDailyTcgPack,
-  resetMyTcgCollection,
-  setTcgGlobalEnabled,
   type AuthUser,
   type TcgCard,
 } from "@/lib/supabase";
 
 /** sessionStorage key a pack bought in the Shop uses to hand its drawn cards to this page's reveal overlay (set by ShopBoard, consumed once here). */
 export const TCG_PENDING_REVEAL_KEY = "tcg_pending_reveal";
+
+/** Cost of a buyable 5-card pack (migration 0029/0030) — mirrors tcg_buy_pack()'s server-side check, just for display/disabling here. Buyable both here and in the Shop. */
+const TCG_PACK_COST = 200;
 import { RARITIES, type TcgRarity } from "@/lib/tcgRarities";
 
 type DrawnCard = {
@@ -207,24 +211,27 @@ export function TcgBoard() {
   const [fragments, setFragments] = useState(0);
   const [claimedToday, setClaimedToday] = useState(false);
   const [opening, setOpening] = useState(false);
+  const [buying, setBuying] = useState(false);
+  const [berries, setBerries] = useState(0);
   const [drawn, setDrawn] = useState<DrawnCard[] | null>(null);
   const [fragmentsGained, setFragmentsGained] = useState(0);
   const [error, setError] = useState("");
-  const [busyAdminAction, setBusyAdminAction] = useState(false);
 
   async function refresh() {
-    const [c, o, claimed, frag, enabled] = await Promise.all([
+    const [c, o, claimed, frag, enabled, levelInfo] = await Promise.all([
       fetchTcgCards(),
       fetchMyTcgCollection(),
       fetchTcgPackClaimedToday(),
       fetchMyTcgFragments(),
       fetchTcgGlobalEnabled(),
+      fetchMyLevelInfo(),
     ]);
     setCards(c);
     setOwned(o);
     setClaimedToday(claimed);
     setFragments(frag);
     setGlobalEnabled(enabled);
+    setBerries(levelInfo?.berries ?? 0);
   }
 
   useEffect(() => {
@@ -268,24 +275,24 @@ export function TcgBoard() {
     setFragmentsGained(result.fragmentsGained);
   }
 
+  /** Buyable pack (200 Berry), now also directly in the TCG area, not just the Shop — same reveal flow as the free daily pack (Boss, 2026-10-17). */
+  async function handleBuyPack() {
+    setError("");
+    setBuying(true);
+    const result = await buyTcgPack();
+    setBuying(false);
+    if (!result.ok) {
+      setError(result.error === "not_enough_berries" ? "Nicht genug Berries." : "Kauf hat nicht geklappt.");
+      return;
+    }
+    setBerries((b) => b - TCG_PACK_COST);
+    setDrawn(result.cards);
+    setFragmentsGained(result.fragmentsGained);
+  }
+
   async function closeReveal() {
     setDrawn(null);
     await refresh();
-  }
-
-  async function handleToggleGlobal() {
-    setBusyAdminAction(true);
-    const ok = await setTcgGlobalEnabled(!globalEnabled);
-    setBusyAdminAction(false);
-    if (ok) setGlobalEnabled((v) => !v);
-  }
-
-  async function handleResetCollection() {
-    if (!window.confirm("Deine ganze TCG-Sammlung (Karten, Fragmente, heutiges Pack) wirklich zurücksetzen?")) return;
-    setBusyAdminAction(true);
-    const ok = await resetMyTcgCollection();
-    setBusyAdminAction(false);
-    if (ok) await refresh();
   }
 
   async function handleExchangeFragments() {
@@ -322,19 +329,6 @@ export function TcgBoard() {
       className="relative isolate flex flex-col gap-5 overflow-hidden rounded-2xl p-4"
       style={{ backgroundImage: "linear-gradient(rgba(5,8,18,0.55), rgba(5,8,18,0.88)), url(/images/tcg/bg-tcg-start.webp)", backgroundSize: "cover", backgroundPosition: "center" }}
     >
-      {user?.isAdmin && (
-        <div className="op-card flex flex-wrap items-center gap-2 p-3 text-xs">
-          <span className="font-semibold text-mode-tcg">Admin:</span>
-          <Button size="sm" variant="secondary" onClick={handleToggleGlobal} disabled={busyAdminAction}>
-            {globalEnabled ? "Für alle sperren" : "Für alle freischalten"}
-          </Button>
-          <Button size="sm" variant="danger" onClick={handleResetCollection} disabled={busyAdminAction}>
-            Meine Sammlung zurücksetzen
-          </Button>
-          <span className="text-black/50 dark:text-white/40">{globalEnabled ? "Für alle sichtbar" : "Nur für Admins sichtbar"}</span>
-        </div>
-      )}
-
       <div className="op-card flex flex-col items-center gap-3 p-5 text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/tcg/pack-pouch.webp" alt="" aria-hidden className="h-20 w-auto object-contain" />
@@ -349,6 +343,9 @@ export function TcgBoard() {
         >
           {claimedToday ? "Heutiges Pack schon geöffnet" : opening ? "Öffne Pack…" : "Tages-Pack öffnen (5 Karten)"}
         </button>
+        <Button size="sm" variant="secondary" onClick={handleBuyPack} disabled={buying || berries < TCG_PACK_COST}>
+          {buying ? "Kaufe…" : `Pack kaufen (5 Karten) · ${formatBerry(TCG_PACK_COST)}`}
+        </Button>
         {error && <p className="text-xs text-danger">{error}</p>}
         <div className="flex items-center gap-2 text-xs text-amber-500">
           <span>{fragments} Fragmente</span>
