@@ -20,6 +20,8 @@ export type RarityMeta = {
   glowClass: string;
   /** Chatti-designed frame overlay (true alpha PNG/WebP) drawn on top of the card art; null = no real frame yet, falls back to ringClass. */
   frameImage: string | null;
+  /** Scale factor applied to frameImage so the painted border reaches past the art box edge (Boss, 2026-10-17: lower rarities need less overscan). */
+  frameScale: number;
 };
 
 export const RARITIES: Record<TcgRarity, RarityMeta> = {
@@ -32,6 +34,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-slate-300",
     glowClass: "",
     frameImage: "/images/tcg/frame-rekrut.webp",
+    frameScale: 1.0,
   },
   pirat: {
     id: "pirat",
@@ -42,6 +45,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-emerald-400",
     glowClass: "shadow-[0_0_10px_rgba(16,185,129,0.4)]",
     frameImage: "/images/tcg/frame-pirat.webp",
+    frameScale: 1.1,
   },
   kopfgeldjaeger: {
     id: "kopfgeldjaeger",
@@ -52,6 +56,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-sky-400",
     glowClass: "shadow-[0_0_13px_rgba(14,165,233,0.45)]",
     frameImage: "/images/tcg/frame-kopfgeldjaeger.webp",
+    frameScale: 1.15,
   },
   rookie: {
     id: "rookie",
@@ -62,6 +67,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-violet-400",
     glowClass: "shadow-[0_0_16px_rgba(139,92,246,0.5)]",
     frameImage: "/images/tcg/frame-rookie.webp",
+    frameScale: 1.3,
   },
   supernova: {
     id: "supernova",
@@ -72,6 +78,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-orange-400",
     glowClass: "shadow-[0_0_20px_rgba(249,115,22,0.6)]",
     frameImage: "/images/tcg/frame-supernova.webp",
+    frameScale: 1.3,
   },
   yonko: {
     id: "yonko",
@@ -82,6 +89,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-rose-400",
     glowClass: "shadow-[0_0_25px_rgba(225,29,72,0.7)]",
     frameImage: "/images/tcg/frame-yonko.webp",
+    frameScale: 1.3,
   },
   god_tier: {
     id: "god_tier",
@@ -92,6 +100,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-[#f4c542]",
     glowClass: "shadow-[0_0_32px_rgba(244,197,66,0.85)] op-s-tier-glow",
     frameImage: "/images/tcg/frame-god-tier.webp",
+    frameScale: 1.3,
   },
 };
 

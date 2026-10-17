@@ -77,8 +77,8 @@ function CardFace({
           src={meta.frameImage}
           alt=""
           aria-hidden
-          className="pointer-events-none absolute left-0 top-0 z-10 w-full scale-[1.3] object-fill"
-          style={{ aspectRatio: "2 / 3" }}
+          className="pointer-events-none absolute left-0 top-0 z-10 w-full object-fill"
+          style={{ aspectRatio: "2 / 3", transform: `scale(${meta.frameScale})` }}
         />
       )}
     </div>
