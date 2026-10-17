@@ -5,7 +5,6 @@ import { characters, type Character } from "@/lib/characters";
 import { classifyFruit, FRUIT_COLORS } from "@/lib/fruitType";
 import { useAnimationsEnabled } from "@/lib/animPrefs";
 import { playTick } from "@/lib/sfx";
-import { CharacterCard } from "./CharacterCard";
 import { Button } from "./ui/Button";
 
 type Props = {
@@ -110,30 +109,21 @@ export function RollPanel({ offered, skipsLeft, onPick, onSkip, readOnly = false
         >
           {char.imageUrl && (
             <div
-              className={`w-full ${isSTier ? "op-s-tier-glow" : ""}`}
+              className={`op-chatti-frame w-full ${isSTier ? "op-s-tier-glow" : ""}`}
               style={fruitColor ? { boxShadow: `0 0 0 3px ${fruitColor}55` } : undefined}
             >
+              {/* Boss, 2026-10-17: Pick-Karten sollen nur noch das Charakterbild
+                  im Rahmen zeigen — kein Name, keine Tier-Stufe mehr darunter
+                  (vorher CharacterCard mit Name/Tier-Badge/Crew). */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={char.imageUrl}
                 alt={spinning ? "" : char.name}
                 referrerPolicy="no-referrer"
-                className={`h-72 w-full rounded-xl border-2 object-cover object-top shadow-lg transition-opacity ${spinning ? "opacity-70 blur-[1px]" : "opacity-100"}`}
-                style={{ borderColor: fruitColor ?? "var(--poster-ink)" }}
+                className={`h-72 w-full object-cover object-top shadow-lg transition-opacity ${spinning ? "opacity-70 blur-[1px]" : "opacity-100"}`}
               />
             </div>
           )}
-          {fruitClass && !spinning && (
-            <span
-              className="-mt-2 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
-              style={{ background: fruitColor }}
-            >
-              {fruitClass}
-            </span>
-          )}
-          <div className="w-full">
-            <CharacterCard character={char} />
-          </div>
           {!readOnly && (
             <Button onClick={() => onPick(char.id)} disabled={spinning} className="w-full shadow hover:shadow-md">
               Wählen

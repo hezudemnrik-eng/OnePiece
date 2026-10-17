@@ -8,6 +8,7 @@ import {
   allRolesConfirmed,
   assignRole,
   assignTeam,
+  autoPick,
   claimSeat,
   clearSeat,
   confirmRoles,
@@ -36,6 +37,7 @@ import { FRAME_IMAGES } from "@/lib/frameImages";
 import { playAccept, playSkip, vibrate } from "@/lib/sfx";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
+  abandonLiveDraft,
   createLiveDraft,
   ensureSupabaseSession,
   fetchFriends,
@@ -208,6 +210,12 @@ export function LiveDraftBoard() {
   const rematchCreateFiredRef = useRef(false);
   const rematchJoinFiredRef = useRef(false);
   const lastHeartbeatRef = useRef(0);
+  // Guards the two "somebody left mid-round" rescue effects below (auto-pick
+  // for an empty seat's turn, auto-confirm for an empty seat's roles) so the
+  // single client responsible for them doesn't refire the same write every
+  // render — reset whenever the thing they're keyed on changes.
+  const autoPickFiredAtRef = useRef<string | null>(null);
+  const autoConfirmFiredRef = useRef(false);
 
   function detachPolling() {
     if (pollIntervalRef.current) {
@@ -508,6 +516,61 @@ export function LiveDraftBoard() {
     return nowTick - new Date(lastSeenAt).getTime() > STALE_MS;
   }
 
+  /** The first seated player's `id` and `userId`, in seat order — used below
+   * to pick exactly one present client to perform a "somebody's missing"
+   * rescue write, the same single-writer pattern as the host-only effects,
+   * but keyed off who's actually still here rather than host_id (the host
+   * themself might be the one who's gone — see handleLeaveRound). */
+  function firstSeatedPlayer(state: DraftState) {
+    return state.players.find((p) => p.userId);
+  }
+
+  // Rescue for a round stuck on an empty seat's turn (Boss, 2026-10-17:
+  // "manchmal bleibt die Runde... stehen und es geht nichts mehr weiter") —
+  // happens whenever the player on turn has left (handleLeaveRound clears
+  // their seat but leaves their entry, with its progress, in state.players)
+  // and nobody else can pick for them. The earliest still-seated client
+  // auto-picks on their behalf so the draft keeps moving instead of hanging
+  // forever on a turn nobody can take.
+  useEffect(() => {
+    if (!session || session.phase !== "drafting" || session.state.finished || isSpectator) return;
+    const state = session.state;
+    const player = currentPlayer(state);
+    if (player.userId) return;
+    const anchor = firstSeatedPlayer(state);
+    if (!anchor || anchor.userId !== myUserId) return;
+    if (autoPickFiredAtRef.current === state.turnStartedAt) return;
+    autoPickFiredAtRef.current = state.turnStartedAt;
+    const next = autoPick(state);
+    writeLiveDraft(session.id, session.updated_at, { state: next }).then((r) => {
+      if (r.session) setSession(r.session);
+      else autoPickFiredAtRef.current = null;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.state.currentPlayerIndex, session?.state.turnStartedAt, session?.phase, myUserId, isSpectator]);
+
+  // Same rescue for the role-assignment phase: allRolesConfirmed also
+  // requires an "every userId || pickedCharacterIds.length > 0" player to be
+  // ready, so someone who left after drafting but before confirming roles
+  // would otherwise block the battle forever. Auto-confirms with no role
+  // assignments on their behalf (same as skipping roles voluntarily).
+  useEffect(() => {
+    if (!session || session.phase !== "roles" || isSpectator) return;
+    const state = session.state;
+    const abandoned = state.players.filter((p) => !p.userId && !p.rolesReady && p.pickedCharacterIds.length > 0);
+    if (abandoned.length === 0) return;
+    const anchor = firstSeatedPlayer(state);
+    if (!anchor || anchor.userId !== myUserId) return;
+    if (autoConfirmFiredRef.current) return;
+    autoConfirmFiredRef.current = true;
+    const next = abandoned.reduce((acc, p) => confirmRoles(acc, p.id), state);
+    writeLiveDraft(session.id, session.updated_at, { state: next }).then((r) => {
+      if (r.session) setSession(r.session);
+      else autoConfirmFiredRef.current = false;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.state.players, session?.phase, myUserId, isSpectator]);
+
   /** Index into state.players of the non-team battle's winner — winnerIndex
    * for a 3+ player free-for-all, otherwise the old winnerTeam "A"/"B" ->
    * 0/1 mapping for a 2-player draft. Team-mode winners are looked up by
@@ -759,6 +822,42 @@ export function LiveDraftBoard() {
         const next = clearSeat(session.state, myUserId);
         await writeLiveDraft(session.id, session.updated_at, { state: next });
       }
+    }
+    backToHome();
+  }
+
+  // "Verlassen" once the round itself is underway (drafting/roles/result) —
+  // previously there was no way to leave at all past the lobby (a stale seat
+  // was meant to be "handled by the other players picking around it", but
+  // nothing ever actually did that, so one gone player could leave everyone
+  // else stuck forever — Boss, 2026-10-17: "Die Runde soll über ein Button
+  // leave bar sein"). Frees the seat; if nobody else is left seated the
+  // session is abandoned outright instead of orphaning the row, and if the
+  // leaver was host, hands host_id to another seated player so the
+  // host-only transition effects (phase changes, rematch creation) don't
+  // die with them. The auto-pick/auto-confirm rescue effects above pick up
+  // the freed seat's remaining turns from here.
+  async function handleLeaveRound() {
+    if (!session || !myUserId || isSpectator) {
+      backToHome();
+      return;
+    }
+    const next = clearSeat(session.state, myUserId);
+    const stillSeated = next.players.filter((p) => p.userId);
+    if (stillSeated.length === 0) {
+      await abandonLiveDraft(session.id);
+      backToHome();
+      return;
+    }
+    const patch: { state: DraftState; host_id?: string } =
+      session.host_id === myUserId ? { state: next, host_id: stillSeated[0].userId! } : { state: next };
+    let current = session;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const result = await writeLiveDraft(current.id, current.updated_at, patch);
+      if (result.session || result.error) break;
+      const refetched = await fetchLiveDraftById(current.id);
+      if (!refetched) break;
+      current = refetched;
     }
     backToHome();
   }
@@ -1176,6 +1275,11 @@ export function LiveDraftBoard() {
           {!myTurn && !isSpectator && !disconnected && (
             <p className="mt-3 text-sm text-black/50 dark:text-white/40">Warte, bis {player.name} gezogen hat…</p>
           )}
+          {!isSpectator && (
+            <Button variant="ghost" onClick={handleLeaveRound} className="mt-4 self-start text-black/50 dark:text-white/40">
+              Runde verlassen
+            </Button>
+          )}
         </div>
         <aside className="flex flex-col gap-2 sm:gap-4">
           {session.state.players.map((p) => (
@@ -1246,6 +1350,11 @@ export function LiveDraftBoard() {
           />
         )}
         {renderChatBar()}
+        {!isSpectator && (
+          <Button variant="ghost" onClick={handleLeaveRound} className="self-start text-black/50 dark:text-white/40">
+            Runde verlassen
+          </Button>
+        )}
       </div>
     );
   }
@@ -1352,7 +1461,7 @@ export function LiveDraftBoard() {
         ) : (
           <p className="text-sm text-black/50 dark:text-white/40">Kampfsimulation wird berechnet…</p>
         )}
-        <Button variant="ghost" onClick={backToHome} className="self-start text-black/50 dark:text-white/40">
+        <Button variant="ghost" onClick={handleLeaveRound} className="self-start text-black/50 dark:text-white/40">
           Zur Startseite
         </Button>
       </div>

@@ -355,7 +355,7 @@ export async function fetchLiveDraftById(id: string): Promise<LiveDraftSession |
 export async function writeLiveDraft(
   id: string,
   expectedUpdatedAt: string,
-  patch: { state?: DraftState; phase?: LiveDraftSession["phase"]; battle?: BattleResult }
+  patch: { state?: DraftState; phase?: LiveDraftSession["phase"]; battle?: BattleResult; host_id?: string }
 ): Promise<{ session?: LiveDraftSession; conflict?: boolean; error?: string }> {
   if (!supabase) return { error: "not configured" };
   const { data, error } = await supabase
@@ -382,6 +382,20 @@ export async function writeLiveDraft(
 export async function cancelLiveDraft(id: string, hostId: string): Promise<void> {
   if (!supabase) return;
   await supabase.from("draft_sessions").delete().eq("id", id).eq("host_id", hostId).eq("phase", "lobby");
+}
+
+/**
+ * Ends a live draft outright, in any phase — used by the "Verlassen" button
+ * once nobody is left seated after someone leaves a round in progress
+ * (Boss, 2026-10-17: "die Runde soll über ein Button leave bar sein", plus
+ * the round sometimes getting permanently stuck with nobody able to move it
+ * forward). Unlike cancelLiveDraft this isn't limited to the host or the
+ * lobby phase, since by the time this is called the row would otherwise be
+ * orphaned with no claimed seats left to act on it.
+ */
+export async function abandonLiveDraft(id: string): Promise<void> {
+  if (!supabase) return;
+  await supabase.from("draft_sessions").delete().eq("id", id);
 }
 
 /**

@@ -170,6 +170,18 @@ export function currentPlayer(state: DraftState): DraftPlayer {
 }
 
 function advanceTurn(state: DraftState, rng: () => number): DraftState {
+  // Check finished *before* touching round/direction — the last pick of the
+  // draft often also lands on a snake-turn boundary (every player's very
+  // last pick does, for an even player count), and incrementing round for a
+  // turn that never actually happens left the finished state one round
+  // ahead of teamSize (Boss, 2026-10-17: "Runde bleibt bei 6 von 5 stehen" —
+  // with teamSize 5 the round counter kept ticking to 6 right as the draft
+  // finished).
+  const finished = state.players.every((p) => p.pickedCharacterIds.length >= state.teamSize);
+  if (finished) {
+    return { ...state, finished: true, turnStartedAt: new Date().toISOString(), rolledCharacterIds: [] };
+  }
+
   const playerCount = state.players.length;
   let { currentPlayerIndex, round, direction } = state;
 
@@ -182,12 +194,8 @@ function advanceTurn(state: DraftState, rng: () => number): DraftState {
     currentPlayerIndex = nextIndex;
   }
 
-  const finished = state.players.every((p) => p.pickedCharacterIds.length >= state.teamSize);
-
   // Refill the now-current player's skips for their fresh turn.
-  const players = finished
-    ? state.players
-    : state.players.map((p, i) => (i === currentPlayerIndex ? { ...p, skipsLeft: state.skipsPerTurn } : p));
+  const players = state.players.map((p, i) => (i === currentPlayerIndex ? { ...p, skipsLeft: state.skipsPerTurn } : p));
 
   return {
     ...state,
@@ -195,9 +203,9 @@ function advanceTurn(state: DraftState, rng: () => number): DraftState {
     currentPlayerIndex,
     round,
     direction,
-    finished,
+    finished: false,
     turnStartedAt: new Date().toISOString(),
-    rolledCharacterIds: finished ? [] : rollMultiple(state.availableCharacterIds, OFFER_COUNT, rng),
+    rolledCharacterIds: rollMultiple(state.availableCharacterIds, OFFER_COUNT, rng),
   };
 }
 
