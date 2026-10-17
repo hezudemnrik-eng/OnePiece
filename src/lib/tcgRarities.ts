@@ -7,6 +7,10 @@
  * Colors/icons/hold-times are presentational only; the actual drop
  * weights and pity rule live server-side in tcg_open_daily_pack()
  * (migration 0027) so they can't be read off the client or spoofed.
+ *
+ * frameScale is independently tunable per rarity (Boss, 2026-10-17) —
+ * each Chatti frame overlay needs its own overscan amount, there is no
+ * shared/global scale.
  */
 export type TcgRarity = "rekrut" | "pirat" | "kopfgeldjaeger" | "rookie" | "supernova" | "yonko" | "god_tier";
 
