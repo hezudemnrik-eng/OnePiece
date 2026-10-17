@@ -156,7 +156,13 @@ function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCa
               aria-hidden
             />
           )}
-          <div className={`relative w-56 sm:w-64 ${revealed ? "op-tcg-card-flip" : ""}`}>
+          {/* my-14: the frame <img> inside CardFace is position:absolute and scaled up to
+              1.3x for the biggest rarities, so it overscans this box without adding to its
+              layout size — flexbox centering then has no reserved room for that overscan and
+              can push its top/bottom past the viewport edge on a short screen, visibly
+              cropping the frame (Boss, 2026-10-17: "komplett sichtbar... überallem liegen").
+              This margin reserves worst-case (god_tier, 130%) headroom on both sides. */}
+          <div className={`relative my-14 w-56 sm:w-64 ${revealed ? "op-tcg-card-flip" : ""}`}>
             <CardFace card={current} owned revealed={revealed} />
           </div>
           {revealed ? (
