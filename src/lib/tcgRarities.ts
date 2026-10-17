@@ -34,7 +34,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-slate-300",
     glowClass: "",
     frameImage: "/images/tcg/frame-rekrut.webp",
-    frameScale: 1.05,
+    frameScale: 1.07,
   },
   pirat: {
     id: "pirat",
@@ -67,7 +67,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-violet-400",
     glowClass: "shadow-[0_0_16px_rgba(139,92,246,0.5)]",
     frameImage: "/images/tcg/frame-rookie.webp",
-    frameScale: 1.3,
+    frameScale: 1.25,
   },
   supernova: {
     id: "supernova",
@@ -78,7 +78,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-orange-400",
     glowClass: "shadow-[0_0_20px_rgba(249,115,22,0.6)]",
     frameImage: "/images/tcg/frame-supernova.webp",
-    frameScale: 1.3,
+    frameScale: 1.25,
   },
   yonko: {
     id: "yonko",
