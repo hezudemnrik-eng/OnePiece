@@ -19,6 +19,10 @@ export type BattleRound = {
 
 export type BattleResult = {
   winnerTeam: "A" | "B";
+  /** Set only by simulateFreeForAll (3+ players, no teams) — indexes into the
+   * draft's players array in turn order. winnerTeam is left as a dummy "A"
+   * in that case since there's no two-sided team to label. */
+  winnerIndex?: number;
   rounds: BattleRound[];
 };
 
@@ -114,4 +118,52 @@ export function simulateBattle(
   const aAlive = teamA.some((f) => f.hp > 0);
   const winnerTeam: "A" | "B" = aAlive ? "A" : "B";
   return { winnerTeam, rounds };
+}
+
+/**
+ * Round-based battle simulation between 3+ players with no teams (free-for-
+ * all Live-Draft, Boss: "ich will den modus auch zu dritt spielen können").
+ * Each round, every living fighter attacks a random living fighter chosen
+ * from across ALL other sides combined (not "the next side" or any fixed
+ * order) — same even-chances targeting as the two-side version, just pooled
+ * over more opponents. Last side with survivors wins.
+ */
+export function simulateFreeForAll(
+  sidesVersions: CharacterVersion[][],
+  sidesNames: string[][],
+  rng: () => number = Math.random
+): { winnerIndex: number; rounds: BattleRound[] } {
+  const sides = sidesVersions.map((versions, i) => toFighters(versions, sidesNames[i]));
+  const rounds: BattleRound[] = [];
+
+  let roundNumber = 0;
+  while (roundNumber < MAX_ROUNDS) {
+    roundNumber++;
+    const sidesAlive = sides.filter((side) => side.some((f) => f.hp > 0));
+    if (sidesAlive.length <= 1) break;
+
+    for (let i = 0; i < sides.length; i++) {
+      const attackers = sides[i].filter((f) => f.hp > 0);
+      for (const attacker of attackers) {
+        for (let hit = 0; hit < attacker.attacksPerRound; hit++) {
+          const targets = sides.flatMap((side, j) => (j === i ? [] : side.filter((f) => f.hp > 0)));
+          if (targets.length === 0) break;
+          const defender = targets[Math.floor(rng() * targets.length)];
+          const { damage, critical } = rollDamage(attacker, rng);
+          defender.hp = Math.max(0, defender.hp - damage);
+          rounds.push({
+            round: roundNumber,
+            attackerName: attacker.name,
+            defenderName: defender.name,
+            damage,
+            critical,
+            defenderHpAfter: defender.hp,
+          });
+        }
+      }
+    }
+  }
+
+  const winnerIndex = sides.findIndex((side) => side.some((f) => f.hp > 0));
+  return { winnerIndex: winnerIndex === -1 ? 0 : winnerIndex, rounds };
 }
