@@ -81,7 +81,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     ringClass: "ring-2 ring-rose-600",
     textClass: "text-rose-400",
     glowClass: "shadow-[0_0_25px_rgba(225,29,72,0.7)]",
-    frameImage: null,
+    frameImage: "/images/tcg/frame-yonko.webp",
   },
   god_tier: {
     id: "god_tier",
@@ -91,7 +91,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     ringClass: "ring-2 ring-[#f4c542]",
     textClass: "text-[#f4c542]",
     glowClass: "shadow-[0_0_32px_rgba(244,197,66,0.85)] op-s-tier-glow",
-    frameImage: null,
+    frameImage: "/images/tcg/frame-god-tier.webp",
   },
 };
 
