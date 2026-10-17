@@ -30,6 +30,16 @@ create table if not exists public.tcg_cards (
   sort_order int not null default 0
 );
 
+-- Safe to re-run even if an earlier (pre-rename) version of this
+-- migration already created tcg_cards with the old 6-tier check
+-- constraint (common/uncommon/.../god_tier): wipe the admin-test catalog
+-- and re-apply the 7-tier constraint before re-seeding below, instead of
+-- failing on either the old rows or the stale constraint.
+delete from public.tcg_cards;
+alter table public.tcg_cards drop constraint if exists tcg_cards_rarity_check;
+alter table public.tcg_cards add constraint tcg_cards_rarity_check
+  check (rarity in ('rekrut', 'pirat', 'kopfgeldjaeger', 'rookie', 'supernova', 'yonko', 'god_tier'));
+
 alter table public.tcg_cards enable row level security;
 
 drop policy if exists "tcg cards are readable by everyone signed in" on public.tcg_cards;
