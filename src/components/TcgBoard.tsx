@@ -70,11 +70,13 @@ function CardFace({
           <span className="absolute right-1 top-1 rounded-full bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-white">×{quantity}</span>
         )}
       </div>
-      {show && meta.frameImage && (
+      {meta.frameImage && (
         // Sits on the outer card (not clipped to the art box) and renders
         // last so it's the topmost layer — Boss wants the enlarged frame
         // never cropped by the art box's own edge, only by the card's
-        // outer rounded corner.
+        // outer rounded corner. Always shown, even face-down/unrevealed
+        // (Boss, 2026-10-17: "der Rahmen immer vorallem") — it just picks
+        // up the outer card's grayscale/opacity when not shown yet.
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={meta.frameImage}
