@@ -498,9 +498,13 @@ export function LiveDraftBoard() {
   // teammate who's just thinking. Throttled against the existing 1s
   // nowTick rather than a second independent interval, matching how the
   // auto-pick/auto-confirm checks below already work off the same clock.
+  // Also runs during "result" (not just drafting/roles) now — isPrimaryActor
+  // below needs a *live* staleness signal on the result screen too, to pick
+  // a present client for rematch creation instead of getting stuck on
+  // whoever happens to sit in the lowest seat if that's the one who left.
   useEffect(() => {
     if (!session || !myUserId || isSpectator) return;
-    if (effectiveView !== "drafting" && effectiveView !== "roles") return;
+    if (effectiveView !== "drafting" && effectiveView !== "roles" && effectiveView !== "result") return;
     const me = session.state.players.find((p) => p.userId === myUserId);
     if (!me) return;
     if (nowTick - lastHeartbeatRef.current < PRESENCE_INTERVAL_MS) return;
@@ -525,20 +529,53 @@ export function LiveDraftBoard() {
     return state.players.find((p) => p.userId);
   }
 
-  // Rescue for a round stuck on an empty seat's turn (Boss, 2026-10-17:
-  // "manchmal bleibt die Runde... stehen und es geht nichts mehr weiter") —
-  // happens whenever the player on turn has left (handleLeaveRound clears
-  // their seat but leaves their entry, with its progress, in state.players)
-  // and nobody else can pick for them. The earliest still-seated client
-  // auto-picks on their behalf so the draft keeps moving instead of hanging
-  // forever on a turn nobody can take.
+  /**
+   * True for exactly one present client: the earliest-seated player who
+   * isn't stale (falls back to the earliest seated player at all, if
+   * somehow everyone currently reads as stale — better one write attempt
+   * too many than none). Every single-writer transition below
+   * (drafting -> roles, roles -> result, result -> rematch lobby) used to
+   * gate on `session.host_id === myUserId` instead — which meant the whole
+   * draft silently wedged if the host's own tab ever closed (no explicit
+   * "leave") right as the draft finished: nobody else was allowed to flip
+   * the phase, so everyone just sat on a frozen "Runde X von Y" forever
+   * (Boss, 2026-10-17: "6 von 5 und dann geht nichts mehr" — this kept
+   * happening even after the round-counter math itself was fixed, because
+   * that bug was a *symptom* of this one, not the cause). Picking "whoever's
+   * seated and actually present" instead of "specifically the host" removes
+   * that single point of failure — it has to be the non-stale check and not
+   * just "first seated player", since a gone host is still "seated"
+   * (userId set) until someone explicitly leaves; optimistic concurrency
+   * (writeLiveDraft's expectedUpdatedAt check) still keeps two clients from
+   * double-writing the same transition if two both read as present.
+   */
+  function isPrimaryActor(state: DraftState): boolean {
+    const present = state.players.find((p) => p.userId && !isPlayerStale(p.lastSeenAt));
+    const anchor = present ?? firstSeatedPlayer(state);
+    return anchor?.userId === myUserId;
+  }
+
+  // Rescue for a round stuck on a turn nobody can take (Boss, 2026-10-17:
+  // "manchmal bleibt die Runde... stehen und es geht nichts mehr weiter",
+  // and again after the round-counter fix: "6 von 5 und dann geht nichts
+  // mehr") — covers both ways that happens: the seat is empty (left via
+  // handleLeaveRound, which clears userId but keeps the player's progress),
+  // or the seat is still claimed but its player has gone quiet (tab closed
+  // without clicking "Verlassen", phone locked, connection dropped) for
+  // longer than STALE_MS — the same signal the "scheint die Verbindung
+  // verloren" warning already uses, just acted on instead of only shown.
+  // The earliest still-*present* client (isPrimaryActor, which already
+  // skips stale seats when picking who acts) auto-picks on their behalf so
+  // the draft keeps moving instead of pausing forever on a turn nobody still
+  // here can take. Depends on nowTick (not just turnStartedAt) because
+  // staleness is itself time-based — a player can go from "maybe still
+  // thinking" to "gone" without any other draft state changing.
   useEffect(() => {
     if (!session || session.phase !== "drafting" || session.state.finished || isSpectator) return;
     const state = session.state;
     const player = currentPlayer(state);
-    if (player.userId) return;
-    const anchor = firstSeatedPlayer(state);
-    if (!anchor || anchor.userId !== myUserId) return;
+    if (player.userId && !isPlayerStale(player.lastSeenAt)) return;
+    if (!isPrimaryActor(state)) return;
     if (autoPickFiredAtRef.current === state.turnStartedAt) return;
     autoPickFiredAtRef.current = state.turnStartedAt;
     const next = autoPick(state);
@@ -547,20 +584,22 @@ export function LiveDraftBoard() {
       else autoPickFiredAtRef.current = null;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.state.currentPlayerIndex, session?.state.turnStartedAt, session?.phase, myUserId, isSpectator]);
+  }, [session?.state.currentPlayerIndex, session?.state.turnStartedAt, session?.phase, myUserId, isSpectator, nowTick]);
 
   // Same rescue for the role-assignment phase: allRolesConfirmed also
   // requires an "every userId || pickedCharacterIds.length > 0" player to be
-  // ready, so someone who left after drafting but before confirming roles
-  // would otherwise block the battle forever. Auto-confirms with no role
-  // assignments on their behalf (same as skipping roles voluntarily).
+  // ready, so someone who left — or just went stale, see the rescue above —
+  // after drafting but before confirming roles would otherwise block the
+  // battle forever. Auto-confirms with no role assignments on their behalf
+  // (same as skipping roles voluntarily).
   useEffect(() => {
     if (!session || session.phase !== "roles" || isSpectator) return;
     const state = session.state;
-    const abandoned = state.players.filter((p) => !p.userId && !p.rolesReady && p.pickedCharacterIds.length > 0);
+    const abandoned = state.players.filter(
+      (p) => (!p.userId || isPlayerStale(p.lastSeenAt)) && !p.rolesReady && p.pickedCharacterIds.length > 0
+    );
     if (abandoned.length === 0) return;
-    const anchor = firstSeatedPlayer(state);
-    if (!anchor || anchor.userId !== myUserId) return;
+    if (!isPrimaryActor(state)) return;
     if (autoConfirmFiredRef.current) return;
     autoConfirmFiredRef.current = true;
     const next = abandoned.reduce((acc, p) => confirmRoles(acc, p.id), state);
@@ -569,7 +608,7 @@ export function LiveDraftBoard() {
       else autoConfirmFiredRef.current = false;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.state.players, session?.phase, myUserId, isSpectator]);
+  }, [session?.state.players, session?.phase, myUserId, isSpectator, nowTick]);
 
   /** Index into state.players of the non-team battle's winner — winnerIndex
    * for a 3+ player free-for-all, otherwise the old winnerTeam "A"/"B" ->
@@ -580,23 +619,25 @@ export function LiveDraftBoard() {
     return battle.winnerTeam === "A" ? 0 : 1;
   }
 
-  // The host's browser moves the draft into the role-assignment phase once
-  // it finishes, so exactly one client writes the transition instead of
-  // every client racing to.
+  // Whichever present client is the "primary actor" (see isPrimaryActor)
+  // moves the draft into the role-assignment phase once it finishes, so
+  // exactly one client writes the transition instead of every client racing
+  // to (or, as it used to be, specifically the host — who might be gone).
   useEffect(() => {
     if (!session || session.phase !== "drafting" || !session.state.finished) return;
-    if (session.host_id !== myUserId) return;
+    if (!isPrimaryActor(session.state)) return;
     writeLiveDraft(session.id, session.updated_at, { phase: "roles" }).then((r) => {
       if (r.session) setSession(r.session);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.state.finished, session?.phase, myUserId]);
 
-  // The host's browser computes the battle result once every seated player
-  // has confirmed their role assignments, so exactly one client writes it.
+  // Same single-writer pattern: the primary actor's browser computes the
+  // battle result once every seated player has confirmed their role
+  // assignments.
   useEffect(() => {
     if (!session || session.phase !== "roles" || !allRolesConfirmed(session.state)) return;
-    if (session.host_id !== myUserId) return;
+    if (!isPrimaryActor(session.state)) return;
 
     const isTeamMode = session.state.players.some((p) => p.team);
     // Teammates assigned roles independently of each other — resolve any
@@ -704,12 +745,16 @@ export function LiveDraftBoard() {
   }, [session?.state.finished, session?.phase, myUserId]);
 
   // Once every seated player has voted ready (handleVoteRematch), the
-  // host's browser alone creates the fresh lobby — exactly one writer, like
-  // the other host-only transitions above — pre-seating every player into
-  // it (not just itself) so nobody has to separately "join" afterwards.
+  // primary actor's browser alone creates the fresh lobby — exactly one
+  // writer, like the other single-writer transitions above — pre-seating
+  // every player into it (not just itself) so nobody has to separately
+  // "join" afterwards. Used to be host-only, which meant a host who closed
+  // their tab after voting (without using the new "Verlassen" button) could
+  // leave everyone else's vote stuck forever with nobody allowed to create
+  // the rematch.
   useEffect(() => {
     if (!session || session.phase !== "result" || isSpectator) return;
-    if (session.host_id !== myUserId) return;
+    if (!isPrimaryActor(session.state)) return;
     if (session.state.rematchInviteCode || !allRematchReady(session.state)) return;
     if (rematchCreateFiredRef.current) return;
     rematchCreateFiredRef.current = true;
@@ -741,10 +786,11 @@ export function LiveDraftBoard() {
       });
       if (started.session) startedSession = started.session;
       // Retries against whoever's vote landed last, same optimistic-concurrency
-      // pattern as every other write here — only the host writes this field,
-      // but a vote from another player can still land in between. Written
-      // only now (after the phase flip above) so a non-host client never
-      // observes the invite code while the new session is still "lobby".
+      // pattern as every other write here — only the primary actor writes
+      // this field, but a vote from another player can still land in
+      // between. Written only now (after the phase flip above) so another
+      // client never observes the invite code while the new session is
+      // still "lobby".
       let current = session;
       for (let attempt = 0; attempt < 5; attempt++) {
         const result = await writeLiveDraft(current.id, current.updated_at, {
@@ -762,10 +808,11 @@ export function LiveDraftBoard() {
   }, [session?.state.players, session?.phase, myUserId, isSpectator]);
 
   // Everyone else just watches the finished session for the invite code the
-  // host wrote above and jumps straight in — they're already seated in the
-  // new round (pre-filled by claimSeat/assignTeam and moved past "lobby" by
-  // the host above), so this fetches and attaches directly instead of going
-  // through handleJoin's seat-claiming path, which doesn't apply here.
+  // primary actor wrote above and jumps straight in — they're already
+  // seated in the new round (pre-filled by claimSeat/assignTeam and moved
+  // past "lobby" by the primary actor above), so this fetches and attaches
+  // directly instead of going through handleJoin's seat-claiming path,
+  // which doesn't apply here.
   // Retries a few times against replica lag: a one-shot attempt that quietly
   // gave up on a transient `null` fetch — while permanently marking itself
   // "already tried" — was why a rematch sometimes left someone stuck on the
@@ -777,7 +824,7 @@ export function LiveDraftBoard() {
   // to re-run and notice the ref was reset.
   useEffect(() => {
     if (!session || session.phase !== "result" || isSpectator) return;
-    if (session.host_id === myUserId || !session.state.rematchInviteCode) return;
+    if (isPrimaryActor(session.state) || !session.state.rematchInviteCode) return;
     if (rematchJoinFiredRef.current) return;
     rematchJoinFiredRef.current = true;
     const inviteCode = session.state.rematchInviteCode;
