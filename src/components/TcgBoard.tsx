@@ -48,12 +48,18 @@ function CardFace({
   const show = revealed ?? owned;
   return (
     <div
+      // isolation: isolate pins art + frame into one locked stacking context so the
+      // frame (z-10) always paints above the art (z-auto) as a single composited unit —
+      // without it, Safari can promote the two absolutely-positioned layers independently
+      // during the parent's op-tcg-card-flip 3D rotation and reorder them mid-animation
+      // (Boss, 2026-10-17: "Der Rahmen ist beim Pack ziehen nicht im vordergrund").
       className={`relative flex flex-col rounded-xl border border-black/10 bg-[var(--surface)] dark:border-white/10 ${
         show ? (meta.frameImage ? "" : `${meta.ringClass} ${meta.glowClass}`) : "opacity-40 grayscale"
       }`}
+      style={{ isolation: "isolate" }}
     >
       {/* aspect-[2/3] sits on the art box itself (not the outer card), matching the Chatti frame artwork's own 2:3 canvas exactly — putting it on the outer box instead squeezed this shorter (meta text below eats some of that height), which stretched the frame off its native proportions and made it look like a smaller picture floating mid-card instead of a border flush with the art. */}
-      <div className="relative aspect-[2/3] bg-black/20">
+      <div className="relative z-0 aspect-[2/3] bg-black/20">
         {show && card.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={card.imageUrl} alt={card.characterName} referrerPolicy="no-referrer" className="h-full w-full object-cover object-top" />
