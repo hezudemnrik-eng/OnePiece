@@ -1378,7 +1378,7 @@ export async function fetchMyTcgCollection(): Promise<Record<string, number>> {
   return owned;
 }
 
-/** Whether today's (Europe/Berlin) daily pack has already been opened (always false for admins — no limit while testing, Q75). */
+/** Whether today's (Europe/Berlin) daily pack has already been opened — applies to admins too since migration 0029. */
 export async function fetchTcgPackClaimedToday(): Promise<boolean> {
   if (!supabase) return false;
   const userId = await ensureSupabaseSession();
@@ -1421,7 +1421,7 @@ export async function fetchMyTcgFragments(): Promise<number> {
   return (data?.tcg_fragments as number) ?? 0;
 }
 
-/** Exchanges Fragmente for Berry (10:1, Q61). amount must be a positive multiple of 10. Returns false if unaffordable/invalid. */
+/** Exchanges Fragmente for Berry (1:1 since migration 0029). Returns false if unaffordable/invalid. */
 export async function exchangeTcgFragments(amount: number): Promise<boolean> {
   if (!supabase) return false;
   const userId = await ensureSupabaseSession();
@@ -1436,16 +1436,13 @@ export type TcgPackResult =
       fragmentsGained: number;
       cards: { cardId: string; characterName: string; versionLabel: string; rarity: TcgRarity; imageUrl: string | null; duplicate: boolean }[];
     }
-  | { ok: false; error: "not_signed_in" | "not_admin" | "already_claimed" | "no_backend" };
+  | { ok: false; error: "not_signed_in" | "not_admin" | "already_claimed" | "not_enough_berries" | "no_backend" };
 
-/** Opens today's daily pack (5 cards) — drop weights, pity, duplicate->Fragmente conversion and the daily/admin/global-switch checks all happen server-side. */
-export async function openDailyTcgPack(): Promise<TcgPackResult> {
-  if (!supabase) return { ok: false, error: "no_backend" };
-  const userId = await ensureSupabaseSession();
-  if (!userId) return { ok: false, error: "not_signed_in" };
-  const { data, error } = await supabase.rpc("tcg_open_daily_pack");
+type TcgPackError = Extract<TcgPackResult, { ok: false }>["error"];
+
+function parseTcgPackResult(data: { ok: boolean; error?: string; fragments_gained?: number; cards?: Record<string, unknown>[] } | null, error: unknown): TcgPackResult {
   if (error || !data) return { ok: false, error: "not_signed_in" };
-  if (!data.ok) return { ok: false, error: data.error };
+  if (!data.ok) return { ok: false, error: data.error as TcgPackError };
   return {
     ok: true,
     fragmentsGained: (data.fragments_gained as number) ?? 0,
@@ -1458,4 +1455,22 @@ export async function openDailyTcgPack(): Promise<TcgPackResult> {
       duplicate: Boolean(c.duplicate),
     })),
   };
+}
+
+/** Opens today's daily pack (5 cards) — drop weights, pity, duplicate->Fragmente conversion and the daily/admin/global-switch checks all happen server-side. Admins are no longer exempt from the daily claim (migration 0029). */
+export async function openDailyTcgPack(): Promise<TcgPackResult> {
+  if (!supabase) return { ok: false, error: "no_backend" };
+  const userId = await ensureSupabaseSession();
+  if (!userId) return { ok: false, error: "not_signed_in" };
+  const { data, error } = await supabase.rpc("tcg_open_daily_pack");
+  return parseTcgPackResult(data, error);
+}
+
+/** Buys a 5-card pack for 200 Berry (migration 0029) — same drop odds as the free daily pack, just an extra pull; doesn't touch the daily-claim limit or award XP. */
+export async function buyTcgPack(): Promise<TcgPackResult> {
+  if (!supabase) return { ok: false, error: "no_backend" };
+  const userId = await ensureSupabaseSession();
+  if (!userId) return { ok: false, error: "not_signed_in" };
+  const { data, error } = await supabase.rpc("tcg_buy_pack");
+  return parseTcgPackResult(data, error);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { characters } from "@/lib/characters";
 import { getLevelProgress, type LevelProgress } from "@/lib/levels";
 import { FRAME_IMAGES } from "@/lib/frameImages";
@@ -8,7 +9,9 @@ import { BERRY_ICON } from "@/lib/iconImages";
 import { formatBerry } from "@/lib/fusionTraits";
 import { MODE_UPGRADE_CATALOG, MODE_UPGRADE_MAX_LEVEL, modeUpgradeBonusPercent, modeUpgradeCost } from "@/lib/modeUpgrades";
 import { LoadingSpinner } from "./LoadingSpinner";
+import { TCG_PENDING_REVEAL_KEY } from "./TcgBoard";
 import {
+  buyTcgPack,
   equipShopItem,
   fetchMyLevelInfo,
   fetchMyModeUpgradeLevels,
@@ -23,6 +26,9 @@ import {
   setEquippedTitle,
   type ShopItem,
 } from "@/lib/supabase";
+
+/** Cost of a Shop-bought TCG pack (migration 0029) — mirrors tcg_buy_pack()'s server-side check, just for display/disabling here. */
+const TCG_PACK_COST = 200;
 
 const CATEGORY_LABELS: Record<string, string> = {
   boost: "Modus-Verbesserungen",
@@ -42,6 +48,7 @@ type ShopTab = { id: string; label: string; categories: string[] };
 
 const SHOP_TABS: ShopTab[] = [
   { id: "upgrades", label: "Spiel-Upgrades", categories: ["upgrades"] },
+  { id: "tcg", label: "TCG-Packs", categories: ["tcg"] },
   { id: "boosts", label: "Boosts", categories: ["boost"] },
   { id: "cosmetics", label: "Rahmen & Titel", categories: ["frame", "title", "color"] },
   { id: "avatars", label: "Avatare", categories: ["avatar"] },
@@ -58,6 +65,8 @@ const CATEGORY_ORDER = ["frame", "color", "avatar", "title", "arena"];
  * unchanged, just lifted out so it can run standalone.
  */
 export function ShopBoard() {
+  const router = useRouter();
+  const [tcgPackError, setTcgPackError] = useState("");
   const [progress, setProgress] = useState<LevelProgress | null>(null);
   const [berries, setBerries] = useState(0);
   const [equippedFrame, setEquippedFrameState] = useState<string | null>(null);
@@ -154,6 +163,24 @@ export function ShopBoard() {
     }
   }
 
+  async function handleBuyTcgPack() {
+    if (busyId) return;
+    setTcgPackError("");
+    setBusyId("tcg-pack");
+    try {
+      const result = await buyTcgPack();
+      if (!result.ok) {
+        setTcgPackError(result.error === "not_enough_berries" ? "Nicht genug Berries." : "Kauf hat nicht geklappt.");
+        return;
+      }
+      setBerries((b) => b - TCG_PACK_COST);
+      sessionStorage.setItem(TCG_PENDING_REVEAL_KEY, JSON.stringify({ cards: result.cards, fragmentsGained: result.fragmentsGained }));
+      router.push("/tcg");
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   async function handleUpgradePurchase(mode: string) {
     if (busyId) return;
     const level = upgradeLevels[mode] ?? 0;
@@ -173,7 +200,7 @@ export function ShopBoard() {
   }
 
   const tabsWithItems = SHOP_TABS.filter(
-    (tab) => tab.id === "upgrades" || tab.categories.some((cat) => shopItems.some((i) => i.category === cat))
+    (tab) => tab.id === "upgrades" || tab.id === "tcg" || tab.categories.some((cat) => shopItems.some((i) => i.category === cat))
   );
   const activeCategories = (tabsWithItems.find((t) => t.id === activeTab) ?? tabsWithItems[0])?.categories ?? [];
   const categories = CATEGORY_ORDER.filter((cat) => activeCategories.includes(cat) && shopItems.some((i) => i.category === cat));
@@ -254,6 +281,26 @@ export function ShopBoard() {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {activeTab === "tcg" && (
+        <div>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">TCG-Packs</h2>
+          <p className="mb-3 text-xs text-black/50 dark:text-white/40">
+            Ein zusätzliches 5-Karten-Pack, gleiche Chancen wie das tägliche Pack — kauft nur mehr Versuche, keine
+            besseren Chancen.
+          </p>
+          <button
+            onClick={handleBuyTcgPack}
+            disabled={busyId === "tcg-pack" || berries < TCG_PACK_COST}
+            className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm border-black/15 dark:border-white/15 ${
+              berries < TCG_PACK_COST ? "opacity-40 cursor-not-allowed" : "hover:border-accent"
+            }`}
+          >
+            TCG-Pack (5 Karten) · {formatBerry(TCG_PACK_COST)}
+          </button>
+          {tcgPackError && <p className="mt-2 text-xs text-danger">{tcgPackError}</p>}
         </div>
       )}
 

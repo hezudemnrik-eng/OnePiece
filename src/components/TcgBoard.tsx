@@ -18,7 +18,10 @@ import {
   type AuthUser,
   type TcgCard,
 } from "@/lib/supabase";
-import { RARITIES, revealHoldMs, type TcgRarity } from "@/lib/tcgRarities";
+
+/** sessionStorage key a pack bought in the Shop uses to hand its drawn cards to this page's reveal overlay (set by ShopBoard, consumed once here). */
+export const TCG_PENDING_REVEAL_KEY = "tcg_pending_reveal";
+import { RARITIES, type TcgRarity } from "@/lib/tcgRarities";
 
 type DrawnCard = {
   cardId: string;
@@ -96,24 +99,28 @@ const BURST_COLOR: Record<TcgRarity, string | null> = {
   god_tier: "rgba(244,197,66,0.8)",
 };
 
-/** Sequential pack-reveal overlay — one card flips in at a time, shown large and alone, held longer for rarer pulls (Q40/Q42/Q48). Always animated regardless of the global "Animationen aus" switch (Q47 — this is the mode's one highlight moment), and never skippable (Q43). */
+/** Sequential pack-reveal overlay — each card shows face-down first; tapping it reveals the card, tapping again advances to the next one (Boss, 2026-10-17: tap-driven instead of auto-timed). Always animated regardless of the global "Animationen aus" switch (Q47 — this is the mode's one highlight moment), and never skippable (Q43) — only tapping advances it. */
 function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCard[]; fragmentsGained: number; onClose: () => void }) {
   const [index, setIndex] = useState(0);
+  const [revealed, setRevealed] = useState(false);
   const [finished, setFinished] = useState(false);
   const current = cards[index];
 
-  useEffect(() => {
-    if (finished) return;
-    const t = setTimeout(() => {
-      if (index < cards.length - 1) setIndex((i) => i + 1);
-      else setFinished(true);
-    }, revealHoldMs(current.rarity));
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, finished]);
+  function handleTap() {
+    if (!revealed) {
+      setRevealed(true);
+      return;
+    }
+    if (index < cards.length - 1) {
+      setIndex((i) => i + 1);
+      setRevealed(false);
+    } else {
+      setFinished(true);
+    }
+  }
 
   const meta = RARITIES[current.rarity];
-  const burstColor = BURST_COLOR[current.rarity];
+  const burstColor = revealed ? BURST_COLOR[current.rarity] : null;
 
   return (
     <div
@@ -132,7 +139,7 @@ function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCa
       </div>
 
       {!finished && (
-        <div key={index} className="relative flex flex-col items-center gap-3">
+        <button onClick={handleTap} key={index} className="relative flex flex-col items-center gap-3" aria-label={revealed ? "Nächste Karte" : "Karte aufdecken"}>
           {burstColor && (
             <div
               key={`burst-${index}`}
@@ -141,14 +148,18 @@ function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCa
               aria-hidden
             />
           )}
-          <div className="op-tcg-card-flip relative w-56 sm:w-64">
-            <CardFace card={current} owned revealed />
+          <div className={`relative w-56 sm:w-64 ${revealed ? "op-tcg-card-flip" : ""}`}>
+            <CardFace card={current} owned revealed={revealed} />
           </div>
-          <div className="op-tcg-label-in flex flex-col items-center gap-0.5 text-center">
-            <p className={`text-sm font-bold ${meta.textClass}`}>{meta.label}</p>
-            {current.duplicate && <p className="text-xs font-semibold text-amber-400">Duplikat</p>}
-          </div>
-        </div>
+          {revealed ? (
+            <div className="op-tcg-label-in flex flex-col items-center gap-0.5 text-center">
+              <p className={`text-sm font-bold ${meta.textClass}`}>{meta.label}</p>
+              {current.duplicate && <p className="text-xs font-semibold text-amber-400">Duplikat</p>}
+            </div>
+          ) : (
+            <p className="text-sm text-white/60">Tippen zum Aufdecken</p>
+          )}
+        </button>
       )}
 
       {finished ? (
@@ -166,6 +177,7 @@ function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCa
       ) : (
         <p className="text-sm text-white/60">
           Karte {index + 1} von {cards.length}
+          {revealed && " — tippen für die nächste"}
         </p>
       )}
     </div>
@@ -208,6 +220,20 @@ export function TcgBoard() {
       setGlobalEnabled(enabled);
       if (u?.isAdmin || enabled) await refresh();
       setLoaded(true);
+
+      // A pack bought in the Shop hands its drawn cards over here via
+      // sessionStorage (same reveal overlay, no duplicate animation code).
+      const pending = sessionStorage.getItem(TCG_PENDING_REVEAL_KEY);
+      if (pending) {
+        sessionStorage.removeItem(TCG_PENDING_REVEAL_KEY);
+        try {
+          const result = JSON.parse(pending) as { cards: DrawnCard[]; fragmentsGained: number };
+          setDrawn(result.cards);
+          setFragmentsGained(result.fragmentsGained);
+        } catch {
+          // malformed/stale payload — ignore
+        }
+      }
     });
   }, []);
 
@@ -249,9 +275,8 @@ export function TcgBoard() {
   }
 
   async function handleExchangeFragments() {
-    const amount = Math.floor(fragments / 10) * 10;
-    if (amount <= 0) return;
-    const ok = await exchangeTcgFragments(amount);
+    if (fragments <= 0) return;
+    const ok = await exchangeTcgFragments(fragments);
     if (ok) await refresh();
   }
 
@@ -313,9 +338,9 @@ export function TcgBoard() {
         {error && <p className="text-xs text-danger">{error}</p>}
         <div className="flex items-center gap-2 text-xs text-amber-500">
           <span>{fragments} Fragmente</span>
-          {fragments >= 10 && (
+          {fragments > 0 && (
             <button onClick={handleExchangeFragments} className="underline">
-              in Berry umtauschen (10:1)
+              in Berry umtauschen (1:1)
             </button>
           )}
         </div>
