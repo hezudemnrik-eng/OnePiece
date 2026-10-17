@@ -323,7 +323,7 @@ export function TcgBoard() {
 
       <div>
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-white/80 [text-shadow:0_1px_3px_rgba(0,0,0,0.8)]">Sammlung</h2>
-        <div className="grid grid-cols-4 gap-x-3 gap-y-12 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-x-10 gap-y-20">
           {cards.map((card) => (
             <CardFace key={card.id} card={card} owned={Boolean(owned[card.id])} quantity={owned[card.id]} />
           ))}
