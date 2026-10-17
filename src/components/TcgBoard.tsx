@@ -50,7 +50,7 @@ function CardFace({
       }`}
     >
       {/* aspect-[2/3] sits on the art box itself (not the outer card), matching the Chatti frame artwork's own 2:3 canvas exactly — putting it on the outer box instead squeezed this shorter (meta text below eats some of that height), which stretched the frame off its native proportions and made it look like a smaller picture floating mid-card instead of a border flush with the art. */}
-      <div className="relative aspect-[2/3] bg-black/20">
+      <div className="relative aspect-[2/3] overflow-hidden bg-black/20">
         {show && card.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={card.imageUrl} alt={card.characterName} referrerPolicy="no-referrer" className="h-full w-full object-cover object-top" />
@@ -65,7 +65,12 @@ function CardFace({
         )}
         {show && meta.frameImage && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={meta.frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-fill" />
+          <img
+            src={meta.frameImage}
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute inset-0 h-full w-full scale-[1.18] object-fill"
+          />
         )}
         {quantity !== undefined && quantity > 1 && (
           <span className="absolute right-1 top-1 rounded-full bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-white">×{quantity}</span>
@@ -324,7 +329,7 @@ export function TcgBoard() {
 
       <div>
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-white/80 [text-shadow:0_1px_3px_rgba(0,0,0,0.8)]">Sammlung</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
           {cards.map((card) => (
             <CardFace key={card.id} card={card} owned={Boolean(owned[card.id])} quantity={owned[card.id]} />
           ))}
