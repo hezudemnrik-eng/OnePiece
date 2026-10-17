@@ -18,6 +18,7 @@ import {
   fetchMyLevelInfo,
   fetchRelevantLiveDrafts,
   fetchShopItems,
+  fetchTcgGlobalEnabled,
   getCurrentAuthUser,
   isSupabaseConfigured,
   type AuthUser,
@@ -54,6 +55,7 @@ function greeting(hour: number): string {
  */
 export function HomeOverview() {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [tcgEnabled, setTcgEnabled] = useState(false);
   const [levelInfo, setLevelInfo] = useState<MyLevelInfo | null>(null);
   const [frameImage, setFrameImage] = useState<string | null>(null);
   const [frameClass, setFrameClass] = useState("");
@@ -89,8 +91,10 @@ export function HomeOverview() {
       fetchFriends(),
       fetchRelevantLiveDrafts(),
       fetchDailyQuestClaimedToday(),
-    ]).then(([authUser, level, items, friendList, drafts, questClaimedToday]) => {
+      fetchTcgGlobalEnabled(),
+    ]).then(([authUser, level, items, friendList, drafts, questClaimedToday, tcgOpenToAll]) => {
       setUser(authUser);
+      setTcgEnabled(tcgOpenToAll);
       setLevelInfo(level);
       setFrameClass(items.find((i) => i.category === "frame" && i.id === level?.equippedFrame)?.className ?? "");
       setFrameImage(level?.equippedFrame ? (FRAME_IMAGES[level.equippedFrame] ?? null) : null);
@@ -316,19 +320,26 @@ export function HomeOverview() {
         ))}
       </div>
 
-      {user?.isAdmin && (
+      {(user?.isAdmin || tcgEnabled) && (
         <Link href="/tcg">
           <div className="op-card flex items-center justify-between gap-2 border border-mode-tcg/40 bg-mode-tcg/10 p-3">
             <span className="flex items-center gap-2 text-sm font-semibold text-mode-tcg">
-              <span className="text-xl" aria-hidden>
-                🎴
-              </span>
-              TCG (Admin-Test)
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/tcg/pack-icon.webp" alt="" aria-hidden className="h-7 w-7 shrink-0 object-contain" />
+              TCG{!tcgEnabled && user?.isAdmin ? " (Admin-Test)" : ""}
             </span>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/ui/arrow-button.png" alt="" aria-hidden className="h-7 w-7 shrink-0 object-contain" />
           </div>
         </Link>
+      )}
+      {!user?.isAdmin && !tcgEnabled && (
+        <div className="op-card flex items-center gap-2 border border-black/10 bg-black/[0.03] p-3 text-sm text-black/40 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/30">
+          <span className="text-xl" aria-hidden>
+            🎴
+          </span>
+          TCG kommt bald
+        </div>
       )}
 
       {isSupabaseConfigured() && loaded && onlineFriends.length > 0 && (

@@ -4,20 +4,32 @@ import { useEffect, useState } from "react";
 import { Button } from "./ui/Button";
 import { LoadingSpinner } from "./LoadingSpinner";
 import {
+  exchangeTcgFragments,
   fetchMyTcgCollection,
+  fetchMyTcgFragments,
   fetchTcgCards,
+  fetchTcgGlobalEnabled,
   fetchTcgPackClaimedToday,
   getCurrentAuthUser,
   isSupabaseConfigured,
   openDailyTcgPack,
+  resetMyTcgCollection,
+  setTcgGlobalEnabled,
   type AuthUser,
   type TcgCard,
 } from "@/lib/supabase";
 import { RARITIES, revealHoldMs, type TcgRarity } from "@/lib/tcgRarities";
 
-type DrawnCard = { cardId: string; characterName: string; versionLabel: string; rarity: TcgRarity; imageUrl: string | null };
+type DrawnCard = {
+  cardId: string;
+  characterName: string;
+  versionLabel: string;
+  rarity: TcgRarity;
+  imageUrl: string | null;
+  duplicate: boolean;
+};
 
-/** Single card face — used both for the pack-reveal overlay and the collection grid. */
+/** Single card face — used both for the pack-reveal overlay and the collection grid. Placeholder art is a rarity-colored icon (Q29/Q92), not a borrowed character photo, until Chatti's real per-version artwork lands. */
 function CardFace({
   card,
   owned,
@@ -34,7 +46,7 @@ function CardFace({
   return (
     <div
       className={`relative flex aspect-[2/3] flex-col overflow-hidden rounded-xl border border-black/10 bg-[var(--surface)] dark:border-white/10 ${
-        show ? `${meta.ringClass} ${meta.glowClass}` : "opacity-40 grayscale"
+        show ? (meta.frameImage ? "" : `${meta.ringClass} ${meta.glowClass}`) : "opacity-40 grayscale"
       }`}
     >
       <div className="relative flex-1 bg-black/20">
@@ -42,9 +54,17 @@ function CardFace({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={card.imageUrl} alt={card.characterName} referrerPolicy="no-referrer" className="h-full w-full object-cover object-top" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-4xl" aria-hidden>
-            {show ? "🏴‍☠️" : "❔"}
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src="/images/tcg/card-back.webp" alt="" aria-hidden className="h-full w-full object-cover" />
+        )}
+        {show && !card.imageUrl && (
+          <div className="absolute inset-0 flex items-center justify-center text-4xl" aria-hidden>
+            {meta.icon}
           </div>
+        )}
+        {show && meta.frameImage && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={meta.frameImage} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full object-fill" />
         )}
         {quantity !== undefined && quantity > 1 && (
           <span className="absolute right-1 top-1 rounded-full bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-white">×{quantity}</span>
@@ -65,8 +85,8 @@ function CardFace({
   );
 }
 
-/** Sequential pack-reveal overlay — one card flips in at a time, held longer for rarer pulls (Q: Animation je Rarität). Always animated regardless of the global "Animationen aus" switch, since this is the mode's one highlight moment. */
-function PackRevealOverlay({ cards, onClose }: { cards: DrawnCard[]; onClose: () => void }) {
+/** Sequential pack-reveal overlay — one card flips in at a time, held longer for rarer pulls (Q40/Q42/Q48). Always animated regardless of the global "Animationen aus" switch (Q47 — this is the mode's one highlight moment), and never skippable (Q43). */
+function PackRevealOverlay({ cards, fragmentsGained, onClose }: { cards: DrawnCard[]; fragmentsGained: number; onClose: () => void }) {
   const [shown, setShown] = useState(0);
 
   useEffect(() => {
@@ -78,14 +98,25 @@ function PackRevealOverlay({ cards, onClose }: { cards: DrawnCard[]; onClose: ()
   const done = shown >= cards.length;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/85 p-4">
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/70 bg-cover bg-center p-4"
+      style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.75)), url(/images/tcg/bg-pack-open.webp)" }}
+    >
       <div className="grid w-full max-w-sm grid-cols-5 gap-2">
         {cards.map((c, i) => (
-          <CardFace key={i} card={c} owned revealed={i < shown} />
+          <div key={i} className="relative">
+            <CardFace card={c} owned revealed={i < shown} />
+            {i < shown && c.duplicate && (
+              <span className="absolute inset-x-0 -bottom-4 text-center text-[10px] font-semibold text-amber-400">Duplikat</span>
+            )}
+          </div>
         ))}
       </div>
       {done ? (
-        <Button onClick={onClose}>Weiter zur Sammlung</Button>
+        <>
+          {fragmentsGained > 0 && <p className="text-sm text-amber-400">+{fragmentsGained} Fragmente aus Duplikaten</p>}
+          <Button onClick={onClose}>Weiter zur Sammlung</Button>
+        </>
       ) : (
         <p className="text-sm text-white/60">Tippe nicht weg, die Karten decken sich auf…</p>
       )}
@@ -96,24 +127,38 @@ function PackRevealOverlay({ cards, onClose }: { cards: DrawnCard[]; onClose: ()
 export function TcgBoard() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [globalEnabled, setGlobalEnabled] = useState(false);
   const [cards, setCards] = useState<TcgCard[]>([]);
   const [owned, setOwned] = useState<Record<string, number>>({});
+  const [fragments, setFragments] = useState(0);
   const [claimedToday, setClaimedToday] = useState(false);
   const [opening, setOpening] = useState(false);
   const [drawn, setDrawn] = useState<DrawnCard[] | null>(null);
+  const [fragmentsGained, setFragmentsGained] = useState(0);
   const [error, setError] = useState("");
+  const [busyAdminAction, setBusyAdminAction] = useState(false);
 
   async function refresh() {
-    const [c, o, claimed] = await Promise.all([fetchTcgCards(), fetchMyTcgCollection(), fetchTcgPackClaimedToday()]);
+    const [c, o, claimed, frag, enabled] = await Promise.all([
+      fetchTcgCards(),
+      fetchMyTcgCollection(),
+      fetchTcgPackClaimedToday(),
+      fetchMyTcgFragments(),
+      fetchTcgGlobalEnabled(),
+    ]);
     setCards(c);
     setOwned(o);
     setClaimedToday(claimed);
+    setFragments(frag);
+    setGlobalEnabled(enabled);
   }
 
   useEffect(() => {
     getCurrentAuthUser().then(async (u) => {
       setUser(u);
-      if (u?.isAdmin) await refresh();
+      const enabled = await fetchTcgGlobalEnabled();
+      setGlobalEnabled(enabled);
+      if (u?.isAdmin || enabled) await refresh();
       setLoaded(true);
     });
   }, []);
@@ -132,11 +177,34 @@ export function TcgBoard() {
       return;
     }
     setDrawn(result.cards);
+    setFragmentsGained(result.fragmentsGained);
   }
 
   async function closeReveal() {
     setDrawn(null);
     await refresh();
+  }
+
+  async function handleToggleGlobal() {
+    setBusyAdminAction(true);
+    const ok = await setTcgGlobalEnabled(!globalEnabled);
+    setBusyAdminAction(false);
+    if (ok) setGlobalEnabled((v) => !v);
+  }
+
+  async function handleResetCollection() {
+    if (!window.confirm("Deine ganze TCG-Sammlung (Karten, Fragmente, heutiges Pack) wirklich zurücksetzen?")) return;
+    setBusyAdminAction(true);
+    const ok = await resetMyTcgCollection();
+    setBusyAdminAction(false);
+    if (ok) await refresh();
+  }
+
+  async function handleExchangeFragments() {
+    const amount = Math.floor(fragments / 10) * 10;
+    if (amount <= 0) return;
+    const ok = await exchangeTcgFragments(amount);
+    if (ok) await refresh();
   }
 
   if (!isSupabaseConfigured() || !loaded) {
@@ -147,10 +215,15 @@ export function TcgBoard() {
     );
   }
 
-  if (!user?.isAdmin) {
+  const hasAccess = Boolean(user?.isAdmin) || globalEnabled;
+
+  if (!hasAccess) {
     return (
-      <div className="op-card p-6 text-center text-sm text-black/60 dark:text-white/50">
-        Der TCG-Modus ist aktuell nur für Admins zum Testen freigeschaltet.
+      <div
+        className="op-card overflow-hidden bg-cover bg-center p-6 text-center text-sm text-white"
+        style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.65)), url(/images/tcg/bg-tcg-start.webp)" }}
+      >
+        Der TCG-Modus kommt bald. 🏴‍☠️
       </div>
     );
   }
@@ -159,14 +232,42 @@ export function TcgBoard() {
 
   return (
     <div className="flex flex-col gap-5">
+      {user?.isAdmin && (
+        <div className="op-card flex flex-wrap items-center gap-2 border border-mode-tcg/40 bg-mode-tcg/10 p-3 text-xs">
+          <span className="font-semibold text-mode-tcg">Admin:</span>
+          <Button size="sm" variant="secondary" onClick={handleToggleGlobal} disabled={busyAdminAction}>
+            {globalEnabled ? "Für alle sperren" : "Für alle freischalten"}
+          </Button>
+          <Button size="sm" variant="danger" onClick={handleResetCollection} disabled={busyAdminAction}>
+            Meine Sammlung zurücksetzen
+          </Button>
+          <span className="text-black/50 dark:text-white/40">{globalEnabled ? "Für alle sichtbar" : "Nur für Admins sichtbar"}</span>
+        </div>
+      )}
+
       <div className="op-card flex flex-col items-center gap-3 p-5 text-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/tcg/pack-pouch.webp" alt="" aria-hidden className="h-20 w-auto object-contain" />
         <p className="text-sm text-black/60 dark:text-white/50">
           {ownedCount} von {cards.length} Karten gesammelt
         </p>
-        <Button onClick={handleOpenPack} disabled={opening || claimedToday} size="md">
+        <button
+          onClick={handleOpenPack}
+          disabled={opening || claimedToday}
+          className="relative flex h-14 w-72 items-center justify-center bg-contain bg-center bg-no-repeat px-6 text-center text-xs font-semibold leading-tight text-[#2a1708] disabled:opacity-60"
+          style={{ backgroundImage: "url(/images/tcg/button-plaque.webp)" }}
+        >
           {claimedToday ? "Heutiges Pack schon geöffnet" : opening ? "Öffne Pack…" : "Tages-Pack öffnen (5 Karten)"}
-        </Button>
+        </button>
         {error && <p className="text-xs text-danger">{error}</p>}
+        <div className="flex items-center gap-2 text-xs text-amber-500">
+          <span>{fragments} Fragmente</span>
+          {fragments >= 10 && (
+            <button onClick={handleExchangeFragments} className="underline">
+              in Berry umtauschen (10:1)
+            </button>
+          )}
+        </div>
       </div>
 
       <div>
@@ -178,7 +279,7 @@ export function TcgBoard() {
         </div>
       </div>
 
-      {drawn && <PackRevealOverlay cards={drawn} onClose={closeReveal} />}
+      {drawn && <PackRevealOverlay cards={drawn} fragmentsGained={fragmentsGained} onClose={closeReveal} />}
     </div>
   );
 }

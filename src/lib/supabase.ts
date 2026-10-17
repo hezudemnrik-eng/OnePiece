@@ -1334,10 +1334,10 @@ export async function purchaseModeUpgrade(mode: string): Promise<boolean> {
 }
 
 // --- TCG mode (migration 0027) ---
-// Admin-only while the mode is being tested (Boss, 2026-10-16) — the
-// server-side RPC re-checks profiles.is_admin on every call, this
-// client-side check (TcgBoard) is only for not showing the mode to
-// everyone else.
+// Admin-only until an admin flips the global switch (Boss, 2026-10-17) —
+// every server-side RPC re-checks profiles.is_admin / tcg_settings.enabled
+// on every call, this client-side check (TcgBoard) is only for not
+// showing the mode to everyone else before then.
 
 export type TcgCard = {
   id: string;
@@ -1378,7 +1378,7 @@ export async function fetchMyTcgCollection(): Promise<Record<string, number>> {
   return owned;
 }
 
-/** Whether today's (Europe/Berlin) daily pack has already been opened. */
+/** Whether today's (Europe/Berlin) daily pack has already been opened (always false for admins — no limit while testing, Q75). */
 export async function fetchTcgPackClaimedToday(): Promise<boolean> {
   if (!supabase) return false;
   const userId = await ensureSupabaseSession();
@@ -1387,11 +1387,58 @@ export async function fetchTcgPackClaimedToday(): Promise<boolean> {
   return Boolean(data);
 }
 
+/** Whether an admin has opened the mode to everyone (migration 0027's tcg_settings row). Readable by anyone signed in, writable only via setTcgGlobalEnabled (admin-checked server-side). */
+export async function fetchTcgGlobalEnabled(): Promise<boolean> {
+  if (!supabase) return false;
+  const { data } = await supabase.from("tcg_settings").select("enabled").eq("id", 1).maybeSingle();
+  return Boolean(data?.enabled);
+}
+
+/** Admin-only: flips the global switch that opens the TCG mode to everyone. Returns false if not admin. */
+export async function setTcgGlobalEnabled(enabled: boolean): Promise<boolean> {
+  if (!supabase) return false;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return false;
+  const { data } = await supabase.rpc("tcg_set_global_enabled", { p_enabled: enabled });
+  return Boolean(data);
+}
+
+/** Admin-only: wipes the signed-in admin's own TCG collection/fragments/pack claim so they can test from scratch. Returns false if not admin. */
+export async function resetMyTcgCollection(): Promise<boolean> {
+  if (!supabase) return false;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return false;
+  const { data } = await supabase.rpc("tcg_reset_my_collection");
+  return Boolean(data);
+}
+
+/** The signed-in user's Fragmente balance (profiles.tcg_fragments), earned from duplicate pulls (Q60/Q67). */
+export async function fetchMyTcgFragments(): Promise<number> {
+  if (!supabase) return 0;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return 0;
+  const { data } = await supabase.from("profiles").select("tcg_fragments").eq("id", userId).maybeSingle();
+  return (data?.tcg_fragments as number) ?? 0;
+}
+
+/** Exchanges Fragmente for Berry (10:1, Q61). amount must be a positive multiple of 10. Returns false if unaffordable/invalid. */
+export async function exchangeTcgFragments(amount: number): Promise<boolean> {
+  if (!supabase) return false;
+  const userId = await ensureSupabaseSession();
+  if (!userId) return false;
+  const { data } = await supabase.rpc("tcg_exchange_fragments", { p_amount: amount });
+  return Boolean(data);
+}
+
 export type TcgPackResult =
-  | { ok: true; cards: { cardId: string; characterName: string; versionLabel: string; rarity: TcgRarity; imageUrl: string | null }[] }
+  | {
+      ok: true;
+      fragmentsGained: number;
+      cards: { cardId: string; characterName: string; versionLabel: string; rarity: TcgRarity; imageUrl: string | null; duplicate: boolean }[];
+    }
   | { ok: false; error: "not_signed_in" | "not_admin" | "already_claimed" | "no_backend" };
 
-/** Opens today's daily pack (5 cards) — drop weights + the daily/admin checks all happen server-side. */
+/** Opens today's daily pack (5 cards) — drop weights, pity, duplicate->Fragmente conversion and the daily/admin/global-switch checks all happen server-side. */
 export async function openDailyTcgPack(): Promise<TcgPackResult> {
   if (!supabase) return { ok: false, error: "no_backend" };
   const userId = await ensureSupabaseSession();
@@ -1401,12 +1448,14 @@ export async function openDailyTcgPack(): Promise<TcgPackResult> {
   if (!data.ok) return { ok: false, error: data.error };
   return {
     ok: true,
+    fragmentsGained: (data.fragments_gained as number) ?? 0,
     cards: (data.cards as Record<string, unknown>[]).map((c) => ({
       cardId: c.card_id as string,
       characterName: c.character_name as string,
       versionLabel: c.version_label as string,
       rarity: c.rarity as TcgRarity,
       imageUrl: c.image_url as string | null,
+      duplicate: Boolean(c.duplicate),
     })),
   };
 }
