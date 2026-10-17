@@ -34,7 +34,7 @@ export const RARITIES: Record<TcgRarity, RarityMeta> = {
     textClass: "text-slate-300",
     glowClass: "",
     frameImage: "/images/tcg/frame-rekrut.webp",
-    frameScale: 1.0,
+    frameScale: 1.05,
   },
   pirat: {
     id: "pirat",
