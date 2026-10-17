@@ -220,8 +220,8 @@ export function TcgBoard() {
   if (!hasAccess) {
     return (
       <div
-        className="op-card overflow-hidden bg-cover bg-center p-6 text-center text-sm text-white"
-        style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.65)), url(/images/tcg/bg-tcg-start.webp)" }}
+        className="op-card overflow-hidden bg-cover bg-center p-6 text-center text-sm font-semibold text-white"
+        style={{ backgroundImage: "linear-gradient(rgba(5,8,18,0.45), rgba(5,8,18,0.8)), url(/images/tcg/bg-tcg-start.webp)" }}
       >
         Der TCG-Modus kommt bald. 🏴‍☠️
       </div>
@@ -231,7 +231,10 @@ export function TcgBoard() {
   const ownedCount = Object.keys(owned).length;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div
+      className="relative isolate flex flex-col gap-5 overflow-hidden rounded-2xl p-4"
+      style={{ backgroundImage: "linear-gradient(rgba(5,8,18,0.55), rgba(5,8,18,0.88)), url(/images/tcg/bg-tcg-start.webp)", backgroundSize: "cover", backgroundPosition: "center" }}
+    >
       {user?.isAdmin && (
         <div className="op-card flex flex-wrap items-center gap-2 border border-mode-tcg/40 bg-mode-tcg/10 p-3 text-xs">
           <span className="font-semibold text-mode-tcg">Admin:</span>
@@ -254,8 +257,8 @@ export function TcgBoard() {
         <button
           onClick={handleOpenPack}
           disabled={opening || claimedToday}
-          className="relative flex h-14 w-72 items-center justify-center bg-contain bg-center bg-no-repeat px-6 text-center text-xs font-semibold leading-tight text-[#2a1708] disabled:opacity-60"
-          style={{ backgroundImage: "url(/images/tcg/button-plaque.webp)" }}
+          className="relative flex w-72 max-w-full items-center justify-center bg-contain bg-center bg-no-repeat px-12 text-center text-[11px] font-bold leading-tight text-[#3a2410] disabled:opacity-60"
+          style={{ backgroundImage: "url(/images/tcg/button-plaque.webp)", aspectRatio: "600 / 204" }}
         >
           {claimedToday ? "Heutiges Pack schon geöffnet" : opening ? "Öffne Pack…" : "Tages-Pack öffnen (5 Karten)"}
         </button>
@@ -271,7 +274,7 @@ export function TcgBoard() {
       </div>
 
       <div>
-        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-black/50 dark:text-white/40">Sammlung</h2>
+        <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-white/80 [text-shadow:0_1px_3px_rgba(0,0,0,0.8)]">Sammlung</h2>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
           {cards.map((card) => (
             <CardFace key={card.id} card={card} owned={Boolean(owned[card.id])} quantity={owned[card.id]} />
