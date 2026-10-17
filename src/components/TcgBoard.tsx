@@ -45,11 +45,12 @@ function CardFace({
   const show = revealed ?? owned;
   return (
     <div
-      className={`relative flex aspect-[2/3] flex-col overflow-hidden rounded-xl border border-black/10 bg-[var(--surface)] dark:border-white/10 ${
+      className={`relative flex flex-col overflow-hidden rounded-xl border border-black/10 bg-[var(--surface)] dark:border-white/10 ${
         show ? (meta.frameImage ? "" : `${meta.ringClass} ${meta.glowClass}`) : "opacity-40 grayscale"
       }`}
     >
-      <div className="relative flex-1 bg-black/20">
+      {/* aspect-[2/3] sits on the art box itself (not the outer card), matching the Chatti frame artwork's own 2:3 canvas exactly — putting it on the outer box instead squeezed this shorter (meta text below eats some of that height), which stretched the frame off its native proportions and made it look like a smaller picture floating mid-card instead of a border flush with the art. */}
+      <div className="relative aspect-[2/3] bg-black/20">
         {show && card.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={card.imageUrl} alt={card.characterName} referrerPolicy="no-referrer" className="h-full w-full object-cover object-top" />
