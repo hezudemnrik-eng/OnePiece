@@ -1,5 +1,16 @@
 import { characters, getStrongestVersion, type Character } from "./characters";
 import { classifyFruit } from "./fruitType";
+import fusionTierOverrides from "../../data/fusionTierOverrides.json";
+
+// Boss's manual Fusion-Piraten tier lists (SS beats S beats A ... beats F),
+// set per character in the "Teufelsfrucht"/"Haki" tier-list artifacts and
+// shipped here as the real score instead of the automatic formula below.
+const TIER_SCORE: Record<string, number> = { SS: 99, S: 90, A: 80, B: 68, C: 55, D: 40, E: 25, F: 10 };
+
+function tierOverrideScore(category: "teufelsfrucht" | "haki", name: string): number | undefined {
+  const tier = (fusionTierOverrides as Record<string, Record<string, string>>)[category]?.[name];
+  return tier ? TIER_SCORE[tier] : undefined;
+}
 
 export type FusionCategoryId = "teufelsfrucht" | "haki" | "body" | "weapon" | "race" | "sensei" | "mind";
 
@@ -198,7 +209,8 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
         .filter((c) => c.devilFruit)
         .map((c) => {
           const cls = classifyFruit(c.devilFruit);
-          const score = cls === "logia" ? 85 : cls === "zoan" ? 70 : 60;
+          const baseScore = cls === "logia" ? 85 : cls === "zoan" ? 70 : 60;
+          const score = tierOverrideScore("teufelsfrucht", c.name) ?? baseScore;
           return {
             categoryId: "teufelsfrucht" as const,
             sourceCharacterId: c.id,
@@ -214,7 +226,7 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
     label: "Haki",
     pool: () =>
       fusionEligibleCharacters.map((c) => {
-        const haki = getStrongestVersion(c).stats.haki;
+        const haki = tierOverrideScore("haki", c.name) ?? getStrongestVersion(c).stats.haki;
         return {
           categoryId: "haki" as const,
           sourceCharacterId: c.id,
@@ -343,9 +355,13 @@ export function rollFusionOption(
 /** Turns the 7 picked traits into a dramatic, One-Piece-style bounty — a flavor formula for the game, not a canon figure. */
 export function computeBounty(picks: FusionOption[]): number {
   const total = picks.reduce((sum, p) => sum + p.score, 0);
-  // Actual ceiling achievable across all 7 categories (best real pick per category):
-  // Teufelsfrucht 85 + Haki 99 + Body 97 + Weapon 75 + Race 30 + Sensei 92.5 + Mind 99
-  const maxPossible = 85 + 99 + 97 + 75 + 30 + 92.5 + 99;
+  // Ceiling actually achievable across all 7 categories: the best real pick
+  // per category, summed. Computed from the live pools (not hardcoded) so it
+  // stays correct as tier overrides above change any category's top score.
+  const maxPossible = FUSION_CATEGORIES.reduce((sum, cat) => {
+    const best = Math.max(...cat.pool().map((o) => o.score));
+    return sum + best;
+  }, 0);
   const ratio = Math.min(1, total / maxPossible);
   const bounty = Math.pow(ratio, 2.3) * 6_000_000_000;
   return Math.max(3_000_000, Math.round(bounty / 1_000_000) * 1_000_000);
