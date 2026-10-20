@@ -363,7 +363,10 @@ export function computeBounty(picks: FusionOption[]): number {
     return sum + best;
   }, 0);
   const ratio = Math.min(1, total / maxPossible);
-  const bounty = Math.pow(ratio, 2.3) * 6_000_000_000;
+  // Steeper than a linear payout: strong picks (ratio close to 1) stay near
+  // the 6B ceiling, while mediocre-to-bad picks fall off much faster than
+  // their raw score would suggest — good picks are rewarded, bad ones punished.
+  const bounty = Math.pow(ratio, 3.8) * 6_000_000_000;
   return Math.max(3_000_000, Math.round(bounty / 1_000_000) * 1_000_000);
 }
 
