@@ -3,11 +3,15 @@ import { classifyFruit } from "./fruitType";
 import fusionTierOverrides from "../../data/fusionTierOverrides.json";
 
 // Boss's manual Fusion-Piraten tier lists (SS beats S beats A ... beats F),
-// set per character in the "Teufelsfrucht"/"Haki" tier-list artifacts and
-// shipped here as the real score instead of the automatic formula below.
+// set per character in the Teufelsfrucht/Haki/Body/Weapon/Sensei tier-list
+// artifacts and shipped here as the real score instead of the automatic
+// formula below.
 const TIER_SCORE: Record<string, number> = { SS: 99, S: 90, A: 80, B: 68, C: 55, D: 40, E: 25, F: 10 };
 
-function tierOverrideScore(category: "teufelsfrucht" | "haki", name: string): number | undefined {
+function tierOverrideScore(
+  category: "teufelsfrucht" | "haki" | "body" | "weapon" | "sensei",
+  name: string
+): number | undefined {
   const tier = (fusionTierOverrides as Record<string, Record<string, string>>)[category]?.[name];
   return tier ? TIER_SCORE[tier] : undefined;
 }
@@ -243,13 +247,14 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
     pool: () =>
       fusionEligibleCharacters.map((c) => {
         const { staerke, durabilitaet } = getStrongestVersion(c).stats;
+        const baseScore = (staerke + durabilitaet) / 2;
         return {
           categoryId: "body" as const,
           sourceCharacterId: c.id,
           sourceName: c.name,
           sourceImageUrl: c.imageUrl,
           traitLabel: `Kraft ${staerke} / Widerstand ${durabilitaet}`,
-          score: (staerke + durabilitaet) / 2,
+          score: tierOverrideScore("body", c.name) ?? baseScore,
         };
       }),
   },
@@ -259,13 +264,14 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
     pool: () =>
       fusionEligibleCharacters.map((c) => {
         const curated = WEAPON_STYLES[c.id];
+        const baseScore = curated ? 75 : 55;
         return {
           categoryId: "weapon" as const,
           sourceCharacterId: c.id,
           sourceName: c.name,
           sourceImageUrl: c.imageUrl,
           traitLabel: curated ?? "Unbewaffnet / Nahkampf",
-          score: curated ? 75 : 55,
+          score: tierOverrideScore("weapon", c.name) ?? baseScore,
         };
       }),
   },
@@ -293,13 +299,14 @@ export const FUSION_CATEGORIES: FusionCategory[] = [
         .filter((c): c is Character => c != null && (c.tier === "S" || c.tier === "A" || c.tier === "B"))
         .map((c) => {
           const { haki, intelligenz } = getStrongestVersion(c).stats;
+          const baseScore = (haki + intelligenz) / 2;
           return {
             categoryId: "sensei" as const,
             sourceCharacterId: c.id,
             sourceName: c.name,
             sourceImageUrl: c.imageUrl,
             traitLabel: `Mentor: ${c.name}`,
-            score: (haki + intelligenz) / 2,
+            score: tierOverrideScore("sensei", c.name) ?? baseScore,
           };
         }),
   },
