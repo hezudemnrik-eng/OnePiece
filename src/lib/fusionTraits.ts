@@ -373,7 +373,11 @@ export function computeBounty(picks: FusionOption[]): number {
   // Steeper than a linear payout: strong picks (ratio close to 1) stay near
   // the 6B ceiling, while mediocre-to-bad picks fall off much faster than
   // their raw score would suggest — good picks are rewarded, bad ones punished.
-  const bounty = Math.pow(ratio, 3.8) * 6_000_000_000;
+  // Exponent calibrated so "Luffy in every category" (he isn't a Sensei
+  // option, so that slot uses the category's best pick instead) lands on
+  // exactly 3B, per Boss's request — don't change it without re-checking
+  // that reference point still holds.
+  const bounty = Math.pow(ratio, 2.706) * 6_000_000_000;
   return Math.max(3_000_000, Math.round(bounty / 1_000_000) * 1_000_000);
 }
 
