@@ -343,9 +343,11 @@ export function rollFusionOption(
 /** Turns the 7 picked traits into a dramatic, One-Piece-style bounty — a flavor formula for the game, not a canon figure. */
 export function computeBounty(picks: FusionOption[]): number {
   const total = picks.reduce((sum, p) => sum + p.score, 0);
-  const maxPossible = 90 + 100 + 100 + 85 + 25 + 100 + 100; // rough ceiling across all 7 categories
+  // Actual ceiling achievable across all 7 categories (best real pick per category):
+  // Teufelsfrucht 85 + Haki 99 + Body 97 + Weapon 75 + Race 30 + Sensei 92.5 + Mind 99
+  const maxPossible = 85 + 99 + 97 + 75 + 30 + 92.5 + 99;
   const ratio = Math.min(1, total / maxPossible);
-  const bounty = Math.pow(ratio, 2.3) * 5_000_000_000;
+  const bounty = Math.pow(ratio, 2.3) * 6_000_000_000;
   return Math.max(3_000_000, Math.round(bounty / 1_000_000) * 1_000_000);
 }
 
