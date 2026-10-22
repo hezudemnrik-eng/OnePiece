@@ -36,7 +36,6 @@ export type DraftState = {
   teamSize: number;
   currentPlayerIndex: number;
   round: number;
-  direction: 1 | -1; // snake draft reverses direction each round
   finished: boolean;
   /** Names of people watching without drafting themselves. */
   spectators: string[];
@@ -103,7 +102,6 @@ export function createDraft(
     teamSize,
     currentPlayerIndex: 0,
     round: 1,
-    direction: 1,
     finished: false,
     spectators: options.spectators ?? [],
     teamModeEnabled: options.teamModeEnabled,
@@ -169,30 +167,65 @@ export function currentPlayer(state: DraftState): DraftPlayer {
   return state.players[state.currentPlayerIndex];
 }
 
+/**
+ * The order players pick in across one full round. Boss, 2026-10-22: "jeder
+ * soll einzeln und abwechselnd seinen pick machen" — strict round-robin
+ * (A,B,A,B,... / A,B,C,A,B,C,...), replacing the previous snake draft, which
+ * gave the same player two picks in a row at every round boundary
+ * (A,B,B,A,A,B,B,A,...) and which Boss never actually wanted. In
+ * Team-vs-Team mode teammates are interleaved with the other team instead
+ * of picking back to back — round-robin across teams first, then within
+ * each team in seat order (e.g. team A/B seated as a1,a2,b1,b2 picks
+ * a1,b1,a2,b2, not a1,a2,b1,b2). Recomputed from the current team
+ * assignments on every call rather than stored on DraftState: those
+ * assignments are frozen once the draft leaves the lobby (see assignTeam),
+ * so deriving this fresh from state.players is always safe and avoids a
+ * second place that could get out of sync with who's actually seated where.
+ */
+function computePickOrder(players: DraftPlayer[]): number[] {
+  const teams = new Map<DraftTeam, number[]>();
+  const noTeam: number[] = [];
+  players.forEach((p, i) => {
+    if (p.team) {
+      const seats = teams.get(p.team) ?? [];
+      seats.push(i);
+      teams.set(p.team, seats);
+    } else {
+      noTeam.push(i);
+    }
+  });
+  if (teams.size === 0) return players.map((_, i) => i);
+
+  const groups = [...teams.values()];
+  const maxGroupLen = Math.max(...groups.map((g) => g.length));
+  const order: number[] = [];
+  for (let round = 0; round < maxGroupLen; round++) {
+    for (const group of groups) {
+      if (group[round] !== undefined) order.push(group[round]);
+    }
+  }
+  return [...order, ...noTeam];
+}
+
 function advanceTurn(state: DraftState, rng: () => number): DraftState {
-  // Check finished *before* touching round/direction — the last pick of the
-  // draft often also lands on a snake-turn boundary (every player's very
-  // last pick does, for an even player count), and incrementing round for a
-  // turn that never actually happens left the finished state one round
-  // ahead of teamSize (Boss, 2026-10-17: "Runde bleibt bei 6 von 5 stehen" —
-  // with teamSize 5 the round counter kept ticking to 6 right as the draft
-  // finished).
+  // Check finished *before* advancing the turn — the last pick of the draft
+  // often also lands right on a round boundary, and advancing anyway left
+  // the finished state one round ahead of teamSize (Boss, 2026-10-17:
+  // "Runde bleibt bei 6 von 5 stehen" — with teamSize 5 the round counter
+  // kept ticking to 6 right as the draft finished).
   const finished = state.players.every((p) => p.pickedCharacterIds.length >= state.teamSize);
   if (finished) {
     return { ...state, finished: true, turnStartedAt: new Date().toISOString(), rolledCharacterIds: [] };
   }
 
-  const playerCount = state.players.length;
-  let { currentPlayerIndex, round, direction } = state;
-
-  const nextIndex = currentPlayerIndex + direction;
-  if (nextIndex < 0 || nextIndex >= playerCount) {
-    // snake draft: reverse direction, same player picks again (classic "snake")
-    direction = direction === 1 ? -1 : 1;
-    round += 1;
-  } else {
-    currentPlayerIndex = nextIndex;
-  }
+  const order = computePickOrder(state.players);
+  const pos = order.indexOf(state.currentPlayerIndex);
+  const nextPos = (pos + 1) % order.length;
+  const currentPlayerIndex = order[nextPos];
+  // A full lap of the pick order is one round; wrapping back to its start
+  // (not literally back to seat 0 — randomizeStartingPlayer/rematch can
+  // start the lap anywhere) is what counts as "everyone has picked once".
+  const round = nextPos === 0 ? state.round + 1 : state.round;
 
   // Refill the now-current player's skips for their fresh turn.
   const players = state.players.map((p, i) => (i === currentPlayerIndex ? { ...p, skipsLeft: state.skipsPerTurn } : p));
@@ -202,7 +235,6 @@ function advanceTurn(state: DraftState, rng: () => number): DraftState {
     players,
     currentPlayerIndex,
     round,
-    direction,
     finished: false,
     turnStartedAt: new Date().toISOString(),
     rolledCharacterIds: rollMultiple(state.availableCharacterIds, OFFER_COUNT, rng),
